@@ -1,0 +1,95 @@
+
+compile by simply doing a make
+
+try to start without any parameters, if g15lcd exits saying that the
+interface can not be claimed you do not have enough permissions to write 
+to the usb device
+
+If you have key handling enabled (default) you might also not have uinput support
+in your kernel or the device does not exist in /dev, or you dont have permissions
+
+Usage:
+
+philip@icefox ~/dev/logitech $ ./g15lcd --help
+Call me like this: g15lcd path_to_fifo 
+Parameters understood:
+                 -h ... guess what
+                 --help .. another wild guess please
+                 -d /dev/input/uinput .... path to the uinput device
+                 --nokeys ... disable key handling
+                 --nolcd ... disable lcd handling
+
+You can leave out the fifo filename if you want. In this case output to the lcd
+will be disabled.
+
+
+SECTION 1, the lcd:
+
+g15lcd will read the data to display on the lcd from a pipe. The filename of the
+pipe has to be specified as a command line argument.
+
+
+DO NOT SPECIFY A REGULAR FILE !
+REALLY, DONT
+EVER.
+
+Commands you can send as input are 
+
+
+Text Commands:
+
+TX "line one" "line two" ....
+
+where X is the size of the font (S, M and L are supported).
+
+
+Pixel Commands:
+
+P 10010101001 .... with exactly (!) 6880 (160x43) 1 or 0's. The first 160
+values are for line 0, the next 160 for line 1 etc
+
+Usage example:
+
+icefox g15lcd # mknod pipe p
+icefox g15lcd # nohup ./g15lcd pipe  &
+icefox g15lcd # echo "TM \"The answer is 42\" \" and the question is ???\""  > pipe 
+
+
+
+SECTION 2. Keys:
+
+ALL keys should work now.
+You need to compile your kernel with uinput support
+Device Drivers -> Inpute Device ... -> Miscellaneous devices -> User level driver support.
+
+Make sure you have this one LOADED and also that the device exists
+crw-r--r--  1 root root 10, 223 Jan 15 20:44 /dev/input/uinput
+
+If you do not have the device g15lcd will simply quit.
+
+Well, now you should have all keys (G, M and L) available. The produce the following scancodes:
+
+/**** SCANCODES SENT BY ME
+   G1 - G18 = 167  ....  184
+   M1 - M4 (MR is M4) = 185 ... 188
+   L1 - L5 (L1 is the round one, L2 - L4 are the flat ones) = 189 ... 203   
+   */// 
+
+Gnome keyboard shortcuts work fine with these keys :)
+
+A BIG FAT WARNING!
+The code currently does _NOT_ cleanup the uinput device if you kill the program (and thats the only way to stop it).
+So if you frequently restart the program you might run into some troubles (though i started it about
+40 times on my machine now without running into problems).
+
+A good setup would be a pipe (user writeable) in /var/run/something and than start
+
+nohup g15lcd /var/run/yourpipe &
+
+Just make sure that the uinput device and the usb device are accessible for your user (you really shouldnt run this one as root)
+
+If a startup was successfull you should have something like
+input: G15 Keys as /class/input/input22
+in your dmesg
+
+Have fun (and be sure to drop a line if you use this program to philip@waug.at)
