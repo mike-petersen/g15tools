@@ -1,0 +1,51 @@
+
+[executer]
+RunInTerminal=true
+
+[Project State]
+clean before build=false
+
+[filenumbers]
+0=156
+1=9
+2=68
+3=14
+4=45
+5=10
+6=173
+7=28
+8=32
+
+[filemarkers]
+0=
+1=
+2=
+3=
+4=
+5=
+6=
+7=
+8=
+
+[File View]
+filter.file.unmatch=*.so *.o *.a *.la
+filter.file.ignore.hidden=0
+filter.dir.ignore.hidden=0
+
+[filelist]
+0=/home/alex/projects/g15composer/pixel.cpp
+1=/home/alex/projects/g15composer/pixel.h
+2=/home/alex/projects/g15composer/screen.cpp
+3=/home/alex/projects/g15composer/screen.h
+4=/home/alex/projects/g15composer/util.cpp
+5=/home/alex/projects/g15composer/util.h
+6=/home/alex/projects/g15composer/text.cpp
+7=/home/alex/projects/g15composer/text.h
+8=/home/alex/projects/g15composer/main.cpp
+
+[Project Tree]
+0=0
+1=0:0
+
+[File Tree]
+0=0
