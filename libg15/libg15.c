@@ -44,8 +44,8 @@ static usb_dev_handle * findAndOpenG15()
   
         if (!devh)
         {
-          fprintf(stderr, "Error, could not open the keyboard");
-          fprintf(stderr, "Perhaps you dont have enough permissions to access it");
+          fprintf(stderr, "Error, could not open the keyboard\n");
+          fprintf(stderr, "Perhaps you dont have enough permissions to access it\n");
           return 0;
         }
   
@@ -66,16 +66,16 @@ static usb_dev_handle * findAndOpenG15()
           }
           else
           {
-            fprintf(stderr,"Sorry, I could not detached the driver, giving up");
+            fprintf(stderr,"Sorry, I could not detached the driver, giving up\n");
             return 0;
           }
         }
-  
+        printf("Debug: %s\n",name_buffer);
   
         ret = usb_set_configuration(devh, 1);
         if (ret)
         {
-          fprintf(stderr,"Error setting the configuration, this is fatal");
+          fprintf(stderr,"Error setting the configuration, this is fatal\n");
           return 0;
         }
   
@@ -85,11 +85,11 @@ static usb_dev_handle * findAndOpenG15()
         
         if (ret)
         {
-          fprintf(stderr,"Error claiming interface, good day cruel world");
+          fprintf(stderr,"Error claiming interface, good day cruel world\n");
           return 0;
         }
         usleep(25*1000);
-        printf("Done opening the keyboard");
+        printf("Done opening the keyboard\n");
         return devh;
       }
     }  
@@ -130,8 +130,12 @@ static void dumpPixmapIntoLCDFormat(char *lcd_buffer, char const *data)
       
       unsigned int row = curr_row / 8;
       unsigned int offset = G15_LCD_WIDTH*row + curr_col;
-      unsigned int bit = row % 8;
+      unsigned int bit = curr_row % 8;
     
+
+      //if (val)
+      //  printf("Setting pixel at row %d col %d to %d offset %d bit %d\n",curr_row,curr_col, val, offset, bit);
+      
       if (val)
         lcd_buffer[offset_from_start + offset] = lcd_buffer[offset_from_start + offset] | 1 << bit;
       else
