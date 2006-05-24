@@ -113,7 +113,7 @@ int initLibG15()
 	return retval;
 }
 
-static void dumpPixmapIntoLCDFormat(char *lcd_buffer, char const *data)
+static void dumpPixmapIntoLCDFormat(unsigned char *lcd_buffer, unsigned char const *data)
 {
   unsigned int offset_from_start = 32;
   unsigned int curr_row = 0;
@@ -132,10 +132,10 @@ static void dumpPixmapIntoLCDFormat(char *lcd_buffer, char const *data)
       unsigned int offset = G15_LCD_WIDTH*row + curr_col;
       unsigned int bit = curr_row % 8;
     
-
-      //if (val)
-      //  printf("Setting pixel at row %d col %d to %d offset %d bit %d\n",curr_row,curr_col, val, offset, bit);
-      
+/*
+      if (val)
+        printf("Setting pixel at row %d col %d to %d offset %d bit %d\n",curr_row,curr_col, val, offset, bit);
+      */
       if (val)
         lcd_buffer[offset_from_start + offset] = lcd_buffer[offset_from_start + offset] | 1 << bit;
       else
@@ -144,21 +144,62 @@ static void dumpPixmapIntoLCDFormat(char *lcd_buffer, char const *data)
   }
 }
 
-int writePixmapToLCD(char const *data)
+int writePixmapToLCD(unsigned char const *data)
 {
   int ret = 0;
-  char lcd_buffer[0x03e0];
+  unsigned char lcd_buffer[0x03e0];
   memset(lcd_buffer,0,0x03e0);
   dumpPixmapIntoLCDFormat(lcd_buffer, data);
   
   /* the keyboard needs this magic byte */
   lcd_buffer[0] = 0x03;
   
-  ret = usb_interrupt_write(keyboard_device, 2, lcd_buffer, 0x03e0, 10000);
+  ret = usb_interrupt_write(keyboard_device, 2, (char*)lcd_buffer, 0x03e0, 10000);
   if (ret != 0x03e0)
   {
     fprintf(stderr, "Error writing pixmap to lcd, return value is %d instead of %d\n",ret,0x03e0);
     return G15_ERROR_WRITING_PIXMAP;
   }
   return 0;
+}
+
+int setLCDContrast(unsigned int level)
+{
+  unsigned char usb_data[] = { 2, 32, 129, 0 };
+
+  switch(level) 
+  {
+    case 1: 
+      usb_data[3] = 22; 
+      break;
+    case 2: 
+      usb_data[3] = 26;
+      break;
+    default:
+      usb_data[3] = 18;
+  }  
+  
+  return usb_control_msg(keyboard_device, USB_TYPE_CLASS + USB_RECIP_INTERFACE, 9, 0x302, 0, (char*)usb_data, 4, 10000); 
+}
+
+int setLEDs(unsigned int leds)
+{
+  unsigned char m_led_buf[4] = { 2, 4, 0, 0 };
+  m_led_buf[2] = ~(unsigned char)leds;
+  return usb_control_msg(keyboard_device, USB_TYPE_CLASS + USB_RECIP_INTERFACE, 9, 0x302, 0, (char*)m_led_buf, 4, 10000); 
+}
+
+int setLCDBrightness(unsigned int level)
+{
+  unsigned char usb_data[] = { 2, 2, 0, 0 };
+
+  switch(level) 
+  {
+    case 1 : usb_data[2] = 0x10; break;
+    case 2 : usb_data[2] = 0x20; break;
+    default:
+      usb_data[2] = 0x00;
+  }
+
+  return usb_control_msg(keyboard_device, USB_TYPE_CLASS + USB_RECIP_INTERFACE, 9, 0x302, 0, (char*)usb_data, 4, 10000); 
 }
