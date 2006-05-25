@@ -140,12 +140,12 @@ void handleTextCommand(string const &input_line)
    else
       parse_line = input_line.substr(3,input_line.length() - 3);
  
-   unsigned int i;
+   int i;
    
    vector <string> lines;
    bool in_line = false;
    int line_start = -1;
-   for (i=0;i<parse_line.length();++i)
+   for (i=0;i<(int)parse_line.length();++i)
    {
       if (parse_line[i] == '\"')
       {
