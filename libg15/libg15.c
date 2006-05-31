@@ -203,3 +203,130 @@ int setLCDBrightness(unsigned int level)
 
   return usb_control_msg(keyboard_device, USB_TYPE_CLASS + USB_RECIP_INTERFACE, 9, 0x302, 0, (char*)usb_data, 4, 10000); 
 }
+
+static unsigned char g15KeyToLogitechKeyCode(int key)
+{
+   // first 12 G keys produce F1 - F12, thats 0x3a + key
+   if (key < 12)
+   {
+      return 0x3a + key;
+   }
+   // the other keys produce Key '1' (above letters) + key, thats 0x1e + key
+   else
+   {
+      return 0x1e + key - 12; // sigh, half an hour to find  -12 ....
+   }
+}
+
+static void processKeyEvent(unsigned int *pressed_keys, unsigned char *buffer)
+{
+  int i;
+  
+  *pressed_keys = 0;
+  /*printf("Buffer: %x, %x, %x, %x, %x, %x, %x, %x, %x\n",buffer[0],buffer[1],buffer[2],buffer[3],buffer[4],buffer[5],buffer[6],buffer[7],buffer[8]);
+  */
+  if (buffer[0] == 0x02)
+  {
+    if (buffer[1]&0x01)
+      *pressed_keys |= G15_KEY_G1;
+    
+    if (buffer[2]&0x02)
+      *pressed_keys |= G15_KEY_G2;
+
+    if (buffer[3]&0x04)
+      *pressed_keys |= G15_KEY_G3;
+    
+    if (buffer[4]&0x08)
+      *pressed_keys |= G15_KEY_G4;
+    
+    if (buffer[5]&0x10)
+      *pressed_keys |= G15_KEY_G5;
+
+    if (buffer[6]&0x20)
+      *pressed_keys |= G15_KEY_G6;
+
+    
+    if (buffer[2]&0x01)
+      *pressed_keys |= G15_KEY_G7;
+    
+    if (buffer[3]&0x02)
+      *pressed_keys |= G15_KEY_G8;
+    
+    if (buffer[4]&0x04)
+      *pressed_keys |= G15_KEY_G9;
+    
+    if (buffer[5]&0x08)
+      *pressed_keys |= G15_KEY_G10;
+    
+    if (buffer[6]&0x10)
+      *pressed_keys |= G15_KEY_G11;
+    
+    if (buffer[7]&0x20)
+      *pressed_keys |= G15_KEY_G12;
+    
+    if (buffer[1]&0x04)
+      *pressed_keys |= G15_KEY_G13;
+    
+    if (buffer[2]&0x08)
+      *pressed_keys |= G15_KEY_G14;
+    
+    if (buffer[3]&0x10)
+      *pressed_keys |= G15_KEY_G15;
+    
+    if (buffer[4]&0x20)
+      *pressed_keys |= G15_KEY_G16;
+    
+    if (buffer[5]&0x40)
+      *pressed_keys |= G15_KEY_G17;
+    
+    if (buffer[8]&0x40)
+      *pressed_keys |= G15_KEY_G18;
+    
+    if (buffer[6]&0x01)
+      *pressed_keys |= G15_KEY_M1;
+    if (buffer[7]&0x02)
+      *pressed_keys |= G15_KEY_M2;
+    if (buffer[8]&0x04)
+      *pressed_keys |= G15_KEY_M3;
+    if (buffer[7]&0x40)
+      *pressed_keys |= G15_KEY_MR;
+
+    if (buffer[8]&0x80)
+      *pressed_keys |= G15_KEY_L1;
+    if (buffer[2]&0x80)
+      *pressed_keys |= G15_KEY_L2;
+    if (buffer[3]&0x80)
+      *pressed_keys |= G15_KEY_L3;
+    if (buffer[4]&0x80)
+      *pressed_keys |= G15_KEY_L4;
+    if (buffer[5]&0x80)
+      *pressed_keys |= G15_KEY_L5;
+
+    if (buffer[1]&0x80)
+      *pressed_keys |= G15_KEY_LIGHT;
+
+  }
+}
+
+int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
+{
+  unsigned char buffer[9];
+  
+  int ret = usb_interrupt_read(keyboard_device, 0x81, (char*)buffer, 9, timeout);
+  if (ret == 9)
+  {
+    if (buffer[0] == 1)
+      return G15_ERROR_TRY_AGAIN;
+    
+    processKeyEvent(pressed_keys, buffer);
+    
+    return G15_NO_ERROR;
+  }
+  else 
+  {
+    printf("Return val is %d\n",ret);
+  }
+  
+  return G15_ERROR_READING_USB_DEVICE;
+  
+}

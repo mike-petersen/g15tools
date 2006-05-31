@@ -14,6 +14,79 @@ int main(int argc, char *argv[])
   ret = initLibG15();
   cout << "Done, return value is " << ret << endl;
   
+  unsigned int key_state = 0;
+for (;;)
+{
+  int ret = getPressedKeys(&key_state,0);
+  if (ret == G15_ERROR_TRY_AGAIN)
+    continue;
+  
+  cout << "Getting key states: " << ret << endl;
+  cout << "Key state: " << key_state << endl;
+  
+  cout << "Pressed Keys: "  ;
+  
+  if (key_state & G15_KEY_G1)
+    cout << "G1 ";
+  if (key_state & G15_KEY_G2)
+    cout << "G2 ";
+  if (key_state & G15_KEY_G3)
+    cout << "G3 ";
+  if (key_state & G15_KEY_G4)
+    cout << "G4 ";
+  if (key_state & G15_KEY_G5)
+    cout << "G5 ";
+  if (key_state & G15_KEY_G6)
+    cout << "G6 ";
+  if (key_state & G15_KEY_G7)
+    cout << "G7 ";
+  if (key_state & G15_KEY_G8)
+    cout << "G8 ";
+  if (key_state & G15_KEY_G9)
+    cout << "G9 ";
+  if (key_state & G15_KEY_G10)
+    cout << "G10 ";
+  if (key_state & G15_KEY_G11)
+    cout << "G11 ";
+  if (key_state & G15_KEY_G12)
+    cout << "G12 ";
+  if (key_state & G15_KEY_G13)
+    cout << "G13 ";
+  if (key_state & G15_KEY_G14)
+    cout << "G14 ";
+  if (key_state & G15_KEY_G15)
+    cout << "G15 ";
+  if (key_state & G15_KEY_G16)
+    cout << "G16 ";
+  if (key_state & G15_KEY_G17)
+    cout << "G17 ";
+  if (key_state & G15_KEY_G18)
+    cout << "G18 ";
+  
+  if (key_state & G15_KEY_M1)
+    cout << "M1 " ;
+  if (key_state & G15_KEY_M2)
+    cout << "M2 " ;
+  if (key_state & G15_KEY_M3)
+    cout << "M3 " ;
+  if (key_state & G15_KEY_MR)
+    cout << "MR " ;
+  
+  if (key_state & G15_KEY_L1)
+    cout << "L1 " ;
+  if (key_state & G15_KEY_L2)
+    cout << "L2 " ;
+  if (key_state & G15_KEY_L3)
+    cout << "L3 " ;
+  if (key_state & G15_KEY_L4)
+    cout << "L4 " ;
+  if (key_state & G15_KEY_L5)
+    cout << "L5 " ;
+  if (key_state & G15_KEY_LIGHT)
+    cout << "LIGHT ";
+  cout << endl;
+}
+  
   int i;
   for (i=0;i<NUM_BYTES;++i) 
     test_data[i] = 0xFF;
