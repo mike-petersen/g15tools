@@ -324,7 +324,7 @@ int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
   }
   else 
   {
-    printf("Return val is %d\n",ret);
+    //printf("Return val is %d\n",ret);
   }
   
   return G15_ERROR_READING_USB_DEVICE;

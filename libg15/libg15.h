@@ -94,6 +94,14 @@ extern "C"
   int setLCDContrast(unsigned int level);
   int setLEDs(unsigned int leds);
   int setLCDBrightness(unsigned int level);
+
+  /* Please be warned
+   * the g15 sends two different usb msgs for each key press
+   * but only one of these two is used here. Since we do not want to wait
+   * longer than timeout we will return on any msg recieved. in the good 
+   * case you will get G15_NO_ERROR and ORd keys in pressed_keys
+   * in the bad case you will get G15_ERROR_TRY_AGAIN -> try again
+   */
   int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout);
   
 
