@@ -19,8 +19,14 @@ extern "C"
   
   enum
   {
+    G15_LCD_OFFSET = 32,
     G15_LCD_HEIGHT = 43,
     G15_LCD_WIDTH = 160
+  };
+
+  enum
+  {
+    G15_BUFFER_LEN = 0x03e0
   };
   
   enum

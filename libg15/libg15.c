@@ -115,7 +115,7 @@ int initLibG15()
 
 static void dumpPixmapIntoLCDFormat(unsigned char *lcd_buffer, unsigned char const *data)
 {
-  unsigned int offset_from_start = 32;
+  unsigned int offset_from_start = G15_LCD_OFFSET;
   unsigned int curr_row = 0;
   unsigned int curr_col = 0;
   
@@ -147,17 +147,17 @@ static void dumpPixmapIntoLCDFormat(unsigned char *lcd_buffer, unsigned char con
 int writePixmapToLCD(unsigned char const *data)
 {
   int ret = 0;
-  unsigned char lcd_buffer[0x03e0];
-  memset(lcd_buffer,0,0x03e0);
+  unsigned char lcd_buffer[G15_BUFFER_LEN];
+  memset(lcd_buffer,0,G15_BUFFER_LEN);
   dumpPixmapIntoLCDFormat(lcd_buffer, data);
   
   /* the keyboard needs this magic byte */
   lcd_buffer[0] = 0x03;
   
-  ret = usb_interrupt_write(keyboard_device, 2, (char*)lcd_buffer, 0x03e0, 10000);
-  if (ret != 0x03e0)
+  ret = usb_interrupt_write(keyboard_device, 2, (char*)lcd_buffer, G15_BUFFER_LEN, 10000);
+  if (ret != G15_BUFFER_LEN)
   {
-    fprintf(stderr, "Error writing pixmap to lcd, return value is %d instead of %d\n",ret,0x03e0);
+    fprintf(stderr, "Error writing pixmap to lcd, return value is %d instead of %d\n",ret,G15_BUFFER_LEN);
     return G15_ERROR_WRITING_PIXMAP;
   }
   return 0;
