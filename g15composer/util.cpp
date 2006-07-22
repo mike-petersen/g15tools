@@ -1,6 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2006 by Philip Lawatsch <philip@waug.at>                *
- *                     and Alex Ibrado <alex@ibrado.org>                   *
+ *                         Alex Ibrado <alex@ibrado.org>                   *
+ *                     and Anthony J. Mirabella <mirabeaj@gmail.com        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,7 +19,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "util.h"
+#include <string>
+#include "libg15render.h"
+
+using namespace std;
 
 int get_params(int* params, string const &input_line, int start, int count)
 {

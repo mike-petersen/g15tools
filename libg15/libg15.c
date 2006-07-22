@@ -161,6 +161,21 @@ static void dumpPixmapIntoLCDFormat(unsigned char *lcd_buffer, unsigned char con
   }
 }
 
+int writeBufferToLCD(unsigned char *buffer)
+{
+  int ret = 0;
+
+  buffer[0] = 0x03;
+
+  ret = usb_interrupt_write(keyboard_device, 2, (char*)buffer, G15_BUFFER_LEN, 10000);
+  if (ret != G15_BUFFER_LEN)
+  {
+    fprintf(stderr, "Error writing buffer to lcd, return value is %d instead of %d\n",ret,G15_BUFFER_LEN);
+    return G15_ERROR_WRITING_BUFFER;
+  }
+  return 0;
+}
+
 int writePixmapToLCD(unsigned char const *data)
 {
   int ret = 0;
