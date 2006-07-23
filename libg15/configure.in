@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(libg15, 1.01, philip@lawatsch.at)
+AC_INIT(libg15, 1.1, philip@lawatsch.at)
 AC_CONFIG_AUX_DIR(config)
 AM_INIT_AUTOMAKE()
 AC_CONFIG_SRCDIR([libg15.c])
@@ -13,7 +13,7 @@ AC_PROG_CC
 AC_PROG_LIBTOOL
 
 # Checks for libraries.
-AC_CHECK_LIB([usb], [main], ,AC_MSG_ERROR(["libusb not found. please install it"]) )
+AC_CHECK_LIB([usb], [main], ,AC_MSG_ERROR(["libusb not found. please install it"]))
 
 # Checks for header files.
 AC_HEADER_STDC

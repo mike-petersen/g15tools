@@ -8,9 +8,10 @@ extern "C"
 
 #include <string.h>
 
+#define BYTE_SIZE 	8
+
 #ifndef _LIBG15_H_
 enum {
-   BYTE_SIZE = 8,
    G15_LCD_OFFSET = 32,
    G15_LCD_HEIGHT = 43,
    G15_LCD_WIDTH = 160

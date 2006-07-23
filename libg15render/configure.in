@@ -13,7 +13,7 @@ AC_PROG_CC
 AC_PROG_LIBTOOL
 
 # Checks for libraries.
-#AC_CHECK_LIB([g15], [writeBufferToLCD])
+AC_CHECK_LIB([g15], [writeBufferToLCD], ,AC_MSG_ERROR(["libg15 not found. please install it"]))
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
