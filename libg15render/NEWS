@@ -1,1 +1,4 @@
-Watch here for interesting news.
+This is the initial release of libg15render.  I separated most of this code from
+g15composer so that I could reuse it in a lcdproc driver for the g15 that I was
+trying to develop.  Now that this library is out, the lcdproc driver should soon
+follow.
