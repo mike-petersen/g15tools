@@ -13,10 +13,9 @@ AC_PROG_CC
 AC_PROG_LIBTOOL
 
 # Checks for libraries.
-#AC_CHECK_LIB([g15], [writePixmapToLCD])
+#AC_CHECK_LIB([g15], [writeBufferToLCD])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_HEADER_STDBOOL
 AC_C_CONST
 
 # Checks for header files.
