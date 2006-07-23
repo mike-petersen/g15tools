@@ -1,0 +1,4 @@
+This is a patch against lcdproc CVS HEAD.  Apply the patch and add g15.{c,h} to
+<lcdproc root>/server/drivers.  Configure with --enable-drivers=g15.  This
+driver requires libg15-1.1 and libg15render-1.0.  This driver is nearly feature
+complete, and will soon be submitted for inclusion in lcdproc.

@@ -1,0 +1,150 @@
+Index: LCDd.conf
+===================================================================
+RCS file: /cvsroot/lcdproc/lcdproc/LCDd.conf,v
+retrieving revision 1.78
+diff -u -r1.78 LCDd.conf
+--- LCDd.conf	16 Jul 2006 11:26:38 -0000	1.78
++++ LCDd.conf	23 Jul 2006 14:02:07 -0000
+@@ -36,6 +36,7 @@
+ #Driver=CFontz633
+ #Driver=CFontzPacket
+ #Driver=CwLnx
++#Driver=g15
+ #Driver=glcdlib
+ #Driver=IOWarrior
+ #Driver=imon
+@@ -277,7 +278,11 @@
+ # Default value is no
+ #keypad_test_mode=yes
+ 
++## g15 driver for Logitech G15 Keyboard LCDs ##
++[g15]
+ 
++# Display size
++size=20x5
+ 
+ ## glcdlib meta driver for graphical LCDs ##
+ [glcdlib]
+Index: acinclude.m4
+===================================================================
+RCS file: /cvsroot/lcdproc/lcdproc/acinclude.m4,v
+retrieving revision 1.74
+diff -u -r1.74 acinclude.m4
+--- acinclude.m4	20 May 2006 15:46:30 -0000	1.74
++++ acinclude.m4	23 Jul 2006 14:02:07 -0000
+@@ -6,7 +6,7 @@
+ 	[                  drivers may be separated with commas.]
+ 	[                  Possible choices are:]
+ 	[                    bayrad,CFontz,CFontz633,CFontzPacket,curses,CwLnx,]
+-	[                    glcdlib,glk,hd44780,icp_a106,imon,IOWarrior,irman,]
++	[                    g15,glcdlib,glk,hd44780,icp_a106,imon,IOWarrior,irman,]
+ 	[                    joy,lb216,lcdm001,lcterm,lirc,MD8800,ms6931,mtc_s16209x,]
+ 	[                    MtxOrb,NoritakeVFD,pyramid,sed1330,sed1520,serialVFD,]
+ 	[                    sli,stv5730,svga,t6963,text,tyan,ula200,xosd]
+@@ -15,7 +15,7 @@
+ 	drivers="$enableval",
+ 	drivers=[bayrad,CFontz,CFontz633,curses,CwLnx,glk,lb216,lcdm001,MtxOrb,pyramid,text])
+ 
+-allDrivers=[bayrad,CFontz,CFontz633,CFontzPacket,curses,CwLnx,glcdlib,glk,hd44780,icp_a106,imon,IOWarrior,irman,joy,lb216,lcdm001,lcterm,lirc,MD8800,ms6931,mtc_s16209x,MtxOrb,NoritakeVFD,pyramid,sed1330,sed1520,serialVFD,sli,stv5730,svga,t6963,text,tyan,ula200,xosd]
++allDrivers=[bayrad,CFontz,CFontz633,CFontzPacket,curses,CwLnx,g15,glcdlib,glk,hd44780,icp_a106,imon,IOWarrior,irman,joy,lb216,lcdm001,lcterm,lirc,MD8800,ms6931,mtc_s16209x,MtxOrb,NoritakeVFD,pyramid,sed1330,sed1520,serialVFD,sli,stv5730,svga,t6963,text,tyan,ula200,xosd]
+ 
+ drivers=`echo $drivers | sed -e 's/,/ /g'`
+ 
+@@ -124,6 +124,36 @@
+ 			DRIVERS="$DRIVERS CwLnx${SO}"
+ 			actdrivers=["$actdrivers CwLnx"]
+ 			;;
++		g15)
++			AC_CHECK_HEADERS([libg15.h],[
++				AC_CHECK_LIB(g15, writeBufferToLCD,[
++					LIBG15="-lg15"
++				],[
++dnl				else
++					AC_MSG_WARN([The g15 driver needs libg15-1.1 or better])
++				],
++				[-lg15]
++				)
++			],[
++dnl			else
++				AC_MSG_WARN([The g15 driver needs libg15.h])
++			])
++			AC_CHECK_HEADERS([libg15render.h],[
++				AC_CHECK_LIB(g15render, g15r_initCanvas,[
++					LIBG15="$LIBG15 -lg15render"
++					DRIVERS="$DRIVERS g15${SO}"
++					actdrivers=["$actdrivers g15"]
++				],[
++dnl				else
++					AC_MSG_WARN([the g15 driver needs libg15render])
++				],
++				[-lg15render]
++				)
++			],[
++dnl			else
++				AC_MSG_WARN([The g15driver needs libg15render.h])
++			])
++			;;
+ 		glcdlib)
+ 			AC_CHECK_HEADERS([glcdproclib/glcdprocdriver.h],[
+ 				AC_CHECK_LIB(glcdprocdriver, main,[
+@@ -353,6 +383,7 @@
+ AC_SUBST(LIBSVGA)
+ AC_SUBST(DRIVERS)
+ AC_SUBST(HD44780_DRIVERS)
++AC_SUBST(LIBG15)
+ AC_SUBST(LIBGLCD)
+ AC_SUBST(LIBFTDI)
+ AC_SUBST(LIBXOSD)
+Index: docs/LCDd.8
+===================================================================
+RCS file: /cvsroot/lcdproc/lcdproc/docs/LCDd.8,v
+retrieving revision 1.11
+diff -u -r1.11 LCDd.8
+--- docs/LCDd.8	18 Jun 2006 20:29:56 -0000	1.11
++++ docs/LCDd.8	23 Jul 2006 14:02:08 -0000
+@@ -81,6 +81,9 @@
+ .B CwLnx
+ serial/USB displays by Cwlinux (http://www.cwlinux.com)
+ .TP
++.B g15
++LCD display on the Logitech G15 keyboard
++.TP
+ .B glcdlib
+ graphical LCDs supported by graphlcd-base
+ .TP
+Index: server/drivers/Makefile.am
+===================================================================
+RCS file: /cvsroot/lcdproc/lcdproc/server/drivers/Makefile.am,v
+retrieving revision 1.58
+diff -u -r1.58 Makefile.am
+--- server/drivers/Makefile.am	25 Jun 2006 15:08:42 -0000	1.58
++++ server/drivers/Makefile.am	23 Jul 2006 14:02:08 -0000
+@@ -19,17 +19,19 @@
+ LIBS =
+ 
+ pkglib_PROGRAMS = @DRIVERS@
+-EXTRA_PROGRAMS = bayrad CFontz CFontz633 CFontzPacket curses CwLnx glcdlib glk hd44780 icp_a106 imon IOWarrior irman joy lb216 lcdm001 lcterm lirc MD8800 ms6931 mtc_s16209x MtxOrb NoritakeVFD pyramid sed1330 sed1520 serialVFD stv5730 svga t6963 text tyan sli ula200 xosd
++EXTRA_PROGRAMS = bayrad CFontz CFontz633 CFontzPacket curses CwLnx g15 glcdlib glk hd44780 icp_a106 imon IOWarrior irman joy lb216 lcdm001 lcterm lirc MD8800 ms6931 mtc_s16209x MtxOrb NoritakeVFD pyramid sed1330 sed1520 serialVFD stv5730 svga t6963 text tyan sli ula200 xosd
+ noinst_LIBRARIES = libLCD.a libbignum.a
+ 
+ IOWarrior_CFLAGS =   @libusb_cflags@ $(AM_CFLAGS)
+ hd44780_CFLAGS =     @libusb_cflags@ $(AM_CFLAGS)
++g15_CFLAGS =         @libusb_cflags@ $(AM_CFLAGS)
+ 
+ CFontz_LDADD =       libLCD.a libbignum.a
+ CFontz633_LDADD =    libLCD.a libbignum.a
+ CFontzPacket_LDADD = libLCD.a libbignum.a
+ curses_LDADD =       @LIBCURSES@
+ CwLnx_LDADD =        libLCD.a
++g15_LDADD =          libLCD.a @LIBG15@
+ glcdlib_LDADD =      libLCD.a @LIBGLCD@
+ hd44780_LDADD =      libLCD.a @HD44780_DRIVERS@ @libusb_libs@ libbignum.a
+ hd44780_DEPENDENCIES = @HD44780_DRIVERS@
+@@ -60,6 +62,7 @@
+ CFontzPacket_SOURCES = lcd.h lcd_lib.h CFontzPacket.c CFontzPacket.h CFontz-charmap.h CFontz633io.c CFontz633io.h report.h adv_bignum.h
+ curses_SOURCES =     lcd.h curses_drv.h curses_drv.c report.h
+ CwLnx_SOURCES =      lcd.h lcd_lib.h CwLnx.c CwLnx.h report.h
++g15_SOURCES = 	      lcd.h lcd_lib.h g15.h g15.c report.h
+ glcdlib_SOURCES =    lcd.h lcd_lib.h glcdlib.h glcdlib.c report.h
+ glk_SOURCES =        lcd.h glk.c glk.h glkproto.c glkproto.h report.h
+ hd44780_SOURCES =    lcd.h lcd_lib.h hd44780.h hd44780.c hd44780-drivers.h hd44780-low.h hd44780-charmap.h report.h adv_bignum.h
