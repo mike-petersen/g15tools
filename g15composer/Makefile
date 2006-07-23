@@ -16,17 +16,9 @@
 
 all:
 
-	g++ -g -O2 -Wall -pedantic -c font_8x8.cpp
-	g++ -g -O2 -Wall -pedantic -c font_7x5.cpp
-	g++ -g -O2 -Wall -pedantic -c font_6x4.cpp
-
-	g++ -g -O2 -Wall -pedantic -c util.cpp
-	g++ -g -O2 -Wall -pedantic -c screen.cpp
-	g++ -g -O2 -Wall -pedantic -c pixel.cpp
-	g++ -g -O2 -Wall -pedantic -c text.cpp
-
 	g++ -g -O2 -Wall -pedantic -c main.cpp
-	g++ -g main.o util.o screen.o pixel.o text.o font_8x8.o font_7x5.o font_6x4.o -o g15composer 
+	g++ -g -O2 -Wall -pedantic -c util.cpp
+	g++ -g util.o main.o -lg15 -lg15render -o g15composer 
 	
 clean:
 

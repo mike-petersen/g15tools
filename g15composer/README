@@ -1,14 +1,14 @@
 Examples:
 
-1) echo 'TL "Hello" "World"' | ./g15composer > /path/to/fifo
+1) echo 'TL "Hello" "World"' | ./g15composer
 
-2) cat instructions | ./g15composer > /path/to/fifo
+2) cat instructions | ./g15composer
 
-3) ./g15_script > /path/to/fifo
+3) ./g15_script
      where g15_script starts with "#!/path/to/g15composer" and is executable
      The rest of the lines should be made up of the commands listed below.
 
-4) ./other_script | ./g15composer > /path/to/fifo 
+4) ./other_script | ./g15composer
      where other_script is a bash, Perl, etc. script or application which outputs
      one or more of the commands listed below.
 
