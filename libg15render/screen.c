@@ -18,6 +18,13 @@
 
 #include "libg15render.h"
 
+/**
+ * Retrieves the value of the pixel at (x, y)
+ * 
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
+ * \param x X offset for pixel to be retrieved.
+ * \param y Y offset for pixel to be retrieved.
+ */
 int g15r_getPixel(g15canvas * canvas, unsigned int x, unsigned int y)
 {
    if (x >= G15_LCD_WIDTH || y >= G15_LCD_HEIGHT)
@@ -30,7 +37,14 @@ int g15r_getPixel(g15canvas * canvas, unsigned int x, unsigned int y)
    return (canvas->buffer[offset] & (1 << bit)) >> bit;
 }
 
-
+/**
+ * Sets the value of the pixel at (x, y)
+ * 
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
+ * \param x X offset for pixel to be set.
+ * \param y Y offset for pixel to be set.
+ * \param val Value to which pixel should be set.
+ */
 void g15r_setPixel(g15canvas * canvas, unsigned int x, unsigned int y, int val)
 {
    if (x >= G15_LCD_WIDTH || y >= G15_LCD_HEIGHT)
@@ -50,11 +64,22 @@ void g15r_setPixel(g15canvas * canvas, unsigned int x, unsigned int y, int val)
    
 }
 
+/**
+ * Clears the screen and fills it with pixels of color
+ * 
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
+ * \param color Screen will be filled with this color.
+ */
 void g15r_clearScreen(g15canvas * canvas, int color)
 {
    memset(canvas->buffer, (color ? 0xFF: 0), G15_LCD_WIDTH * G15_LCD_HEIGHT);
 }
 
+/**
+ * Clears the screen and resets the mode values for a canvas
+ * 
+ * \param canvas A pointer to a g15canvas struct
+ */
 void g15r_initCanvas(g15canvas * canvas)
 {
    memset(canvas->buffer, 0, G15_LCD_WIDTH * G15_LCD_HEIGHT);
