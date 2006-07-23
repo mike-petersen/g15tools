@@ -217,9 +217,11 @@ MODULE_EXPORT int g15_icon (Driver *drvthis, int x, int y, int icon)
 	switch (icon) {
 		case ICON_BLOCK_FILLED:
 			{
-			int px = x * 8;
-			int py = y * 8;
-			g15r_pixelBox(p->canvas, px, py, px+6, py+6, 1, 1, 1);
+			int px1 = x * p->cellwidth;
+			int py1 = y * p->cellheight;
+			int px2 = px1 + (p->cellwidth - 2);
+			int py2 = py1 + (p->cellheight - 2);
+			g15r_pixelBox(p->canvas, px1, py1, px2, py2, 1, 1, 1);
 			break;
 			}
 		case ICON_HEART_FILLED:
@@ -329,10 +331,10 @@ MODULE_EXPORT void g15_hbar(Driver *drvthis, int x, int y, int len, int promille
 	y--;
 	
 	int total_pixels = ((long) 2 * len * p->cellwidth + 1) * promille / 2000;
-	int px1 = x * 8;
-	int py1 = y * 8;
+	int px1 = x * p->cellwidth;
+	int py1 = y * p->cellheight;
 	int px2 = px1 + total_pixels;
-	int py2 = py1 + 6;
+	int py2 = py1 + (p->cellheight - 2);
 	
 	g15r_pixelBox(p->canvas, px1, py1, px2, py2, 1, 1, 1);
 }
@@ -346,9 +348,9 @@ MODULE_EXPORT void g15_vbar(Driver *drvthis, int x, int y, int len, int promille
 	x--;
 	
 	int total_pixels = ((long) 2 * len * p->cellwidth + 1) * promille / 2000;
-	int px1 = x * 8;
-	int py1 = y * 8 - total_pixels;
-	int px2 = px1 + 6;
+	int px1 = x * p->cellwidth;
+	int py1 = y * p->cellheight - total_pixels;
+	int px2 = px1 + (p->cellwidth - 2);
 	int py2 = py1 + total_pixels;
 	
 	g15r_pixelBox(p->canvas, px1, py1, px2, py2, 1, 1, 1);
