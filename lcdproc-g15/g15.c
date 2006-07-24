@@ -231,7 +231,9 @@ MODULE_EXPORT int g15_icon (Driver *drvthis, int x, int y, int icon)
 			}
 		case ICON_HEART_OPEN:
 			{
+			p->canvas->mode_reverse = 1;
 			g15r_renderCharacterLarge(p->canvas, x, y, G15_ICON_HEART_OPEN, 0, 0);
+			p->canvas->mode_reverse = 0;
 			break;
 			}
 		case ICON_ARROW_UP:

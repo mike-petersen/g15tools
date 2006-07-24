@@ -46,8 +46,8 @@ typedef struct driver_private_data {
 #define G15_CELL_HEIGHT			8
 #define G15_LCD_WRITE_CMD 		0x03
 #define G15_USB_ENDPT 			2
-#define G15_ICON_HEART_FILLED	7
-#define G15_ICON_HEART_OPEN		15
+#define G15_ICON_HEART_FILLED	3
+#define G15_ICON_HEART_OPEN		3
 #define G15_ICON_ARROW_UP		24
 #define G15_ICON_ARROW_DOWN		25
 #define G15_ICON_ARROW_RIGHT	26
