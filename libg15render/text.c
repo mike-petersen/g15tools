@@ -33,9 +33,9 @@ void g15r_renderCharacterLarge(g15canvas *canvas, int col, int row, unsigned cha
          char font_entry = fontdata_8x8[helper + y];
         
          if (font_entry & 1<<(7-x))       
-            g15r_setPixel(canvas, top_left_pixel_x + x, top_left_pixel_y + y, 1);
+            g15r_setPixel(canvas, top_left_pixel_x + x, top_left_pixel_y + y, G15_COLOR_BLACK);
          else
-            g15r_setPixel(canvas, top_left_pixel_x + x, top_left_pixel_y + y, 0);
+            g15r_setPixel(canvas, top_left_pixel_x + x, top_left_pixel_y + y, G15_COLOR_WHITE);
          
       }
    }
@@ -55,9 +55,9 @@ void g15r_renderCharacterMedium(g15canvas *canvas, int col, int row, unsigned ch
       {
          char font_entry = fontdata_7x5[helper + y * 5 + x];
          if (font_entry)       
-            g15r_setPixel(canvas, top_left_pixel_x + x, top_left_pixel_y + y, 1);
+            g15r_setPixel(canvas, top_left_pixel_x + x, top_left_pixel_y + y, G15_COLOR_BLACK);
          else
-            g15r_setPixel(canvas, top_left_pixel_x + x, top_left_pixel_y + y, 0);
+            g15r_setPixel(canvas, top_left_pixel_x + x, top_left_pixel_y + y, G15_COLOR_WHITE);
          
       }
    }
@@ -77,9 +77,9 @@ void g15r_renderCharacterSmall(g15canvas *canvas, int col, int row, unsigned cha
       {
          char font_entry = fontdata_6x4[helper + y * 4 + x];
          if (font_entry)       
-            g15r_setPixel(canvas, top_left_pixel_x + x, top_left_pixel_y + y, 1);
+            g15r_setPixel(canvas, top_left_pixel_x + x, top_left_pixel_y + y, G15_COLOR_BLACK);
          else
-            g15r_setPixel(canvas, top_left_pixel_x + x, top_left_pixel_y + y, 0);
+            g15r_setPixel(canvas, top_left_pixel_x + x, top_left_pixel_y + y, G15_COLOR_WHITE);
          
       }
    }
@@ -91,12 +91,25 @@ void g15r_renderString(g15canvas *canvas, unsigned char stringOut[], int row, in
    int i=0;
    for (i; stringOut[i] != NULL; ++i)
    {
-   	   if (size == 0)
-   	      g15r_renderCharacterSmall(canvas, i,row,stringOut[i],sx,sy);
-       else if (size == 1)
-          g15r_renderCharacterMedium(canvas, i,row,stringOut[i],sx,sy);
-       else if (size == 2)
-          g15r_renderCharacterLarge(canvas, i,row,stringOut[i],sx,sy);
+   	   switch (size) {
+   	   		case G15_TEXT_SMALL:
+   	   		{
+	   	      g15r_renderCharacterSmall(canvas, i,row,stringOut[i],sx,sy);
+	   	      break;
+   	   		}
+   	   		case G15_TEXT_MED:
+   	   		{
+	          g15r_renderCharacterMedium(canvas, i,row,stringOut[i],sx,sy);
+	          break;
+   	   		}
+   	   		case G15_TEXT_LARGE:
+   	   		{
+	          g15r_renderCharacterLarge(canvas, i,row,stringOut[i],sx,sy);
+	          break;
+   	   		}
+   	   		default:
+   	   		  break;
+   	   }
    }
    
 }

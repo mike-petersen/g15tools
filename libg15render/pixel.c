@@ -71,9 +71,7 @@ void g15r_pixelOverlay(g15canvas * canvas, int x1, int y1, int width, int height
    
    for (i=0;i<(width*height);++i)
    {
-      int color=0;
-      if (colormap[i] != 0)
-         color = 1;
+      int color = (colormap[i] ? G15_COLOR_BLACK : G15_COLOR_WHITE);
       int x = x1 + i % width;
       int y = y1 + i / width;
       g15r_setPixel(canvas, x, y, color);

@@ -111,7 +111,7 @@ void handlePixelCommand(g15canvas * canvas, string const &input_line)
 	   int params[5] = { 0, 0, 0, 0, 0 };
 	
 	   bool fill = input_line[1] == 'F';
-	   int color = 0;
+	   int color = G15_COLOR_WHITE;
 	   	   
 	   if(fill)
 	   {
@@ -198,11 +198,11 @@ void handleTextCommand(g15canvas * canvas, string const &input_line)
    int size = -1;
 
    if (input_line[1] == 'S')
-      size = 0;
+      size = G15_TEXT_SMALL;
    else if (input_line[1] == 'M')
-      size = 1;
+      size = G15_TEXT_MED;
    else if (input_line[1] == 'L')
-      size = 2;
+      size = G15_TEXT_LARGE;
    else if (input_line[1] == 'O') {
       get_params(params, input_line, 3, 3);
       size = params[2];
@@ -210,7 +210,7 @@ void handleTextCommand(g15canvas * canvas, string const &input_line)
    
    if (size == -1)
    {
-      size = 1;
+      size = G15_TEXT_MED;
       parse_line = input_line.substr(2,input_line.length() - 2);
    }
    else

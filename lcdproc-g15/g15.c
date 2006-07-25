@@ -221,7 +221,7 @@ MODULE_EXPORT int g15_icon (Driver *drvthis, int x, int y, int icon)
 			int py1 = y * p->cellheight;
 			int px2 = px1 + (p->cellwidth - 2);
 			int py2 = py1 + (p->cellheight - 2);
-			g15r_pixelBox(p->canvas, px1, py1, px2, py2, 1, 1, 1);
+			g15r_pixelBox(p->canvas, px1, py1, px2, py2, G15_COLOR_BLACK, 1, G15_PIXEL_FILL);
 			break;
 			}
 		case ICON_HEART_FILLED:
@@ -338,7 +338,7 @@ MODULE_EXPORT void g15_hbar(Driver *drvthis, int x, int y, int len, int promille
 	int px2 = px1 + total_pixels;
 	int py2 = py1 + (p->cellheight - 2);
 	
-	g15r_pixelBox(p->canvas, px1, py1, px2, py2, 1, 1, 1);
+	g15r_pixelBox(p->canvas, px1, py1, px2, py2, G15_COLOR_BLACK, 1, G15_PIXEL_FILL);
 }
 
 // Draws a vertical bar growing up
@@ -355,7 +355,7 @@ MODULE_EXPORT void g15_vbar(Driver *drvthis, int x, int y, int len, int promille
 	int px2 = px1 + (p->cellwidth - 2);
 	int py2 = py1 + total_pixels;
 	
-	g15r_pixelBox(p->canvas, px1, py1, px2, py2, 1, 1, 1);
+	g15r_pixelBox(p->canvas, px1, py1, px2, py2, G15_COLOR_BLACK, 1, G15_PIXEL_FILL);
 	
 }
 

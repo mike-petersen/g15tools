@@ -8,11 +8,18 @@ extern "C"
 
 #include <string.h>
 
-#define BYTE_SIZE 	8
-#define G15_BUFFER_LEN  0x03e0
-#define G15_LCD_OFFSET  32
-#define G15_LCD_HEIGHT  43
-#define G15_LCD_WIDTH   160
+#define BYTE_SIZE 			8
+#define G15_BUFFER_LEN  	0x03e0
+#define G15_LCD_OFFSET  	32
+#define G15_LCD_HEIGHT  	43
+#define G15_LCD_WIDTH   	160
+#define G15_COLOR_WHITE 	0
+#define G15_COLOR_BLACK 	1
+#define G15_TEXT_SMALL  	0
+#define G15_TEXT_MED    	1
+#define G15_TEXT_LARGE  	2
+#define G15_PIXEL_NOFILL 	0
+#define G15_PIXEL_FILL  	1
 
 /// \brief This structure holds the data need to render objects to the LCD screen.
 typedef struct g15canvas {
