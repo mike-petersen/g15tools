@@ -9,19 +9,15 @@ extern "C"
 #include <string.h>
 
 #define BYTE_SIZE 	8
-
-#ifndef _LIBG15_H_
-enum {
-   G15_LCD_OFFSET = 32,
-   G15_LCD_HEIGHT = 43,
-   G15_LCD_WIDTH = 160
-};
-#endif /*_LIBG15_H_*/
+#define G15_BUFFER_LEN  0x03e0
+#define G15_LCD_OFFSET  32
+#define G15_LCD_HEIGHT  43
+#define G15_LCD_WIDTH   160
 
 /// \brief This structure holds the data need to render objects to the LCD screen.
 typedef struct g15canvas {
 /// g15canvas::buffer[] is a buffer holding the pixel data to be sent to the LCD.
-    unsigned char buffer[G15_LCD_WIDTH * G15_LCD_HEIGHT];  
+    unsigned char buffer[G15_BUFFER_LEN];  
 /// g15canvas::mode_xor determines whether xor processing is used in g15r_setPixel.
     int mode_xor;  
 /// g15canvas::mode_cache can be used to determine whether caching should be used in an application.

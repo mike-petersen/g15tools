@@ -72,7 +72,7 @@ void g15r_setPixel(g15canvas * canvas, unsigned int x, unsigned int y, int val)
  */
 void g15r_clearScreen(g15canvas * canvas, int color)
 {
-   memset(canvas->buffer, (color ? 0xFF: 0), G15_LCD_WIDTH * G15_LCD_HEIGHT);
+   memset(canvas->buffer, (color ? 0xFF: 0), G15_BUFFER_LEN);
 }
 
 /**
@@ -82,7 +82,7 @@ void g15r_clearScreen(g15canvas * canvas, int color)
  */
 void g15r_initCanvas(g15canvas * canvas)
 {
-   memset(canvas->buffer, 0, G15_LCD_WIDTH * G15_LCD_HEIGHT);
+   memset(canvas->buffer, 0, G15_BUFFER_LEN);
    canvas->mode_cache = 0;
    canvas->mode_reverse = 0;
    canvas->mode_xor = 0;
