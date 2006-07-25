@@ -165,10 +165,10 @@ MODULE_EXPORT void g15_flush (Driver *drvthis)
 {
 	PrivateData *p = drvthis->private_data;
 
-	if (memcmp(p->backingstore->buffer, p->canvas->buffer, G15_LCD_WIDTH * G15_LCD_HEIGHT * sizeof(unsigned char)) == 0)
+	if (memcmp(p->backingstore->buffer, p->canvas->buffer, G15_BUFFER_LEN * sizeof(unsigned char)) == 0)
 		return;
 
-	memcpy(p->backingstore->buffer, p->canvas->buffer, G15_LCD_WIDTH * G15_LCD_HEIGHT * sizeof(unsigned char));
+	memcpy(p->backingstore->buffer, p->canvas->buffer, G15_BUFFER_LEN * sizeof(unsigned char));
 
 	writeBufferToLCD(p->canvas->buffer);
 }
