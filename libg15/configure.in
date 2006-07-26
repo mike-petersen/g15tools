@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(libg15, 1.1, philip@lawatsch.at)
+AC_INIT(libg15, 1.0, philip@lawatsch.at)
 AC_CONFIG_AUX_DIR(config)
 AM_INIT_AUTOMAKE()
 AC_CONFIG_SRCDIR([libg15.c])
