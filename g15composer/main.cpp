@@ -135,7 +135,7 @@ void handlePixelCommand(g15canvas * canvas, string const &input_line)
          return;
       }
          
-      int output_line[G15_LCD_WIDTH*G15_LCD_HEIGHT];
+      short output_line[G15_BUFFER_LEN];
       
       for(int i=0;i<exp;++i)
       {
@@ -264,6 +264,6 @@ void handleTextCommand(g15canvas * canvas, string const &input_line)
 void updateScreen(g15canvas * canvas, bool force)
 {
    if(force || !canvas->mode_cache)
-	  writeBufferToLCD(canvas->buffer);
+	  writePixmapToLCD(canvas->buffer);
 }
 

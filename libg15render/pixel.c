@@ -65,7 +65,7 @@ void g15r_pixelReverseFill(g15canvas * canvas, int x1, int y1, int x2, int y2, i
  * \param height Defines the height of the bitmap to be drawn.
  * \param colormap An array containing width*height entries of value 0 for pixel off or != 0 for pixel on.
  */
-void g15r_pixelOverlay(g15canvas * canvas, int x1, int y1, int width, int height, int colormap[])
+void g15r_pixelOverlay(g15canvas * canvas, int x1, int y1, int width, int height, short colormap[])
 {
    int i=0;
    

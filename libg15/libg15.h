@@ -108,7 +108,6 @@ extern "C"
    * else otherwise (for instance G15_ERROR_OPENING_USB_DEVICE */
   int initLibG15();
   
-  int writeBufferToLCD(unsigned char *buffer);
   int writePixmapToLCD(unsigned char const *data);
   int setLCDContrast(unsigned int level);
   int setLEDs(unsigned int leds);

@@ -30,11 +30,11 @@ int g15r_getPixel(g15canvas * canvas, unsigned int x, unsigned int y)
    if (x >= G15_LCD_WIDTH || y >= G15_LCD_HEIGHT)
       return 0;
    
-   int row = y / BYTE_SIZE;
-   int offset = G15_LCD_WIDTH * row + x;
-   int bit = y % BYTE_SIZE;
+   unsigned int pixel_offset = y * G15_LCD_WIDTH + x;
+   unsigned int byte_offset = pixel_offset / BYTE_SIZE;
+   unsigned int bit_offset = 7-(pixel_offset % BYTE_SIZE);
     
-   return (canvas->buffer[offset] & (1 << bit)) >> bit;
+   return (canvas->buffer[byte_offset] & (1 << bit_offset)) >> bit_offset;
 }
 
 /**
@@ -50,17 +50,17 @@ void g15r_setPixel(g15canvas * canvas, unsigned int x, unsigned int y, int val)
    if (x >= G15_LCD_WIDTH || y >= G15_LCD_HEIGHT)
       return;
    
-   int row = y / BYTE_SIZE;
-   int offset = G15_LCD_WIDTH * row + x;
-   int bit = y % BYTE_SIZE;
-    
+   unsigned int pixel_offset = y * G15_LCD_WIDTH + x;
+   unsigned int byte_offset = pixel_offset / BYTE_SIZE;
+   unsigned int bit_offset = 7-(pixel_offset % BYTE_SIZE);
+
    if (canvas->mode_xor) val ^= g15r_getPixel(canvas, x, y);
    if (canvas->mode_reverse) val = !val;
 
    if (val)
-      canvas->buffer[G15_LCD_OFFSET + offset] = canvas->buffer[G15_LCD_OFFSET + offset] | 1 << bit;
+      canvas->buffer[byte_offset] = canvas->buffer[byte_offset] | 1 << bit_offset;
    else
-      canvas->buffer[G15_LCD_OFFSET + offset] = canvas->buffer[G15_LCD_OFFSET + offset]  &  ~(1 << bit);
+      canvas->buffer[byte_offset] = canvas->buffer[byte_offset]  &  ~(1 << bit_offset);
    
 }
 

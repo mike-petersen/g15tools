@@ -170,7 +170,7 @@ MODULE_EXPORT void g15_flush (Driver *drvthis)
 
 	memcpy(p->backingstore->buffer, p->canvas->buffer, G15_BUFFER_LEN * sizeof(unsigned char));
 
-	writeBufferToLCD(p->canvas->buffer);
+	writePixmapToLCD(p->canvas->buffer);
 }
 
 // Character function for the lcdproc driver API

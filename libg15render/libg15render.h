@@ -9,7 +9,7 @@ extern "C"
 #include <string.h>
 
 #define BYTE_SIZE 			8
-#define G15_BUFFER_LEN  	0x03e0
+#define G15_BUFFER_LEN  	6880
 #define G15_LCD_OFFSET  	32
 #define G15_LCD_HEIGHT  	43
 #define G15_LCD_WIDTH   	160
@@ -36,7 +36,7 @@ typedef struct g15canvas {
 /// \brief Fills an area bounded by (x1, y1) and (x2, y2)
 void g15r_pixelReverseFill(g15canvas * canvas, int x1, int y1, int x2, int y2, int fill, int color);
 /// \brief Overlays a bitmap of size width x height starting at (x1, y1)
-void g15r_pixelOverlay(g15canvas * canvas, int x1, int y1, int width, int height, int colormap[]);
+void g15r_pixelOverlay(g15canvas * canvas, int x1, int y1, int width, int height, short colormap[]);
 /// \brief Draws a line from (px1, py1) to (px2, py2)
 void g15r_drawLine(g15canvas * canvas, int px1, int py1, int px2, int py2, const int color);
 /// \brief Draws a box bounded by (x1, y1) and (x2, y2)
