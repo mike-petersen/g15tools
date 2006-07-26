@@ -20,4 +20,4 @@ all:
 	
 clean:
 	rm -f *.o
-	rm -f testlibg15
+	rm -f testlibg15render
