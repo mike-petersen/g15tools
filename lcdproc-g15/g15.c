@@ -434,17 +434,13 @@ MODULE_EXPORT void g15_num(Driver * drvthis, int x, int num)
 	else
 		width = 9;
 	
-	p->canvas->mode_reverse = 1;
-	
 	int i=0;
    
    	for (i=0;i<(width*height);++i)
    	{
-      	int color = (g15_bignum_data[num][i] ? G15_COLOR_BLACK : G15_COLOR_WHITE);
+      	int color = (g15_bignum_data[num][i] ? G15_COLOR_WHITE : G15_COLOR_BLACK);
       	int px = ox + i % width;
       	int py = i / width;
       	g15r_setPixel(p->canvas, px, py, color);
    	}
-	
-	p->canvas->mode_reverse = 0;
 }
