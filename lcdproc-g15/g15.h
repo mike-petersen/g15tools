@@ -64,6 +64,9 @@ typedef struct driver_private_data {
 #define G15_ICON_NEXT			242
 #define G15_ICON_PREV			243
 #define G15_ICON_REC			7
+#define G15_BIGNUM_LEN			1032
+
+extern short g15_bignum_data[11][G15_BIGNUM_LEN];
 
 MODULE_EXPORT int  g15_init (Driver *drvthis);
 MODULE_EXPORT void g15_close (Driver *drvthis);
@@ -80,5 +83,6 @@ MODULE_EXPORT void g15_hbar(Driver *drvthis, int x, int y, int len, int promille
 MODULE_EXPORT void g15_vbar(Driver *drvthis, int x, int y, int len, int promille, int options);
 MODULE_EXPORT const char * g15_get_key (Driver *drvthis);
 MODULE_EXPORT void g15_backlight(Driver *drvthis, int on);
+MODULE_EXPORT void g15_num(Driver * drvthis, int x, int num);
 
 #endif /*G15_H_*/

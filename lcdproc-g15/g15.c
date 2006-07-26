@@ -415,3 +415,36 @@ MODULE_EXPORT void g15_backlight(Driver *drvthis, int on)
 			}
 		}
 }
+
+MODULE_EXPORT void g15_num(Driver * drvthis, int x, int num)
+{
+	PrivateData *p = drvthis->private_data;
+	
+	x--;
+	int ox = x * p->cellwidth;
+	
+	if ((num < 0) || (num > 10))
+		return;
+		
+	int width = 0;
+	int height = 43;
+	
+	if ((num >= 0) && (num <=9))
+		width = 24;
+	else
+		width = 9;
+	
+	p->canvas->mode_reverse = 1;
+	
+	int i=0;
+   
+   	for (i=0;i<(width*height);++i)
+   	{
+      	int color = (g15_bignum_data[num][i] ? G15_COLOR_BLACK : G15_COLOR_WHITE);
+      	int px = ox + i % width;
+      	int py = i / width;
+      	g15r_setPixel(p->canvas, px, py, color);
+   	}
+	
+	p->canvas->mode_reverse = 0;
+}
