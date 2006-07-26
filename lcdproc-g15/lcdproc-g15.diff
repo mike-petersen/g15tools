@@ -56,7 +56,7 @@ diff -u -r1.74 acinclude.m4
  			;;
 +		g15)
 +			AC_CHECK_HEADERS([libg15.h],[
-+				AC_CHECK_LIB(g15, writeBufferToLCD,[
++				AC_CHECK_LIB(g15, writePixmapToLCD,[
 +					LIBG15="-lg15"
 +				],[
 +dnl				else
