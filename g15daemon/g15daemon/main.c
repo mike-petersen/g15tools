@@ -49,20 +49,21 @@ static void *keyboard_watch_thread(void *lcdlist){
     lcdlist_t *displaylist = (lcdlist_t*)(lcdlist);
     
     static unsigned int lastkeypresses = 0;
+    unsigned int keypresses = 0;
     int retval = 0;
     current_key_state = 0;
     
     while (!leaving) {
         
         pthread_mutex_lock(&g15lib_mutex);
-          retval = getPressedKeys(&current_key_state, 100);
+          retval = getPressedKeys(&keypresses, 100);
         pthread_mutex_unlock(&g15lib_mutex);
         
         if(retval == G15_NO_ERROR){
-            if(current_key_state != lastkeypresses){
-
-                g15_uinput_process_keys(displaylist, current_key_state,lastkeypresses);
-                lastkeypresses = current_key_state;
+            if(keypresses != lastkeypresses){
+                current_key_state = keypresses;
+                g15_uinput_process_keys(displaylist, keypresses,lastkeypresses);
+                lastkeypresses = keypresses;
             }
         }
         pthread_msleep(100);

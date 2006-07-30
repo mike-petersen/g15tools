@@ -120,6 +120,7 @@ int g15_recv(lcdnode_t *lcdnode, int sock, char *buf, unsigned int len)
                     if(lcdnode->list->current == lcdnode){
                         if((msgret=send(sock,(void *)&current_key_state,sizeof(current_key_state),0))<0) /* send the keystate inband back to the client */
                            daemon_log(LOG_WARNING,"Error in send: %s\n",strerror(errno));
+                        current_key_state = 0;
                     }
                     else{
                         memset(msgbuf,0,4); /* client isn't currently being displayed.. tell them nothing */
