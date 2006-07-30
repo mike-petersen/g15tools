@@ -89,12 +89,12 @@ void setpixel(lcd_t *lcd, unsigned int x, unsigned int y, unsigned int val)
 
 void convert_buf(lcd_t *lcd, unsigned char * orig_buf)
 {
-  unsigned int x,y;
-  for(x=0;x<160;x++)
-    for(y=0;y<43;y++)
-      setpixel(lcd,x,y,orig_buf[x+(y*160)]);
+    unsigned int x,y;
+    for(x=0;x<160;x++)
+        for(y=0;y<43;y++)
+            setpixel(lcd,x,y,orig_buf[x+(y*160)]);
 }
-                                         
+                                        
 
 /* wrap the libg15 function */
 void write_buf_to_g15(lcd_t *lcd)
@@ -417,12 +417,12 @@ void lcdclock(lcd_t *lcd)
 
 
 /* the client must send 6880 bytes for each lcd screen.  This thread will continue to copy data
- * into the clients LCD buffer for as long as the connection remains open. 
- * so, the client should open a socket, check to ensure that the server is a g15daemon,
- * and send multiple 6880 byte packets (1 for each screen update) 
- * once the client disconnects by closing the socket, the LCD buffer is 
- * removed and will no longer be displayed.
- */
+* into the clients LCD buffer for as long as the connection remains open. 
+* so, the client should open a socket, check to ensure that the server is a g15daemon,
+* and send multiple 6880 byte packets (1 for each screen update) 
+* once the client disconnects by closing the socket, the LCD buffer is 
+* removed and will no longer be displayed.
+*/
 void *lcd_client_thread(void *display) {
 
     lcdnode_t *g15node = display;
@@ -438,7 +438,7 @@ void *lcd_client_thread(void *display) {
     if(!connected_clients)
         setLEDs(G15_LED_MR); /* turn on the MR backlight to show that it's now being used for lcd-switching */
     connected_clients++;
-      
+    
     if(g15_send(client_sock, (char*)helo, strlen(SERV_HELO))<0){
         goto exitthread;
     }
@@ -453,52 +453,52 @@ void *lcd_client_thread(void *display) {
             if(retval!=6880){
                 break;
             }
-           pthread_mutex_lock(&lcdlist_mutex);
+            pthread_mutex_lock(&lcdlist_mutex);
             memset(client_lcd->buf,0,1024);      
             convert_buf(client_lcd,tmpbuf);
             client_lcd->ident = random();
             pthread_mutex_unlock(&lcdlist_mutex);
         }
     }
-    else if (tmpbuf[0]=='R') { /* libg15render buffer */
-       while(!leaving) {
-               retval = g15_recv(g15node, client_sock, (char *)tmpbuf, 1048);
-               if(retval != 1048) {
-                       break;
-               }
-               pthread_mutex_lock(&lcdlist_mutex);
-                       memcpy(client_lcd->buf,tmpbuf,sizeof(client_lcd->buf));
-                       client_lcd->ident = random();
-               pthread_mutex_unlock(&lcdlist_mutex);
-       }
-    }
+    else if (tmpbuf[0]=='R') { /* libg15render buffer */
+        while(!leaving) {
+            retval = g15_recv(g15node, client_sock, (char *)tmpbuf, 1048);
+            if(retval != 1048) {
+                break;
+            }
+            pthread_mutex_lock(&lcdlist_mutex);
+            memcpy(client_lcd->buf,tmpbuf,sizeof(client_lcd->buf));
+            client_lcd->ident = random();
+            pthread_mutex_unlock(&lcdlist_mutex);
+        }
+    }
     else if (tmpbuf[0]=='W'){ /* wbmp buffer - we assume (stupidly) that it's 160 pixels wide */
         while(!leaving) {
             retval = g15_recv(g15node, client_sock,(char*)tmpbuf, 865);
             if(!retval)
-              break;
+                break;
 
             if (tmpbuf[2] & 1) {
-              width = ((unsigned char)tmpbuf[2] ^ 1) | (unsigned char)tmpbuf[3];
-              height = tmpbuf[4];
-              header = 5;
+                width = ((unsigned char)tmpbuf[2] ^ 1) | (unsigned char)tmpbuf[3];
+                height = tmpbuf[4];
+                header = 5;
             } else {
-              width = tmpbuf[2];
-              height = tmpbuf[3];
-              header = 4;
+                width = tmpbuf[2];
+                height = tmpbuf[3];
+                header = 4;
             }
             
             buflen = (width/8)*height;
 
             if(buflen>860){ /* grab the remainder of the image and discard excess bytes */
-              /*  retval=g15_recv(client_sock,(char*)tmpbuf+865,buflen-860);  */
-              retval=g15_recv(g15node, client_sock,NULL,buflen-860); 
-              buflen = 860;
+                /*  retval=g15_recv(client_sock,(char*)tmpbuf+865,buflen-860);  */
+                retval=g15_recv(g15node, client_sock,NULL,buflen-860); 
+                buflen = 860;
             }
             
             if(width!=160) /* FIXME - we ought to scale images I suppose */
-              goto exitthread;
-              
+                goto exitthread;
+            
             pthread_mutex_lock(&lcdlist_mutex);
             memcpy(client_lcd->buf,tmpbuf+header,buflen+header);
             client_lcd->ident = random();
@@ -506,7 +506,7 @@ void *lcd_client_thread(void *display) {
         }
     }
 exitthread:
-    close(client_sock);
+        close(client_sock);
     free(tmpbuf);
     lcdnode_remove(display);
     connected_clients--;
