@@ -33,6 +33,13 @@ g15daemon -k
 
 [USING THE EXTRA KEYS]
 
+*** Please Note ***
+
+   As of version 1.2, the MR key is used for switching between LCD clients,
+	and cannot be used for other purposes if the LCD is being used.
+
+***
+
 For a number of reasons, by default the keys on the G15 arent usable -
 especially without g15daemon :)  With g15daemon running, the kernel will
 know all about the new keys, but your 'X' server won't without a bit of help.

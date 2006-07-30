@@ -32,4 +32,7 @@ Version 1.0-pre0
 - optimize lcd buffer path, removing a conversion step. and reducing the
   buffer size from 7k to 1k
 - misc other memory optimisations.
-
+- added python bindings
+- added ability for lcd clients to receive keypresses directly
+- moved lcd display/client switch from L1 to MR
+- MR key is now backlit.

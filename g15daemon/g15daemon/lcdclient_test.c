@@ -23,15 +23,18 @@
 */
 
 /* quickndirty g15daemon client example. it just connects and sends a prefab image to the server
- * and remains connected until the user presses enter.. 
+* and remains connected until the user presses enter.. 
 */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <sys/types.h>
+#include <sys/socket.h>
 #include "g15daemon_client.h"
 #include "g15logo.h"
+#include <errno.h>
+#include <poll.h>
 
 int main(int argc, char *argv[])
 {
@@ -44,16 +47,31 @@ int main(int argc, char *argv[])
     }else
         printf("Connected to g15daemon.  sending image\n");
 
-    if(argc<2)
-        retval = g15_send(g15screen_fd,(char*)logo_data,6880);
-    else {
-        memset(lcdbuffer,0,6880);
-        memset(lcdbuffer,1,6880/2);
-        retval = g15_send(g15screen_fd,(char*)lcdbuffer,6880);
-    }
-    printf("Sleeping for 10seconds then exiting\n",retval);
-    
-    sleep(10);    
-    g15_close_screen(g15screen_fd);
-    return 0;
+        if(argc<2)
+            retval = g15_send(g15screen_fd,(char*)logo_data,6880);
+        else {
+            memset(lcdbuffer,0,6880);
+            memset(lcdbuffer,1,6880/2);
+            retval = g15_send(g15screen_fd,(char*)lcdbuffer,6880);
+        }
+        printf("Sleeping for 10seconds then exiting\n",retval);
+        unsigned int keystate;
+        char msgbuf[256];
+        char *key = &keystate;
+        while(1){
+            keystate = 0;
+
+            if(send(g15screen_fd, "k", 1, MSG_OOB)<1) /* request key status */
+                printf("Error in send\n");    
+
+            retval = recv(g15screen_fd, &keystate , sizeof(keystate),0);
+            if(keystate)
+              printf("keystate = %i\n",keystate);
+
+            usleep(5000);
+            if(keystate & 1) //G1 key.  See libg15.h for details on key values.
+                break;
+        }
+        g15_close_screen(g15screen_fd);
+        return 0;
 }

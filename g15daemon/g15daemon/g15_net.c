@@ -14,7 +14,7 @@
     You should have received a copy of the GNU General Public License
     along with g15daemon; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-    
+
     (c) 2006 Mike Lampard, Philip Lawatsch, and others
     
     This daemon listens on localhost port 15550 for client connections,
@@ -30,10 +30,12 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
+#include <errno.h>
 
 #include "g15daemon.h"
 #include <libdaemon/daemon.h>
 extern int leaving;
+extern unsigned int current_key_state;
 
 /* create and open a socket for listening */
 int init_sockserver(){
@@ -93,19 +95,39 @@ int g15_send(int sock, char *buf, unsigned int len)
     return retval==-1?-1:0;
 } 
 
-int g15_recv(int sock, char *buf, unsigned int len)
+int g15_recv(lcdnode_t *lcdnode, int sock, char *buf, unsigned int len)
 {
     int total = 0;
     int retval = 0;
+    int msgret = 0;
     int bytesleft = len; 
     struct pollfd pfd[1];
-    
+    unsigned int msgbuf[20];
+
     while(total < len  && !leaving) {
         memset(pfd,0,sizeof(pfd));
         pfd[0].fd = sock;
-        pfd[0].events = POLLIN;
+        pfd[0].events = POLLIN | POLLPRI;
         if(poll(pfd,1,500)>0){
-            if(pfd[0].revents & POLLIN) {
+            if(pfd[0].revents & POLLPRI) { /* receive out-of-band request from client and deal with it */
+                memset(msgbuf,0,sizeof(msgbuf));
+                msgret = recv(sock, msgbuf, sizeof(msgbuf) , MSG_OOB);
+                if (msgret < 1) {
+                    break;
+                }
+
+                if(msgbuf[0] == 'k') { /* client wants keypresses */
+                    if(lcdnode->list->current == lcdnode){
+                        if((msgret=send(sock,(void *)&current_key_state,sizeof(current_key_state),0))<0) /* send the keystate inband back to the client */
+                           daemon_log(LOG_WARNING,"Error in send: %s\n",strerror(errno));
+                    }
+                    else{
+                        memset(msgbuf,0,4); /* client isn't currently being displayed.. tell them nothing */
+                        send(sock,(void *)msgbuf,sizeof(current_key_state),0);
+                    }
+                }
+            }
+            else if(pfd[0].revents & POLLIN) {
                 retval = recv(sock, buf+total, bytesleft, 0);
                 if (retval < 1) { 
                     break; 

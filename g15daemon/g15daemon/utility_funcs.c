@@ -438,13 +438,13 @@ void *lcd_client_thread(void *display) {
         goto exitthread;
     }
     /* check for requested buffer type.. we only handle pixel buffers atm */
-    if(g15_recv(client_sock,(char*)tmpbuf,4)<4)
+    if(g15_recv(g15node, client_sock,(char*)tmpbuf,4)<4)
         goto exitthread;
 
     /* we will in the future handle txt buffers gracefully but for now we just hangup */
     if(tmpbuf[0]=='G') {
         while(!leaving) {
-            retval = g15_recv(client_sock,(char *)tmpbuf,6880);
+            retval = g15_recv(g15node, client_sock,(char *)tmpbuf,6880);
             if(retval!=6880){
                 break;
             }
@@ -457,7 +457,7 @@ void *lcd_client_thread(void *display) {
     }
     else if (tmpbuf[0]=='W'){ /* wbmp buffer - we assume (stupidly) that it's 160 pixels wide */
         while(!leaving) {
-            retval = g15_recv(client_sock,(char*)tmpbuf, 865);
+            retval = g15_recv(g15node, client_sock,(char*)tmpbuf, 865);
             if(!retval)
               break;
 
@@ -475,7 +475,7 @@ void *lcd_client_thread(void *display) {
 
             if(buflen>860){ /* grab the remainder of the image and discard excess bytes */
               /*  retval=g15_recv(client_sock,(char*)tmpbuf+865,buflen-860);  */
-              retval=g15_recv(client_sock,NULL,buflen-860); 
+              retval=g15_recv(g15node, client_sock,NULL,buflen-860); 
               buflen = 860;
             }
             

@@ -42,25 +42,27 @@
 /* all threads will exit if leaving >0 */
 int leaving = 0;
 
+unsigned int current_key_state;
+
 static void *keyboard_watch_thread(void *lcdlist){
     
     lcdlist_t *displaylist = (lcdlist_t*)(lcdlist);
     
     static unsigned int lastkeypresses = 0;
-    unsigned int keypresses = 0;
     int retval = 0;
+    current_key_state = 0;
     
     while (!leaving) {
         
         pthread_mutex_lock(&g15lib_mutex);
-          retval = getPressedKeys(&keypresses, 100);
+          retval = getPressedKeys(&current_key_state, 100);
         pthread_mutex_unlock(&g15lib_mutex);
         
         if(retval == G15_NO_ERROR){
-            if(keypresses != lastkeypresses){
+            if(current_key_state != lastkeypresses){
 
-                g15_uinput_process_keys(displaylist, keypresses,lastkeypresses);
-                lastkeypresses = keypresses;
+                g15_uinput_process_keys(displaylist, current_key_state,lastkeypresses);
+                lastkeypresses = current_key_state;
             }
         }
         pthread_msleep(100);
@@ -190,6 +192,7 @@ int main (int argc, char *argv[])
         /* init stuff here..  */
         retval = initLibG15();
         setLCDContrast(1); 
+        setLEDs(G15_LED_MR);
         
         if(retval != G15_NO_ERROR){
             daemon_log(LOG_ERR,"Couldnt find G15 keyboard or keyboard is already handled. Exiting");
