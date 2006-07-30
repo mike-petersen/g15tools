@@ -41,6 +41,7 @@
 static int uinp_fd = -1;
 
 extern int leaving;
+extern unsigned int connected_clients;
 
 int g15_init_uinput() {
     
@@ -215,24 +216,25 @@ void g15_uinput_process_keys(lcdlist_t *displaylist, unsigned int currentkeys, u
         g15_uinput_keydown(MKEY_OFFSET+2);
     else if(!(currentkeys & G15_KEY_M3) && (lastkeys & G15_KEY_M3))
         g15_uinput_keyup(MKEY_OFFSET+2);
-
-    if((currentkeys & G15_KEY_MR) && !(lastkeys & G15_KEY_MR))
-        g15_uinput_keydown(MKEY_OFFSET+3);
-    else if(!(currentkeys & G15_KEY_MR) && (lastkeys & G15_KEY_MR))
-        g15_uinput_keyup(MKEY_OFFSET+3);
-
-    /* cycle through connected client displays if L1 is pressed */
-    if((currentkeys & G15_KEY_MR) && !(lastkeys & G15_KEY_MR))
-    {
-        pthread_mutex_lock(&lcdlist_mutex);
-        if(displaylist->tail == displaylist->current) {
-            displaylist->current = displaylist->head;
-        } else {
-            displaylist->current = displaylist->current->prev;
+    
+    if(!connected_clients) {
+        if((currentkeys & G15_KEY_MR) && !(lastkeys & G15_KEY_MR))
+            g15_uinput_keydown(MKEY_OFFSET+3);
+        else if(!(currentkeys & G15_KEY_MR) && (lastkeys & G15_KEY_MR))
+            g15_uinput_keyup(MKEY_OFFSET+3);
+    }else{
+        /* cycle through connected client displays if L1 is pressed */
+        if((currentkeys & G15_KEY_MR) && !(lastkeys & G15_KEY_MR))
+        {
+            pthread_mutex_lock(&lcdlist_mutex);
+            if(displaylist->tail == displaylist->current) {
+                displaylist->current = displaylist->head;
+            } else {
+                displaylist->current = displaylist->current->prev;
+            }
+            pthread_mutex_unlock(&lcdlist_mutex);
         }
-        pthread_mutex_unlock(&lcdlist_mutex);
     }
-
     
     /* 'L' keys...  */
     

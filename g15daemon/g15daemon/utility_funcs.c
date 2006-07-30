@@ -39,6 +39,7 @@
 #include "libg15.h"
 
 extern int leaving;
+unsigned int connected_clients = 0;
 
 /* handy function from xine_utils.c */
 void *g15_xmalloc(size_t size) {
@@ -433,7 +434,11 @@ void *lcd_client_thread(void *display) {
     int client_sock = client_lcd->connection;
     char helo[]=SERV_HELO;
     unsigned char *tmpbuf=g15_xmalloc(6880);
-           
+    
+    if(!connected_clients)
+        setLEDs(G15_LED_MR); /* turn on the MR backlight to show that it's now being used for lcd-switching */
+    connected_clients++;
+      
     if(g15_send(client_sock, (char*)helo, strlen(SERV_HELO))<0){
         goto exitthread;
     }
@@ -492,6 +497,9 @@ exitthread:
     close(client_sock);
     free(tmpbuf);
     lcdnode_remove(display);
+    connected_clients--;
+    if(!connected_clients)
+        setLEDs(0);
     pthread_exit(NULL);
 }
 
@@ -510,7 +518,6 @@ int g15_clientconnect (lcdlist_t **g15daemon, int listening_socket) {
 
 
     if (poll(pfd,1,500)>0){
-
         if (!(pfd[0].revents & POLLIN)){
             return 0;
         }
