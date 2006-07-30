@@ -21,7 +21,7 @@
 #ifndef G15_H_
 #define G15_H_
 
-#include <usb.h>
+//#include <usb.h>
 #include <libg15.h>
 #include <libg15render.h>
 #include "lcd.h"
@@ -30,6 +30,8 @@ typedef struct driver_private_data {
 	/* dimensions */
 	int width, height;
 	int cellwidth, cellheight;
+	/* file descriptor for g15daemon socket */
+	int g15screen_fd;
 	/* canvas for LCD contents */
 	g15canvas *canvas;
 	g15canvas *backingstore;
@@ -40,8 +42,8 @@ typedef struct driver_private_data {
 #define G15_OFFSET				32
 #define G15_PX_WIDTH			160
 #define G15_PX_HEIGHT			43
-#define G15_WIDTH				20
-#define G15_HEIGHT				5
+#define G15_CHAR_WIDTH				20
+#define G15_CHAR_HEIGHT				5
 #define G15_CELL_WIDTH			8
 #define G15_CELL_HEIGHT			8
 #define G15_LCD_WRITE_CMD 		0x03
@@ -82,7 +84,7 @@ MODULE_EXPORT int g15_icon (Driver *drvthis, int x, int y, int icon);
 MODULE_EXPORT void g15_hbar(Driver *drvthis, int x, int y, int len, int promille, int options);
 MODULE_EXPORT void g15_vbar(Driver *drvthis, int x, int y, int len, int promille, int options);
 MODULE_EXPORT const char * g15_get_key (Driver *drvthis);
-MODULE_EXPORT void g15_backlight(Driver *drvthis, int on);
+//MODULE_EXPORT void g15_backlight(Driver *drvthis, int on);
 MODULE_EXPORT void g15_num(Driver * drvthis, int x, int num);
 
 #endif /*G15_H_*/

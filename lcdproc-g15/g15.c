@@ -29,8 +29,9 @@
 #include <string.h>
 #include <errno.h>
 #include <syslog.h>
-#include <usb.h>
+#include <sys/socket.h>
 #include <libg15.h>
+#include <g15daemon_client.h>
 #include <libg15render.h>
 
 #ifdef HAVE_CONFIG_H
@@ -63,14 +64,18 @@ MODULE_EXPORT int g15_init (Driver *drvthis)
 		return -1;
 
    /* Initialize the PrivateData structure */
-   p->width = G15_WIDTH;
-   p->height = G15_HEIGHT;
+   p->width = G15_CHAR_WIDTH;
+   p->height = G15_CHAR_HEIGHT;
    p->cellwidth = G15_CELL_WIDTH;
    p->cellheight = G15_CELL_HEIGHT;
    p->backlight_state = BACKLIGHT_ON;
+   p->g15screen_fd = 0;
 
-   int ret = 0;
-   ret = initLibG15();
+   if((p->g15screen_fd = new_g15_screen(G15_G15RBUF)) < 0)
+   {
+        report(RPT_ERR, "%s: Sorry, cant connect to the G15daemon", drvthis->name);
+        return -1;
+   }
    
 	/* make sure the canvas is there... */
 	p->canvas = (g15canvas *) malloc(sizeof(g15canvas));
@@ -91,7 +96,7 @@ MODULE_EXPORT int g15_init (Driver *drvthis)
 	p->canvas->buffer[0] = G15_LCD_WRITE_CMD;
 	p->backingstore->buffer[0] = G15_LCD_WRITE_CMD;
 	
-	ret = setLCDBrightness(G15_BRIGHTNESS_BRIGHT);
+//	ret = setLCDBrightness(G15_BRIGHTNESS_BRIGHT);
 	   
    return 0;
 }
@@ -101,6 +106,9 @@ MODULE_EXPORT int g15_init (Driver *drvthis)
 MODULE_EXPORT void g15_close (Driver *drvthis)
 {
 	PrivateData *p = drvthis->private_data;
+	
+	g15_close_screen(p->g15screen_fd);
+	
 	if (p != NULL) {
 		if (p->canvas)
 			free(p->canvas);
@@ -170,7 +178,7 @@ MODULE_EXPORT void g15_flush (Driver *drvthis)
 
 	memcpy(p->backingstore->buffer, p->canvas->buffer, G15_BUFFER_LEN * sizeof(unsigned char));
 
-	writePixmapToLCD(p->canvas->buffer);
+	g15_send(p->g15screen_fd,(char*)p->canvas->buffer,1048);
 }
 
 // Character function for the lcdproc driver API
@@ -363,11 +371,14 @@ MODULE_EXPORT void g15_vbar(Driver *drvthis, int x, int y, int len, int promille
 //
 MODULE_EXPORT const char * g15_get_key (Driver *drvthis)
 {
+	PrivateData *p = drvthis->private_data;
+	
 	unsigned int key_state = 0;
 	
-	int ret = getPressedKeys(&key_state,0);
-    if (ret == G15_ERROR_TRY_AGAIN)
-      return NULL;
+	if(send(p->g15screen_fd, "k", 1, MSG_OOB)<1) /* request key status */
+        report(RPT_INFO, "%s: Error in send to g15daemon", drvthis->name);    
+
+    	int retval = recv(p->g15screen_fd, &key_state , sizeof(key_state),0);
 	
 	if (key_state & G15_KEY_G1)
 		return "Escape";
@@ -387,6 +398,7 @@ MODULE_EXPORT const char * g15_get_key (Driver *drvthis)
 
 // Set the backlight
 //
+/*
 MODULE_EXPORT void g15_backlight(Driver *drvthis, int on)
 {
 	PrivateData *p = drvthis->private_data;
@@ -409,13 +421,13 @@ MODULE_EXPORT void g15_backlight(Driver *drvthis, int on)
 			ret = setLCDBrightness(G15_BRIGHTNESS_DARK);
 			break;
 			}
-		default: /* ignored... */
+		default: 
 			{
 			break;
 			}
 		}
 }
-
+*/
 MODULE_EXPORT void g15_num(Driver * drvthis, int x, int num)
 {
 	PrivateData *p = drvthis->private_data;

@@ -4,7 +4,7 @@ RCS file: /cvsroot/lcdproc/lcdproc/LCDd.conf,v
 retrieving revision 1.78
 diff -u -r1.78 LCDd.conf
 --- LCDd.conf	16 Jul 2006 11:26:38 -0000	1.78
-+++ LCDd.conf	23 Jul 2006 14:02:07 -0000
++++ LCDd.conf	30 Jul 2006 08:27:01 -0000
 @@ -36,6 +36,7 @@
  #Driver=CFontz633
  #Driver=CFontzPacket
@@ -31,7 +31,7 @@ RCS file: /cvsroot/lcdproc/lcdproc/acinclude.m4,v
 retrieving revision 1.74
 diff -u -r1.74 acinclude.m4
 --- acinclude.m4	20 May 2006 15:46:30 -0000	1.74
-+++ acinclude.m4	23 Jul 2006 14:02:07 -0000
++++ acinclude.m4	30 Jul 2006 08:27:01 -0000
 @@ -6,7 +6,7 @@
  	[                  drivers may be separated with commas.]
  	[                  Possible choices are:]
@@ -55,18 +55,18 @@ diff -u -r1.74 acinclude.m4
  			actdrivers=["$actdrivers CwLnx"]
  			;;
 +		g15)
-+			AC_CHECK_HEADERS([libg15.h],[
-+				AC_CHECK_LIB(g15, writePixmapToLCD,[
-+					LIBG15="-lg15"
++			AC_CHECK_HEADERS([g15daemon_client.h],[
++				AC_CHECK_LIB(g15daemon_client, new_g15_screen,[
++					LIBG15="-lg15daemon_client"
 +				],[
 +dnl				else
-+					AC_MSG_WARN([The g15 driver needs libg15-1.1 or better])
++					AC_MSG_WARN([The g15 driver needs libg15daemon_client-1.2 or better])
 +				],
-+				[-lg15]
++				[-lg15daemon_client]
 +				)
 +			],[
 +dnl			else
-+				AC_MSG_WARN([The g15 driver needs libg15.h])
++				AC_MSG_WARN([The g15 driver needs g15daemon_client.h])
 +			])
 +			AC_CHECK_HEADERS([libg15render.h],[
 +				AC_CHECK_LIB(g15render, g15r_initCanvas,[
@@ -101,7 +101,7 @@ RCS file: /cvsroot/lcdproc/lcdproc/docs/LCDd.8,v
 retrieving revision 1.11
 diff -u -r1.11 LCDd.8
 --- docs/LCDd.8	18 Jun 2006 20:29:56 -0000	1.11
-+++ docs/LCDd.8	23 Jul 2006 14:02:08 -0000
++++ docs/LCDd.8	30 Jul 2006 08:27:03 -0000
 @@ -81,6 +81,9 @@
  .B CwLnx
  serial/USB displays by Cwlinux (http://www.cwlinux.com)
@@ -118,7 +118,7 @@ RCS file: /cvsroot/lcdproc/lcdproc/server/drivers/Makefile.am,v
 retrieving revision 1.58
 diff -u -r1.58 Makefile.am
 --- server/drivers/Makefile.am	25 Jun 2006 15:08:42 -0000	1.58
-+++ server/drivers/Makefile.am	23 Jul 2006 14:02:08 -0000
++++ server/drivers/Makefile.am	30 Jul 2006 08:27:03 -0000
 @@ -19,17 +19,19 @@
  LIBS =
  
