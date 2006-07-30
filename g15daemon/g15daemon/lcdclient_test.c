@@ -36,11 +36,16 @@
 #include <errno.h>
 #include <poll.h>
 
+#include <libg15.h>
+
+
 int main(int argc, char *argv[])
 {
     int g15screen_fd, retval;
     char lcdbuffer[6880];
-
+    unsigned int keystate;
+    char msgbuf[256];
+    
     if((g15screen_fd = new_g15_screen(G15_PIXELBUF))<0){
         printf("Sorry, cant connect to the G15daemon\n");
         return 5;
@@ -54,23 +59,38 @@ int main(int argc, char *argv[])
             memset(lcdbuffer,1,6880/2);
             retval = g15_send(g15screen_fd,(char*)lcdbuffer,6880);
         }
-        printf("Sleeping for 10seconds then exiting\n",retval);
-        unsigned int keystate;
-        char msgbuf[256];
-        char *key = &keystate;
+
+        printf("checking key status - press G1 to exit\n",retval);
+        
         while(1){
             keystate = 0;
+            memset(msgbuf,0,256);
 
             if(send(g15screen_fd, "k", 1, MSG_OOB)<1) /* request key status */
                 printf("Error in send\n");    
-
             retval = recv(g15screen_fd, &keystate , sizeof(keystate),0);
             if(keystate)
-              printf("keystate = %i\n",keystate);
+                printf("keystate = %i\n",keystate);
 
-            usleep(5000);
             if(keystate & 1) //G1 key.  See libg15.h for details on key values.
                 break;
+
+            memset(msgbuf,0,5);
+            /* G2,G3 & G4 change LCD backlight */
+            if(keystate & 2){
+                msgbuf[0]=G15_BRIGHTNESS_DARK|G15DAEMON_BACKLIGHT;
+                send(g15screen_fd,msgbuf,1,MSG_OOB);
+            }
+            if(keystate & 4){
+                msgbuf[0]=G15_BRIGHTNESS_MEDIUM|G15DAEMON_BACKLIGHT;
+                send(g15screen_fd,msgbuf,1,MSG_OOB);
+            }
+            if(keystate & 8){
+                msgbuf[0]=G15_BRIGHTNESS_BRIGHT|G15DAEMON_BACKLIGHT;
+                send(g15screen_fd,msgbuf,1,MSG_OOB);            
+            }
+                usleep(5000);
+
         }
         g15_close_screen(g15screen_fd);
         return 0;

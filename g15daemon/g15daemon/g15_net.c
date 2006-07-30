@@ -31,7 +31,7 @@
 #include <unistd.h>
 
 #include <errno.h>
-
+#include <libg15.h>
 #include "g15daemon.h"
 #include <libdaemon/daemon.h>
 extern int leaving;
@@ -41,6 +41,7 @@ extern unsigned int current_key_state;
 int init_sockserver(){
     int listening_socket;
     int yes=1;
+    int tos = 0x18;
 
     struct    sockaddr_in servaddr; 
 
@@ -50,7 +51,8 @@ int init_sockserver(){
     }
 
     setsockopt(listening_socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
-
+    setsockopt(listening_socket, SOL_SOCKET, SO_PRIORITY, &tos, sizeof(tos));
+    
     memset(&servaddr, 0, sizeof(servaddr));
     servaddr.sin_family      = AF_INET;
     inet_aton (LISTEN_ADDR, &servaddr.sin_addr);
@@ -110,8 +112,9 @@ int g15_recv(lcdnode_t *lcdnode, int sock, char *buf, unsigned int len)
         pfd[0].events = POLLIN | POLLPRI;
         if(poll(pfd,1,500)>0){
             if(pfd[0].revents & POLLPRI) { /* receive out-of-band request from client and deal with it */
-                memset(msgbuf,0,sizeof(msgbuf));
-                msgret = recv(sock, msgbuf, sizeof(msgbuf) , MSG_OOB);
+                oobdata:
+                memset(msgbuf,0,20);
+                msgret = recv(sock, msgbuf, 10 , MSG_OOB);
                 if (msgret < 1) {
                     break;
                 }
@@ -126,9 +129,16 @@ int g15_recv(lcdnode_t *lcdnode, int sock, char *buf, unsigned int len)
                         memset(msgbuf,0,4); /* client isn't currently being displayed.. tell them nothing */
                         send(sock,(void *)msgbuf,sizeof(current_key_state),0);
                     }
+                }else if(msgbuf[0] & 0x80) { /* client wants to change the backlight */
+                    setLCDBrightness(msgbuf[0]-0x80);
+                }else if(msgbuf[0] & 0x40) { /* client wants to change the LCD contrast */
+                    setLCDContrast(msgbuf[0]-0x40);
+                }else if(msgbuf[0] & 0x20) { /* client wants to change the M-key backlights */
+                    setLEDs(msgbuf[0]-0x20);
                 }
             }
             else if(pfd[0].revents & POLLIN) {
+
                 retval = recv(sock, buf+total, bytesleft, 0);
                 if (retval < 1) { 
                     break; 
