@@ -84,7 +84,7 @@ MODULE_EXPORT int g15_icon (Driver *drvthis, int x, int y, int icon);
 MODULE_EXPORT void g15_hbar(Driver *drvthis, int x, int y, int len, int promille, int options);
 MODULE_EXPORT void g15_vbar(Driver *drvthis, int x, int y, int len, int promille, int options);
 MODULE_EXPORT const char * g15_get_key (Driver *drvthis);
-//MODULE_EXPORT void g15_backlight(Driver *drvthis, int on);
+MODULE_EXPORT void g15_backlight(Driver *drvthis, int on);
 MODULE_EXPORT void g15_num(Driver * drvthis, int x, int num);
 
 #endif /*G15_H_*/

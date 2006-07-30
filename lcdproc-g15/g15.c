@@ -378,7 +378,7 @@ MODULE_EXPORT const char * g15_get_key (Driver *drvthis)
 	if(send(p->g15screen_fd, "k", 1, MSG_OOB)<1) /* request key status */
         report(RPT_INFO, "%s: Error in send to g15daemon", drvthis->name);    
 
-    	int retval = recv(p->g15screen_fd, &key_state , sizeof(key_state),0);
+    	recv(p->g15screen_fd, &key_state , sizeof(key_state),0);
 	
 	if (key_state & G15_KEY_G1)
 		return "Escape";
@@ -398,7 +398,6 @@ MODULE_EXPORT const char * g15_get_key (Driver *drvthis)
 
 // Set the backlight
 //
-/*
 MODULE_EXPORT void g15_backlight(Driver *drvthis, int on)
 {
 	PrivateData *p = drvthis->private_data;
@@ -408,17 +407,19 @@ MODULE_EXPORT void g15_backlight(Driver *drvthis, int on)
 
 	p->backlight_state = on;
 
-	int ret=0;
+	char msgbuf[256];
 	
 	switch (on) {
 		case BACKLIGHT_ON:
 			{
-			ret = setLCDBrightness(G15_BRIGHTNESS_BRIGHT);
+			msgbuf[0]=G15_BRIGHTNESS_BRIGHT|G15DAEMON_BACKLIGHT;
+			send(p->g15screen_fd,msgbuf,1,MSG_OOB);
 			break;
 			}
 		case BACKLIGHT_OFF:
 			{
-			ret = setLCDBrightness(G15_BRIGHTNESS_DARK);
+			msgbuf[0]=G15_BRIGHTNESS_DARK|G15DAEMON_BACKLIGHT;
+			send(p->g15screen_fd,msgbuf,1,MSG_OOB);
 			break;
 			}
 		default: 
@@ -427,7 +428,7 @@ MODULE_EXPORT void g15_backlight(Driver *drvthis, int on)
 			}
 		}
 }
-*/
+
 MODULE_EXPORT void g15_num(Driver * drvthis, int x, int num)
 {
 	PrivateData *p = drvthis->private_data;
