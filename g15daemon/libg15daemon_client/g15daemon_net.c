@@ -71,6 +71,8 @@ int new_g15_screen(int screentype)
         g15_send(g15screen_fd,"TBUF",4);
     else if(screentype == G15_WBMPBUF) /* wbmp buffer */
         g15_send(g15screen_fd,"WBUF",4);
+    else if(screentype == G15_G15RBUF)
+        g15_send(g15screen_fd,"RBUF",4);
     else 
         g15_send(g15screen_fd,"GBUF",4);
     

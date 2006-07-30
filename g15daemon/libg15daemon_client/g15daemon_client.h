@@ -31,6 +31,7 @@
 #define G15_PIXELBUF 0
 #define G15_TEXTBUF 1
 #define G15_WBMPBUF 2
+#define G15_G15RBUF 3
 
 const char *g15daemon_version();
 

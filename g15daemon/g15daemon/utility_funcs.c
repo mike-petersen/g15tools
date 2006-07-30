@@ -460,6 +460,18 @@ void *lcd_client_thread(void *display) {
             pthread_mutex_unlock(&lcdlist_mutex);
         }
     }
+    else if (tmpbuf[0]=='R') { /* libg15render buffer */
+       while(!leaving) {
+               retval = g15_recv(g15node, client_sock, (char *)tmpbuf, 1048);
+               if(retval != 1048) {
+                       break;
+               }
+               pthread_mutex_lock(&lcdlist_mutex);
+                       memcpy(client_lcd->buf,tmpbuf,sizeof(client_lcd->buf));
+                       client_lcd->ident = random();
+               pthread_mutex_unlock(&lcdlist_mutex);
+       }
+    }
     else if (tmpbuf[0]=='W'){ /* wbmp buffer - we assume (stupidly) that it's 160 pixels wide */
         while(!leaving) {
             retval = g15_recv(g15node, client_sock,(char*)tmpbuf, 865);

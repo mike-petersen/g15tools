@@ -115,7 +115,7 @@ void lcdnode_remove(lcdnode_t *badnode);
 int init_sockserver();
 int g15_clientconnect(lcdlist_t **g15daemon,int listening_socket);
 int g15_send(int sock, char *buf, unsigned int len);
-int g15_recv(int sock, char *buf, unsigned int len);
+int g15_recv(lcdnode_t *lcdnode, int sock, char *buf, unsigned int len);
 
 /* handy function from xine_utils.c */
 void *g15_xmalloc(size_t size);
