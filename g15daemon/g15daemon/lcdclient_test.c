@@ -89,12 +89,22 @@ int main(int argc, char *argv[])
                 msgbuf[0]=G15_BRIGHTNESS_BRIGHT|G15DAEMON_BACKLIGHT;
                 send(g15screen_fd,msgbuf,1,MSG_OOB);            
             }
-//            if(keystate & 16){
+
+            msgbuf[0]='v'; /* are we viewable? */
+            send(g15screen_fd,msgbuf,1,MSG_OOB);            
+            recv(g15screen_fd,msgbuf,1,0);
+            if(msgbuf[0])
+              printf("Hey, we are in the foreground, Doc\n");
+            else
+              printf("What dastardly wabbit put me in the background?\n");
+            
+            if(!msgbuf[0]){ /* we've been backgrounded! */
+                sleep(2); /* remain in the background for a bit */
                 msgbuf[0]='p'; /* switch priorities */
                 send(g15screen_fd,msgbuf,1,MSG_OOB);            
-                sleep(2);
-//            }
-                usleep(5000);
+            }
+                           
+            usleep(5000);
         }
         g15_close_screen(g15screen_fd);
         return 0;

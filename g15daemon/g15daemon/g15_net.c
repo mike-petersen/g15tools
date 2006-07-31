@@ -131,12 +131,20 @@ int g15_recv(lcdnode_t *lcdnode, int sock, char *buf, unsigned int len)
                 }else if(msgbuf[0] == 'p') { /* client wants to switch priorities */
                     pthread_mutex_lock(&lcdlist_mutex);
                     if(lcdnode->list->current != lcdnode){
-                        lcdnode->last_priority = lcdnode->list->current;
                         lcdnode->list->current = lcdnode;
                     }
-                    else if (lcdnode->list->current == lcdnode && lcdnode->last_priority != NULL){
-                        lcdnode->list->current = lcdnode->last_priority;
-                        lcdnode->last_priority = NULL;
+                    else {
+                        lcdnode->list->current = lcdnode->list->current->prev;
+                    }
+                    pthread_mutex_unlock(&lcdlist_mutex);
+                }else if(msgbuf[0] == 'v') { /* client wants to know if it's currently viewable */
+                    pthread_mutex_lock(&lcdlist_mutex);
+                    if(lcdnode->list->current == lcdnode){
+                        msgbuf[0] = 1;
+                        send(sock,msgbuf,1,0);
+                    }else{
+                        msgbuf[0] = 0;
+                        send(sock,msgbuf,1,0);
                     }
                     pthread_mutex_unlock(&lcdlist_mutex);
                 }else if(msgbuf[0] & 0x80) { /* client wants to change the backlight */

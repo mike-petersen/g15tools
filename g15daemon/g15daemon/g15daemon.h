@@ -69,7 +69,6 @@ struct lcdnode_s {
     lcdlist_t *list;
     lcdnode_t *prev;
     lcdnode_t *next;
-    lcdnode_t *last_priority;
     lcd_t *lcd;
 }lcdnode_s;
 
