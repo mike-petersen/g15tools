@@ -23,11 +23,14 @@
 #include <getopt.h>
 
 #include <libg15.h>
+#include <g15daemon_client.h>
 #include <libg15render.h>
 #include "composer.h"
 
 using namespace std;
 
+int g15screen_fd = 0;
+   
 void printUsage()
 {
    cout << "Usage: cat instructions | g15composer" << endl;
@@ -45,8 +48,12 @@ int main(int argc, char *argv[])
       return 0;
    }
    
-   int ret = 0;
-   ret = initLibG15();
+   if((g15screen_fd = new_g15_screen(G15_G15RBUF)) < 0)
+   {
+        cout << "Sorry, cant connect to the G15daemon" << endl;
+        return -1;
+   }
+   
   
    fstream script;
    bool is_script = false;
@@ -92,7 +99,8 @@ int main(int argc, char *argv[])
 
    if(is_script)
       script.close();
-   
+      
+   g15_close_screen(g15screen_fd);
    return EXIT_SUCCESS;
 
 
@@ -264,6 +272,6 @@ void handleTextCommand(g15canvas * canvas, string const &input_line)
 void updateScreen(g15canvas * canvas, bool force)
 {
    if(force || !canvas->mode_cache)
-	  writePixmapToLCD(canvas->buffer);
+      g15_send(g15screen_fd,(char*)canvas->buffer,1048);
 }
 

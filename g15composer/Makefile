@@ -18,7 +18,7 @@ all:
 
 	g++ -g -O2 -Wall -pedantic -c main.cpp
 	g++ -g -O2 -Wall -pedantic -c util.cpp
-	g++ -g util.o main.o -lg15 -lg15render -o g15composer 
+	g++ -g util.o main.o -lg15daemon_client -lg15render -o g15composer 
 	
 clean:
 

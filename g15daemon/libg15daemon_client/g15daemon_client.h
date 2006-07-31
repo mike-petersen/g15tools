@@ -21,6 +21,10 @@
     and arbitrates LCD display.  Allows for multiple simultaneous clients.
     Client screens can be cycled through by pressing the 'L1' key.
 */
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #define G15_WIDTH 160
 #define G15_HEIGHT 43
@@ -51,3 +55,7 @@ int g15_close_screen(int sock);
  * until _all_ len bytes are sent or received, or an error occurs */
 int g15_send(int sock, char *buf, unsigned int len);
 int g15_recv(int sock, char *buf, unsigned int len);
+
+#ifdef __cplusplus
+}
+#endif
