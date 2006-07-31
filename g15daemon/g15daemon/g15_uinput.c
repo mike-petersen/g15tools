@@ -232,6 +232,8 @@ void g15_uinput_process_keys(lcdlist_t *displaylist, unsigned int currentkeys, u
             } else {
                 displaylist->current = displaylist->current->prev;
             }
+            displaylist->current->lcd->state_changed = 1;
+            displaylist->current->last_priority =  displaylist->current;
             pthread_mutex_unlock(&lcdlist_mutex);
         }
     }

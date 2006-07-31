@@ -44,6 +44,8 @@ int leaving = 0;
 
 unsigned int current_key_state;
 
+extern unsigned int connected_clients;
+
 static void *keyboard_watch_thread(void *lcdlist){
     
     lcdlist_t *displaylist = (lcdlist_t*)(lcdlist);
@@ -89,6 +91,7 @@ static void *lcd_draw_thread(void *lcdlist){
         
         if(displaylist->tail == displaylist->current){
             lcdclock(displaying);
+            displaying->mkey_state = 0;
         }
         
         if(displaying->ident != lastlcd){
@@ -96,6 +99,15 @@ static void *lcd_draw_thread(void *lcdlist){
            lastlcd = displaying->ident;
         }
         
+        if(displaying->state_changed ){
+            setLCDContrast(displaying->contrast_state);
+            if(connected_clients)
+                displaying->mkey_state = displaying->mkey_state | G15_LED_MR;
+            setLEDs(displaying->mkey_state);
+            setLCDBrightness(displaying->backlight_state);
+            displaying->state_changed = 0;
+        }
+            
         pthread_mutex_unlock(&lcdlist_mutex);
         
         pthread_msleep(200);

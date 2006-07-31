@@ -62,7 +62,11 @@ lcd_t * create_lcd () {
     lcd_t *lcd = g15_xmalloc (sizeof (lcd_t));
     lcd->max_x = LCD_WIDTH;
     lcd->max_y = LCD_HEIGHT;
-
+    lcd->backlight_state = G15_BRIGHTNESS_MEDIUM;
+    lcd->mkey_state = G15_LED_MR;
+    lcd->contrast_state = G15_CONTRAST_MEDIUM;
+    lcd->state_changed = 1;
+    
     return (lcd);
 }
 
@@ -272,6 +276,8 @@ lcdlist_t *lcdlist_init () {
     displaylist->current = displaylist->head;
     
     displaylist->head->lcd = create_lcd();
+    displaylist->head->lcd->mkey_state = 0;
+    
     displaylist->head->prev = displaylist->head;
     displaylist->head->next = displaylist->head;
     displaylist->head->list = displaylist;
@@ -290,6 +296,7 @@ lcdnode_t *lcdnode_add(lcdlist_t **display_list) {
     new->prev = (*display_list)->current;
     new->next = NULL; 
     new->lcd = create_lcd();
+    new->last_priority = NULL;
     
     (*display_list)->current->next=new;
     (*display_list)->current = new;
@@ -315,8 +322,10 @@ void lcdnode_remove (lcdnode_t *oldnode) {
     
     quit_lcd(oldnode->lcd);
     
-    if((*display_list)->current == oldnode)
-        (*display_list)->current = oldnode->prev; 
+    if((*display_list)->current == oldnode) {
+        (*display_list)->current = oldnode->prev;
+    	(*display_list)->current->lcd->state_changed = 1;
+    }
     
     if(oldnode->next!=NULL){
         (*next)->prev = oldnode->prev;
@@ -326,6 +335,7 @@ void lcdnode_remove (lcdnode_t *oldnode) {
     }
 
     free(oldnode);
+    
     pthread_mutex_unlock(&lcdlist_mutex);
 }
 

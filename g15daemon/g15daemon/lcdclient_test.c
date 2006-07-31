@@ -89,8 +89,12 @@ int main(int argc, char *argv[])
                 msgbuf[0]=G15_BRIGHTNESS_BRIGHT|G15DAEMON_BACKLIGHT;
                 send(g15screen_fd,msgbuf,1,MSG_OOB);            
             }
+//            if(keystate & 16){
+                msgbuf[0]='p'; /* switch priorities */
+                send(g15screen_fd,msgbuf,1,MSG_OOB);            
+                sleep(2);
+//            }
                 usleep(5000);
-
         }
         g15_close_screen(g15screen_fd);
         return 0;

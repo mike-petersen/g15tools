@@ -112,7 +112,6 @@ int g15_recv(lcdnode_t *lcdnode, int sock, char *buf, unsigned int len)
         pfd[0].events = POLLIN | POLLPRI;
         if(poll(pfd,1,500)>0){
             if(pfd[0].revents & POLLPRI) { /* receive out-of-band request from client and deal with it */
-                oobdata:
                 memset(msgbuf,0,20);
                 msgret = recv(sock, msgbuf, 10 , MSG_OOB);
                 if (msgret < 1) {
@@ -129,12 +128,26 @@ int g15_recv(lcdnode_t *lcdnode, int sock, char *buf, unsigned int len)
                         memset(msgbuf,0,4); /* client isn't currently being displayed.. tell them nothing */
                         send(sock,(void *)msgbuf,sizeof(current_key_state),0);
                     }
+                }else if(msgbuf[0] == 'p') { /* client wants to switch priorities */
+                    pthread_mutex_lock(&lcdlist_mutex);
+                    if(lcdnode->list->current != lcdnode){
+                        lcdnode->last_priority = lcdnode->list->current;
+                        lcdnode->list->current = lcdnode;
+                    }
+                    else if (lcdnode->list->current == lcdnode && lcdnode->last_priority != NULL){
+                        lcdnode->list->current = lcdnode->last_priority;
+                        lcdnode->last_priority = NULL;
+                    }
+                    pthread_mutex_unlock(&lcdlist_mutex);
                 }else if(msgbuf[0] & 0x80) { /* client wants to change the backlight */
-                    setLCDBrightness(msgbuf[0]-0x80);
+                    lcdnode->lcd->backlight_state = msgbuf[0]-0x80;
+                    lcdnode->lcd->state_changed = 1;
                 }else if(msgbuf[0] & 0x40) { /* client wants to change the LCD contrast */
-                    setLCDContrast(msgbuf[0]-0x40);
+                    lcdnode->lcd->contrast_state = msgbuf[0]-0x40;
+                    lcdnode->lcd->state_changed = 1;
                 }else if(msgbuf[0] & 0x20) { /* client wants to change the M-key backlights */
-                    setLEDs(msgbuf[0]-0x20);
+                    lcdnode->lcd->mkey_state = msgbuf[0]-0x20;
+                    lcdnode->lcd->state_changed = 1;
                 }
             }
             else if(pfd[0].revents & POLLIN) {

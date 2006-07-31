@@ -26,13 +26,23 @@ Version 1.0-pre0
 - Initial release
 1.1 21/07/2006
 - Add WBMP support and Perl bindings.
-1.2 svn - current
+1.2 31/07/2006
+** IMPORTANT NOTE **
+This release has changed the LCD screen switch function to the MR key to
+allow clients use of all 'L' keys.
+**
 - reduce per-thread stack usage - default was 8Mb on i386 linux.  now 256k
   this makes top output look much nicer ;)
 - optimize lcd buffer path, removing a conversion step. and reducing the
   buffer size from 7k to 1k
 - misc other memory optimisations.
-- added python bindings
-- added ability for lcd clients to receive keypresses directly
+- added python bindings (thanks muhgatus)
+- added ability for lcd clients to receive L G & M key keypresses directly
 - moved lcd display/client switch from L1 to MR
-- MR key is now backlit.
+- MR key is now backlit when clients are attached.
+- Added ability for lcd clients to change backlight brightness
+- Added ability for lcd clients to toggle M-key LEDs
+- Added libG15Render client support.
+- Added ability for hidden lcd clients to bring themselves to the foreground
+- clients change only their own backlight/mkey led status
+

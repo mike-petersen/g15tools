@@ -54,6 +54,12 @@ typedef struct lcd_s
     int max_y;
     int connection;
     long int ident;
+    unsigned int backlight_state;
+    unsigned int mkey_state;
+    unsigned int contrast_state;
+    unsigned int state_changed;
+    unsigned int client_notify;
+    unsigned int display_status;
 } lcd_t;
 
 typedef struct lcdnode_s lcdnode_t;
@@ -63,6 +69,7 @@ struct lcdnode_s {
     lcdlist_t *list;
     lcdnode_t *prev;
     lcdnode_t *next;
+    lcdnode_t *last_priority;
     lcd_t *lcd;
 }lcdnode_s;
 
