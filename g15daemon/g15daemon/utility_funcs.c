@@ -296,6 +296,7 @@ lcdnode_t *lcdnode_add(lcdlist_t **display_list) {
     new->prev = (*display_list)->current;
     new->next = NULL; 
     new->lcd = create_lcd();
+    new->last_priority = NULL;
     
     (*display_list)->current->next=new;
     (*display_list)->current = new;

@@ -98,10 +98,13 @@ int main(int argc, char *argv[])
             else
               printf("What dastardly wabbit put me in the background?\n");
             
-            if(!msgbuf[0]){ /* we've been backgrounded! */
+            if(msgbuf[0]){ /* we've been backgrounded! */
                 sleep(2); /* remain in the background for a bit */
                 msgbuf[0]='p'; /* switch priorities */
                 send(g15screen_fd,msgbuf,1,MSG_OOB);            
+                sleep(2);
+                send(g15screen_fd,msgbuf,1,MSG_OOB);            
+
             }
                            
             usleep(5000);

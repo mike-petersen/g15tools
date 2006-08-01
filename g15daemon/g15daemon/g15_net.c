@@ -131,10 +131,18 @@ int g15_recv(lcdnode_t *lcdnode, int sock, char *buf, unsigned int len)
                 }else if(msgbuf[0] == 'p') { /* client wants to switch priorities */
                     pthread_mutex_lock(&lcdlist_mutex);
                     if(lcdnode->list->current != lcdnode){
+                        lcdnode->last_priority = lcdnode->list->current;
                         lcdnode->list->current = lcdnode;
                     }
                     else {
-                        lcdnode->list->current = lcdnode->list->current->prev;
+                        if(lcdnode->list->current == lcdnode->last_priority){
+                            lcdnode->list->current = lcdnode->list->current->prev;
+                        } else{
+                            if(lcdnode->last_priority != NULL)
+                            	lcdnode->list->current = lcdnode->last_priority;
+                            else
+                                lcdnode->list->current = lcdnode->list->current->prev;
+                        }
                     }
                     pthread_mutex_unlock(&lcdlist_mutex);
                 }else if(msgbuf[0] == 'v') { /* client wants to know if it's currently viewable */
