@@ -192,7 +192,10 @@ void handlePixelCommand(string const &input_line)
 
 void handleModeCommand(string const &input_line)
 {
-   bool stat = input_line.substr(3,1) == "1";
+   string cmdval = input_line.substr(3,1);
+   bool fore = cmdval == "0";
+   bool stat = cmdval == "1";
+   bool revert = cmdval == "2";
    char msgbuf[1];
 
    if(input_line[1] == 'C')
@@ -210,15 +213,26 @@ void handleModeCommand(string const &input_line)
       msgbuf[0] = 'v';
       send(g15screen_fd,msgbuf,1,MSG_OOB);
       recv(g15screen_fd,msgbuf,1,0);
-      bool at_front = msgbuf[0] ? true : false;
+      bool at_front = (msgbuf[0] != '0') ? true : false;
+      bool user_to_front = (msgbuf[0] == '2') ? true : false;
       msgbuf[0] = 'p';
       if(at_front) {
-      	if(stat)
+      	if(stat) /* we want to go to the back */
+      	{
       		send(g15screen_fd,msgbuf,1,MSG_OOB);
+      	}      	
+      	else if (!user_to_front && revert) /* we want to go to the back if forced to the front */
+      	{
+      		send(g15screen_fd,msgbuf,1,MSG_OOB);
+      	}	
       }
       else
-      	if(!stat)
+      { 
+      	if(fore) /* we want to go to the front */
+      	{
       		send(g15screen_fd,msgbuf,1,MSG_OOB);
+      	}
+      }
    }
 }
 

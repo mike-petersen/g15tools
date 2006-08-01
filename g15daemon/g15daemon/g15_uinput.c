@@ -228,9 +228,13 @@ void g15_uinput_process_keys(lcdlist_t *displaylist, unsigned int currentkeys, u
         {
             pthread_mutex_lock(&lcdlist_mutex);
             if(displaylist->tail == displaylist->current) {
+                displaylist->current->lcd->usr_foreground = 0;
                 displaylist->current = displaylist->head;
+                displaylist->current->lcd->usr_foreground = 1;
             } else {
+                displaylist->current->lcd->usr_foreground = 0;
                 displaylist->current = displaylist->current->prev;
+                displaylist->current->lcd->usr_foreground = 1;
             }
             displaylist->current->lcd->state_changed = 1;
             displaylist->current->last_priority =  displaylist->current;

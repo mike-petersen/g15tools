@@ -66,6 +66,7 @@ lcd_t * create_lcd () {
     lcd->mkey_state = G15_LED_MR;
     lcd->contrast_state = G15_CONTRAST_MEDIUM;
     lcd->state_changed = 1;
+    lcd->usr_foreground = 0; 
     
     return (lcd);
 }

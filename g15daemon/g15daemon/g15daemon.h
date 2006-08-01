@@ -58,8 +58,8 @@ typedef struct lcd_s
     unsigned int mkey_state;
     unsigned int contrast_state;
     unsigned int state_changed;
-    unsigned int client_notify;
-    unsigned int display_status;
+    /* set to 1 if user manually selected this screen 0 otherwise*/
+    unsigned int usr_foreground;
 } lcd_t;
 
 typedef struct lcdnode_s lcdnode_t;
