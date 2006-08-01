@@ -21,15 +21,24 @@
 #include <cstdlib>
 #include <string>
 #include <getopt.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 #include <libg15.h>
 #include <g15daemon_client.h>
 #include <libg15render.h>
 #include "composer.h"
+#include "g15c_logo.h"
 
 using namespace std;
 
 int g15screen_fd = 0;
+static string fifo_filename = "";
+g15canvas *canvas;
+bool is_script = false;
+extern short g15c_logo_data[];
+ifstream script;
    
 void printUsage()
 {
@@ -38,75 +47,74 @@ void printUsage()
    cout << "Display composer for the Logitech G15 LCD" << endl;
 }
 
-
 /********************************************************/
 
 int main(int argc, char *argv[])
 {
-   if(argv[1] == "-h" || argv[1] == "help") {
-      printUsage();
-      return 0;
-   }
-   
-   if((g15screen_fd = new_g15_screen(G15_G15RBUF)) < 0)
+   int i=1;
+   for (i=1;(i<argc && fifo_filename == "");++i)
    {
-        cout << "Sorry, cant connect to the G15daemon" << endl;
-        return -1;
+      string arg(argv[i]);
+      if (arg == "-h" || arg == "--help")
+      {
+         printUsage();
+         return 0;
+      }
+      else
+      {
+         fifo_filename = argv[i];
+      }
+   }
+   if (fifo_filename == "")
+   {
+      cout << "You didnt specify a fifo filename, I'm this disabling writing text to the lcd" << endl;
+      cout << "This is a change in behaviour from previous version, I will _NOT_ read data from stdin anymore" << endl;
+      return -1;
+   }
+   if (fifo_filename == "-")
+   {
+      cout << "Dont try to trick me, I wont read input from stdin anymore" << endl;
+      return -1;
    }
    
-  
-   fstream script;
-   bool is_script = false;
-   if( argc > optind ) {
-      script.open(argv[optind]);
+  if( argc > i ) {
+      script.open(argv[i]);
       is_script = script.is_open();
    }
 
-   g15canvas canvas;
-
-   g15r_initCanvas(&canvas);
-   updateScreen(&canvas, true);
-   
-   string cmdline;
-   while( getline(is_script ? script : cin, cmdline) )
-   {
-      int i = 0;
-      int len = cmdline.length();
-      while( i < len && (cmdline[i] == ' ' || cmdline[i] == '\t') )
-         ++i;
-      
-      if( i+1 >= len || cmdline[i] == '#' )
-         continue;
-
-      if( cmdline[i] == 'P' && cmdline[i+1] != ' ' ) 
-      {
-         handlePixelCommand(&canvas, cmdline.substr(i) );
-      }
-      else if( cmdline[i] == 'T' ) 
-      {
-         handleTextCommand(&canvas, cmdline.substr(i) );
-      }
-      else if( cmdline[i] == 'M' ) 
-      {
-         handleModeCommand(&canvas, cmdline.substr(i) );
-      }
-      else 
-      {
-         // Relay to g15daemon
-         cout << cmdline.substr(i) << endl;         
-      }
+   if(!is_script)
+   {   
+	   if((g15screen_fd = new_g15_screen(G15_G15RBUF)) < 0)
+	   {
+	        cout << "Sorry, cant connect to the G15daemon" << endl;
+	        return -1;
+	   }
+	
+	   canvas = (g15canvas *) malloc(sizeof(g15canvas));
+	
+	   g15r_initCanvas(canvas);
+	   canvas->mode_reverse = 1;
+	   g15r_pixelOverlay(canvas, 0, 0, 160, 43, g15c_logo_data);
+	   canvas->mode_reverse = 0;
+	   updateScreen(true);
+	   g15r_clearScreen(canvas, G15_COLOR_WHITE);
    }
+   
+   if (fifo_filename != "")
+    fifoProcessingWorkflow(is_script, fifo_filename);
 
    if(is_script)
       script.close();
-      
-   g15_close_screen(g15screen_fd);
+   else
+   {   
+   	  g15_close_screen(g15screen_fd);
+   	  free(canvas->buffer);
+   	  free(canvas);
+   }
    return EXIT_SUCCESS;
-
-
 }
 
-void handlePixelCommand(g15canvas * canvas, string const &input_line)
+void handlePixelCommand(string const &input_line)
 {
    if (input_line[1] == 'S') // Set
    {
@@ -179,27 +187,42 @@ void handlePixelCommand(g15canvas * canvas, string const &input_line)
    {
       g15r_clearScreen(canvas, input_line.length() < 4 || input_line[3] == '1');
    }
-   updateScreen(canvas, true);
+   updateScreen(true);
 }
 
-void handleModeCommand(g15canvas * canvas, string const &input_line)
+void handleModeCommand(string const &input_line)
 {
    bool stat = input_line.substr(3,1) == "1";
+   char msgbuf[1];
 
    if(input_line[1] == 'C')
    {
       bool was_cached = canvas->mode_cache;
       canvas->mode_cache = stat;
       if(was_cached) 
-         updateScreen(canvas, true);
+         updateScreen(true);
    }
    else if(input_line[1] == 'R')
       canvas->mode_reverse = stat;
    else if(input_line[1] == 'X')
       canvas->mode_xor = stat;
+   else if(input_line[1] == 'P') {
+      msgbuf[0] = 'v';
+      send(g15screen_fd,msgbuf,1,MSG_OOB);
+      recv(g15screen_fd,msgbuf,1,0);
+      bool at_front = msgbuf[0] ? true : false;
+      msgbuf[0] = 'p';
+      if(at_front) {
+      	if(stat)
+      		send(g15screen_fd,msgbuf,1,MSG_OOB);
+      }
+      else
+      	if(!stat)
+      		send(g15screen_fd,msgbuf,1,MSG_OOB);
+   }
 }
 
-void handleTextCommand(g15canvas * canvas, string const &input_line)
+void handleTextCommand(string const &input_line)
 {
    string parse_line;
    int params[4] = { 0, 0, 0, 0 };
@@ -266,12 +289,116 @@ void handleTextCommand(g15canvas * canvas, string const &input_line)
       g15r_renderString(canvas, stringOut, row, size, params[0], params[1]);
    }
    
-   updateScreen(canvas, true);
+   updateScreen(true);
 }
 
-void updateScreen(g15canvas * canvas, bool force)
+void updateScreen(bool force)
 {
    if(force || !canvas->mode_cache)
       g15_send(g15screen_fd,(char*)canvas->buffer,1048);
+}
+
+int doOpen(string const &filename)
+{
+   int fd = -1;
+
+   if (filename == "-")
+      fd = 0;
+   else
+   {
+      fd = open(filename.c_str(),O_RDONLY);
+      if (fd == -1)
+      {
+         cout << "Error, could not open " << filename << " aborting" << endl;
+      }
+   }
+   return fd;
+}
+
+void parseCommandLine(string cmdline)
+{
+	  int i = 0;
+	  int len = cmdline.length();
+	  while( i < len && (cmdline[i] == ' ' || cmdline[i] == '\t') )
+	     ++i;
+	  
+	  if( i+1 >= len || cmdline[i] == '#' )
+	     return;
+	
+	  if( cmdline[i] == 'P' && cmdline[i+1] != ' ' ) 
+	  {
+	     handlePixelCommand(cmdline.substr(i) );
+	  }
+	  else if( cmdline[i] == 'T' ) 
+	  {
+	     handleTextCommand(cmdline.substr(i) );
+	  }
+	  else if( cmdline[i] == 'M' ) 
+	  {
+	     handleModeCommand(cmdline.substr(i) );
+	  }
+	  else 
+	  {
+	     // Relay to g15daemon
+	 //cout << cmdline.substr(i) << endl;         
+	  }
+}
+
+void fifoProcessingWorkflow(bool is_script, string const &filename)
+{
+   string line = "";
+   if(!is_script)
+   {
+	   int fd = doOpen(filename);
+	   
+	   if (fd != -1)
+	   {
+	      bool read_something = true;
+	      while (read_something)
+	      {
+	         char buffer_character[1];
+	         int ret = read(fd,buffer_character,1);
+	         if (ret == 0)
+	         {
+	            close(fd);
+	            fd = doOpen(filename);
+	            if (fd < 0)
+	            {
+	               cout << "Error, reopening failed" << endl;
+	               break;
+	            }
+	            g15r_clearScreen(canvas, G15_COLOR_WHITE);
+	         }
+	         else if (ret == -1)
+	         {
+	            cout << "Reading failed, aborting fifo thread" << endl;
+	            break;
+	         }
+	         else
+	         {
+	            if (buffer_character[0] == '\r')
+	            {
+	            }
+	            else if (buffer_character[0] == '\n')
+	            {
+	 			  parseCommandLine(line);
+	              line = "";
+	            }
+	            else
+	            {
+	               line = line + buffer_character[0];
+	            }
+	         }
+	      }
+	   }
+   }
+   else /* is_script */
+   {
+   		ofstream fifo(filename.c_str());
+   		while (getline(script, line))
+   		{
+   			fifo << line << endl;
+   		}
+   } 
 }
 
