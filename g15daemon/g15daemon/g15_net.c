@@ -131,10 +131,8 @@ int g15_recv(lcdnode_t *lcdnode, int sock, char *buf, unsigned int len)
                 }else if(msgbuf[0] == 'p') { /* client wants to switch priorities */
                     pthread_mutex_lock(&lcdlist_mutex);
                     if(lcdnode->list->current != lcdnode){
-                    	lcdnode->list->current->lcd->usr_foreground = 0;
                         lcdnode->last_priority = lcdnode->list->current;
                         lcdnode->list->current = lcdnode;
-                        lcdnode->list->current->lcd->usr_foreground = 0;
                     }
                     else {
                         if(lcdnode->list->current == lcdnode->last_priority){
@@ -150,13 +148,18 @@ int g15_recv(lcdnode_t *lcdnode, int sock, char *buf, unsigned int len)
                 }else if(msgbuf[0] == 'v') { /* client wants to know if it's currently viewable */
                     pthread_mutex_lock(&lcdlist_mutex);
                     if(lcdnode->list->current == lcdnode){
-                        if(lcdnode->lcd->usr_foreground)  /* user manually selected this lcd */
-                            msgbuf[0] = '2';
-                        else
-                            msgbuf[0] = '1';
+                        msgbuf[0] = '1';
                     }else{
                         msgbuf[0] = '0';
                     }
+                    pthread_mutex_unlock(&lcdlist_mutex);
+                    send(sock,msgbuf,1,0);
+                }else if(msgbuf[0] == 'u') { /* client wants to know if it was set to foreground by the user */
+                	pthread_mutex_lock(&lcdlist_mutex);
+                	if(lcdnode->lcd->usr_foreground)  /* user manually selected this lcd */
+                        msgbuf[0] = '1';
+                    else
+                        msgbuf[0] = '0';
                     pthread_mutex_unlock(&lcdlist_mutex);
                     send(sock,msgbuf,1,0);
                 }else if(msgbuf[0] & 0x80) { /* client wants to change the backlight */

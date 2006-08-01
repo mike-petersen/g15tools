@@ -213,8 +213,11 @@ void handleModeCommand(string const &input_line)
       msgbuf[0] = 'v';
       send(g15screen_fd,msgbuf,1,MSG_OOB);
       recv(g15screen_fd,msgbuf,1,0);
-      bool at_front = (msgbuf[0] != '0') ? true : false;
-      bool user_to_front = (msgbuf[0] == '2') ? true : false;
+      bool at_front = (msgbuf[0] == '1') ? true : false;
+      msgbuf[0] = 'u';
+      send(g15screen_fd,msgbuf,1,MSG_OOB);
+      recv(g15screen_fd,msgbuf,1,0);      
+      bool user_to_front = (msgbuf[0] == '1') ? true : false;
       msgbuf[0] = 'p';
       if(at_front) {
       	if(stat) /* we want to go to the back */
@@ -229,6 +232,10 @@ void handleModeCommand(string const &input_line)
       else
       { 
       	if(fore) /* we want to go to the front */
+      	{
+      		send(g15screen_fd,msgbuf,1,MSG_OOB);
+      	}
+      	else if(user_to_front && revert) /* we want to take back the foreground if forced to the back */
       	{
       		send(g15screen_fd,msgbuf,1,MSG_OOB);
       	}
