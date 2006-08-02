@@ -1,8 +1,0 @@
-This directory contains misc. scripts and handy stuff for the G15daemon
-user.
-
-It currently has:
-
-xmodmaprc
-- enables support for the extra G15 keys in Xorg.
-
