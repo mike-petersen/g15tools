@@ -16,7 +16,7 @@
 
 all:
 	g++ -O2 -fpic -Wall -pedantic -c testlibg15render.cpp 
-	g++ testlibg15render.o -lg15 -lg15render -o testlibg15render
+	g++ testlibg15render.o -lg15daemon_client -lg15render -o testlibg15render
 	
 clean:
 	rm -f *.o

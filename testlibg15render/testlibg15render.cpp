@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include <libg15.h>
+#include <g15daemon_client.h>
 #include <libg15render.h>
 #include "g15logo.h"
 
@@ -9,34 +10,48 @@ using namespace std;
 int const NUM_BYTES = G15_LCD_WIDTH*G15_LCD_HEIGHT/8;
 unsigned char test_data[NUM_BYTES];
 extern short logo_data[];
+int g15screen_fd = 0;
+g15canvas *canvas;
+
+void updateScreen(void)
+{
+   if(!canvas->mode_cache)
+      g15_send(g15screen_fd,(char*)canvas->buffer,1048);
+}
+
+void connectToScreen(void)
+{
+   if((g15screen_fd = new_g15_screen(G15_G15RBUF)) < 0)
+   {
+	  cout << "Sorry, cant connect to the G15daemon" << endl;
+      exit(-1);
+   }
+	
+   canvas = (g15canvas *) malloc(sizeof(g15canvas));
+	
+   g15r_initCanvas(canvas);
+}
 
 int main(int argc, char *argv[])
 {
-  int ret = 0;
-  cout << "Trying to init libg15" << endl;
-  ret = initLibG15();
-  cout << "Done, return value is " << ret << endl;
-  
-  g15canvas canvas;
-  g15canvas *p_canvas = &canvas;
-  g15r_initCanvas(p_canvas);
-
-  g15r_setPixel(p_canvas, 20, 20, 1);
-  ret = g15r_getPixel(p_canvas, 20, 20);
+  connectToScreen();
+	
+  g15r_setPixel(canvas, 20, 20, 1);
+  int ret = g15r_getPixel(canvas, 20, 20);
   cout << "g15r_getPixel(20, 20) returns " << ret << " which should be 1" << endl;
-  ret = g15r_getPixel(p_canvas, 21, 20);
+  ret = g15r_getPixel(canvas, 21, 20);
   cout << "g15r_getPixel(21, 20) returns " << ret << " which should be 0" << endl;
 
-  g15r_setPixel(p_canvas, 20, 20, 0);
-  ret = g15r_getPixel(p_canvas, 20, 20);
+  g15r_setPixel(canvas, 20, 20, 0);
+  ret = g15r_getPixel(canvas, 20, 20);
   cout << "g15r_getPixel(20, 20) returns " << ret << " which should be 0" << endl;
-  ret = g15r_getPixel(p_canvas, 21, 20);
+  ret = g15r_getPixel(canvas, 21, 20);
   cout << "g15r_getPixel(21, 20) returns " << ret << " which should be 0" << endl;
 
   int i=0, x=0, y=0;
   unsigned char character=0;
   
-  g15r_clearScreen(p_canvas, 0);
+  g15r_clearScreen(canvas, 0);
 
   for (i=0;i<3;)
   {
@@ -44,17 +59,17 @@ int main(int argc, char *argv[])
   	{
 		for (x=0;x<20;x++)
 		{
-			g15r_renderCharacterLarge(p_canvas, x, y, character, 0, 0);
+			g15r_renderCharacterLarge(canvas, x, y, character, 0, 0);
 			character++;
 		}
   	}
-  	writePixmapToLCD(p_canvas->buffer);
+  	updateScreen();
 	i++;
 	character = 100 * i;
 	sleep(3);
   }
 
-  g15r_clearScreen(p_canvas, 0);
+  g15r_clearScreen(canvas, 0);
   character = 0;
 
   for (i=0;i<3;)
@@ -63,40 +78,62 @@ int main(int argc, char *argv[])
   	{
 		for (x=0;x<32;x++)
 		{
-			g15r_renderCharacterMedium(p_canvas, x, y, character, 0, 0);
+			g15r_renderCharacterMedium(canvas, x, y, character, 0, 0);
 			character++;
 		}
   	}
-  	writePixmapToLCD(p_canvas->buffer);
+  	updateScreen();
 	i++;
 	character = 192 * i;
 	sleep(3);
   }
 
-  g15r_clearScreen(p_canvas, 0);
+  g15r_clearScreen(canvas, 0);
   character = 0;
 
   for (y=0;y<7;y++)
   {
 	for (x=0;x<42;x++)
 	{
-		g15r_renderCharacterSmall(p_canvas, x, y, character, 0, 0);
+		g15r_renderCharacterSmall(canvas, x, y, character, 0, 0);
 		character++;
 	}
   }
-  writePixmapToLCD(p_canvas->buffer);
+  updateScreen();
   sleep(3);
 
-  g15r_clearScreen(p_canvas, 0);
+  g15r_clearScreen(canvas, 0);
 
-  g15r_pixelBox(p_canvas, 40, 20, 90, 40, 1, 1, 1);
-  g15r_pixelBox(p_canvas, 10, 10, 50, 30, 1, 3, 0);
-  writePixmapToLCD(p_canvas->buffer);
+  g15r_pixelBox(canvas, 40, 20, 90, 40, 1, 1, 1);
+  g15r_pixelBox(canvas, 10, 10, 50, 30, 1, 3, 0);
+  updateScreen();
+  sleep(3);
+  
+  g15r_clearScreen(canvas, 0);
+  
+  g15r_drawCircle(canvas, 10, 21, 5, 0, 1);
+  g15r_drawCircle(canvas, 110, 21, 15, 1, 1);
+  updateScreen();
   sleep(3);
 
-  g15r_clearScreen(p_canvas, 0);
-  g15r_pixelOverlay(p_canvas, 0, 0, 160, 43, logo_data);
-  writePixmapToLCD(p_canvas->buffer);
+  g15r_clearScreen(canvas, 0);
+  
+  g15r_drawRoundBox(canvas, 10, 21, 50, 40, 0, 1);
+  g15r_drawRoundBox(canvas, 80, 15, 140, 30, 1, 1);
+  updateScreen();
+  sleep(4);
+
+  g15r_clearScreen(canvas, 0);
+  
+  g15r_drawBar(canvas, 10, 10, 150, 20, 1, 50, 100, 1);
+  g15r_drawBar(canvas, 10, 22, 150, 32, 1, 75, 100, 2);
+  g15r_drawBar(canvas, 10, 34, 150, 42, 1, 315, 900, 3);
+  updateScreen();
+  sleep(6);
+
+  g15r_clearScreen(canvas, 0);
+  g15r_pixelOverlay(canvas, 0, 0, 160, 43, logo_data);
+  updateScreen();
   sleep(3);
 
   return 0;
