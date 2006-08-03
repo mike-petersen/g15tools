@@ -180,7 +180,7 @@ void handlePixelCommand(string const &input_line)
    {
       g15r_clearScreen(canvas, input_line.length() < 4 || input_line[3] == '1');
    }
-   updateScreen(true);
+   updateScreen(false);
 }
 
 void handleDrawCommand(string const &input_line)
@@ -213,7 +213,7 @@ void handleDrawCommand(string const &input_line)
    	   
    	   g15r_drawBar(canvas, params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
    }
-   updateScreen(true);
+   updateScreen(false);
 }
 
 void handleModeCommand(string const &input_line)
@@ -336,7 +336,7 @@ void handleTextCommand(string const &input_line)
       g15r_renderString(canvas, stringOut, row, size, params[0], params[1]);
    }
    
-   updateScreen(true);
+   updateScreen(false);
 }
 
 void updateScreen(bool force)
