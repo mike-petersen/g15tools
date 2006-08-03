@@ -413,7 +413,8 @@ void fifoProcessingWorkflow(bool is_script, string const &filename)
 	               cout << "Error, reopening failed" << endl;
 	               break;
 	            }
-	            g15r_clearScreen(canvas, G15_COLOR_WHITE);
+	            if (!canvas->mode_cache)
+	            	g15r_clearScreen(canvas, G15_COLOR_WHITE);
 	         }
 	         else if (ret == -1)
 	         {
