@@ -9,7 +9,7 @@ extern "C"
 #include <string.h>
 
 #define BYTE_SIZE 			8
-#define G15_BUFFER_LEN  	6880
+#define G15_BUFFER_LEN  	1048
 #define G15_LCD_OFFSET  	32
 #define G15_LCD_HEIGHT  	43
 #define G15_LCD_WIDTH   	160
@@ -41,6 +41,9 @@ void g15r_pixelOverlay(g15canvas * canvas, int x1, int y1, int width, int height
 void g15r_drawLine(g15canvas * canvas, int px1, int py1, int px2, int py2, const int color);
 /// \brief Draws a box bounded by (x1, y1) and (x2, y2)
 void g15r_pixelBox(g15canvas * canvas, int x1, int y1, int x2, int y2, int color, int thick, int fill);
+void g15r_drawCircle(g15canvas * canvas, int x, int y, int r, int fill, int color);
+void g15r_drawRoundBox (g15canvas * canvas, int x1, int y1, int x2, int y2, int fill, int color);
+void g15r_drawBar (g15canvas * canvas, int x1, int y1, int x2, int y2, int color, int num, int max, int type);
 
 /// \brief Gets the value of the pixel at (x, y)
 int g15r_getPixel(g15canvas * canvas, unsigned int x, unsigned int y);

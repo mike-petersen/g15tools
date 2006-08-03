@@ -172,3 +172,115 @@ void g15r_pixelBox(g15canvas * canvas, int x1, int y1, int x2, int y2, int color
 
 }
 
+void g15r_drawCircle(g15canvas * canvas, int x, int y, int r, int fill, int color)
+{
+    int xx, yy, dd;
+
+    xx = 0;
+    yy = r;
+    dd = 2 * (1 - r);
+
+    while (yy >= 0)
+    {
+        if (!fill)
+        {
+            g15r_setPixel(canvas, x + xx, y - yy, color);
+            g15r_setPixel(canvas, x + xx, y + yy, color);
+            g15r_setPixel(canvas, x - xx, y - yy, color);
+            g15r_setPixel(canvas, x - xx, y + yy, color);
+        }
+        else
+        {
+            g15r_drawLine(canvas, x - xx, y - yy, x + xx, y - yy, color);
+            g15r_drawLine(canvas, x - xx, y + yy, x + xx, y + yy, color);
+        }
+        if (dd + yy > 0)
+        {
+            yy--;
+            dd = dd - (2 * yy + 1);
+        }
+        if (xx > dd)
+        {
+            xx++;
+            dd = dd + (2 * xx + 1);
+        }
+    }
+}
+
+void g15r_drawRoundBox (g15canvas * canvas, int x1, int y1, int x2, int y2, int fill, int color)
+{
+    int y, shave=3;
+
+    if (shave > (x2 - x1) / 2)
+        shave = (x2 - x1) / 2;
+    if (shave > (y2 - y1) / 2)
+        shave = (y2 - y1) / 2;
+
+    if ((x1 != x2) && (y1 != y2))
+    {
+        if (fill)
+        {
+            g15r_drawLine(canvas, x1 + shave, y1, x2 - shave, y1, color);
+            for (y = y1 + 1; y < y1 + shave; y++)
+                g15r_drawLine(canvas, x1 + 1, y, x2 - 1, y, color);
+            for (y = y1 + shave; y <= y2 - shave; y++)
+                g15r_drawLine(canvas, x1, y, x2, y, color);
+            for (y = y2 - shave + 1; y < y2; y++)
+                g15r_drawLine(canvas, x1 + 1, y, x2 - 1, y, color);
+            g15r_drawLine(canvas, x1 + shave, y2, x2 - shave, y2, color);
+            if (shave == 4)
+            {
+                g15r_setPixel(canvas, x1 + 1, y1 + 1, color == G15_COLOR_WHITE ? G15_COLOR_BLACK : G15_COLOR_WHITE);
+                g15r_setPixel(canvas, x1 + 1, y2 - 1, color == G15_COLOR_WHITE ? G15_COLOR_BLACK : G15_COLOR_WHITE);
+                g15r_setPixel(canvas, x2 - 1, y1 + 1, color == G15_COLOR_WHITE ? G15_COLOR_BLACK : G15_COLOR_WHITE);
+                g15r_setPixel(canvas, x2 - 1, y2 - 1, color == G15_COLOR_WHITE ? G15_COLOR_BLACK : G15_COLOR_WHITE);
+            }
+        }
+        else
+        {
+            g15r_drawLine(canvas, x1 + shave, y1, x2 - shave, y1, color);
+            g15r_drawLine(canvas, x1, y1 + shave, x1, y2 - shave, color);
+            g15r_drawLine(canvas, x2, y1 + shave, x2, y2 - shave, color);
+            g15r_drawLine(canvas, x1 + shave, y2, x2 - shave, y2, color);
+            if (shave > 1)
+            {
+                g15r_drawLine(canvas, x1 + 1, y1 + 1, x1 + shave - 1, y1 + 1, color);
+                g15r_drawLine(canvas, x2 - shave + 1, y1 + 1, x2 - 1, y1 + 1, color);
+                g15r_drawLine(canvas, x1 + 1, y2 - 1, x1 + shave - 1, y2 - 1, color);
+                g15r_drawLine(canvas, x2 - shave + 1, y2 - 1, x2 - 1, y2 - 1, color);
+                g15r_drawLine(canvas, x1 + 1, y1 + 1, x1 + 1, y1 + shave - 1, color);
+                g15r_drawLine(canvas, x1 + 1, y2 - 1, x1 + 1, y2 - shave + 1, color);
+                g15r_drawLine(canvas, x2 - 1, y1 + 1, x2 - 1, y1 + shave - 1, color);
+                g15r_drawLine(canvas, x2 - 1, y2 - 1, x2 - 1, y2 - shave + 1, color);
+            }
+        }
+    }
+}
+
+// given a maximum value, and a value between 0 and that maximum value, calculate and draw a bar showing that percentage
+void g15r_drawBar (g15canvas * canvas, int x1, int y1, int x2, int y2, int color, int num, int max, int type)
+{
+    float len, length;
+    int x;
+    if (num > max)
+        num = max;
+
+    if(type==2)
+        y1+=2;y2-=2;x1+=2;x2-=2;
+
+    len = ((float) max / (float) num);
+    length = (x2 - x1) / len;
+
+    if(type==1){
+        g15r_pixelBox(canvas, x1, y1-type, x2, y2+type, color ^1, 1, 1);
+        g15r_pixelBox(canvas, x1, y1-type, x2, y2+type, color, 1, 0);
+    } else if(type==2){
+        g15r_pixelBox(canvas, x1-2, y1-type, x2+2, y2+type, color ^1, 1, 1);
+        g15r_pixelBox(canvas, x1-2, y1-type, x2+2, y2+type, color, 1, 0);
+    }else if(type==3) {
+        g15r_drawLine(canvas, x1, y1-type, x1, y2+type, color);
+        g15r_drawLine(canvas, x2, y1-type, x2, y2+type, color);  
+        g15r_drawLine(canvas, x1, y1+((y2-y1)/2),x2, y1+((y2-y1)/2), color);
+    }
+    g15r_pixelBox(canvas, x1, y1 , (int) ceil(x1 + length) , y2 , color, 1, 1);
+}
