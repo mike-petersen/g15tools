@@ -161,13 +161,6 @@ void handlePixelCommand(string const &input_line)
       }
       g15r_pixelOverlay(canvas, params[0], params[1], params[2], params[3], output_line);
    }
-   else if (input_line[1] == 'L')
-   {
-	   int params[5] = { 0, 0, 0, 0, 1 };
-	   get_params(params, input_line, 3, 5);
-	   
-	   g15r_drawLine(canvas, params[0], params[1], params[2], params[3], params[4]);
-   }
    else if (input_line[1] == 'B')
    {
 	   int params[7] = { 0, 0, 0, 0, 1, 1, 0 };
@@ -186,6 +179,39 @@ void handlePixelCommand(string const &input_line)
    else if (input_line[1] == 'C')
    {
       g15r_clearScreen(canvas, input_line.length() < 4 || input_line[3] == '1');
+   }
+   updateScreen(true);
+}
+
+void handleDrawCommand(string const &input_line)
+{
+   if (input_line[1] == 'L')
+   {
+	   int params[5] = { 0, 0, 0, 0, 1 };
+	   get_params(params, input_line, 3, 5);
+	   
+	   g15r_drawLine(canvas, params[0], params[1], params[2], params[3], params[4]);
+   }
+   else if (input_line[1] == 'C')
+   {
+   	   int params[5] = { 0, 0, 0, 0, 1 };
+   	   get_params(params, input_line, 3, 5);
+   	   
+   	   g15r_drawCircle(canvas, params[0], params[1], params[2], params[3], params[4]);
+   }
+   else if (input_line[1] == 'R')
+   {
+   	   int params[6] = { 0, 0, 0, 0, 0, 1 };
+   	   get_params(params, input_line, 3, 6);
+   	   
+   	   g15r_drawRoundBox(canvas, params[0], params[1], params[2], params[3], params[4], params[5]);
+   }
+   else if (input_line[1] == 'B')
+   {
+       int params[8] = { 0, 0, 0, 0, 1, 0, 0, 1 };
+   	   get_params(params, input_line, 3, 8);
+   	   
+   	   g15r_drawBar(canvas, params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
    }
    updateScreen(true);
 }
@@ -358,10 +384,9 @@ void parseCommandLine(string cmdline)
 	  {
 	     handleModeCommand(cmdline.substr(i) );
 	  }
-	  else 
+	  else if( cmdline[i] == 'D' )
 	  {
-	     // Relay to g15daemon
-	 //cout << cmdline.substr(i) << endl;         
+	     handleDrawCommand(cmdline.substr(i) );         
 	  }
 }
 

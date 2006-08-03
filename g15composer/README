@@ -32,6 +32,9 @@ PO X Y W H 100101101...
 
 PS X Y C
    Sets the pixel at (X,Y) to color C (0 or 1)
+   
+PC 0|1
+   Clears the screen and fills it with 0|1
 
 PF X1 Y1 X2 Y2 C
    Fills the area from (X1,Y1) to (X2,Y2) with color C
@@ -39,14 +42,29 @@ PF X1 Y1 X2 Y2 C
 PR X1 Y1 X2 Y2
    Reverses the pixels from (X1,Y1) to (X2,Y2)
 
-PL X1 Y1 X2 Y2 C
-   Draws a line from (X1,Y1) to (X2,Y2) using color C
-
 PB X1 Y1 X2 Y2 C T F
    Draws a box from (X1,Y1) to (X2,Y2) using color C and thickness T, filling if F=1
    C, T, and F are optional; defaults are C=1, T=1, and F=0
 
+*** Drawing Commands:
 
+DL X1 Y1 X2 Y2 C
+   Draws a line from (X1,Y1) to (X2,Y2) using color C
+
+DC X Y R F C
+   Draws a circle centered at (X,Y) with radius R using color C, filling if F=1
+   C and F are optional; defaults are C=1, F=0
+   
+DR X1 Y1 X2 Y2 F C
+   Draws a rounded box from (X1,Y1) to (X2,Y2) using color C, filling if F=1
+   C and F are optional; defaults are C=1, F=0
+   
+DB X1 Y1 X2 Y2 C N M T
+   Draws a percentage or progress bar from (X1,Y1) to (X2,Y2) using color C
+   The bar will be filled with N units out of M
+   T sets the type of the bar, valid values are 1, 2, or 3
+   T is optional; default value is T=1
+   
 *** Mode Commands:
 
 MC 0|1
