@@ -273,7 +273,8 @@ void handleTextCommand(string const &input_line)
 {
    string parse_line;
    int params[4] = { 0, 0, 0, 0 };
-   int size = -1, center = 0;
+   int size = -1;
+   bool center = false;
 
    if (input_line[1] == 'S')
       size = G15_TEXT_SMALL;
@@ -284,7 +285,7 @@ void handleTextCommand(string const &input_line)
    else if (input_line[1] == 'O') {
       get_params(params, input_line, 3, 4);
       size = params[2];
-      center = params[3];
+      center = params[3] ? true: false;
    }
    
    if (size == -1)
@@ -293,7 +294,7 @@ void handleTextCommand(string const &input_line)
       parse_line = input_line.substr(2,input_line.length() - 2);
    }
    else
-      parse_line = input_line.substr(4,input_line.length() - 4);
+      parse_line = input_line.substr(3,input_line.length() - 3);
  
    int i;
    
