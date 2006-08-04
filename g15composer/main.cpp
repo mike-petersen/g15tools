@@ -273,7 +273,7 @@ void handleTextCommand(string const &input_line)
 {
    string parse_line;
    int params[4] = { 0, 0, 0, 0 };
-   int size = -1;
+   int size = -1, center = 0;
 
    if (input_line[1] == 'S')
       size = G15_TEXT_SMALL;
@@ -282,8 +282,9 @@ void handleTextCommand(string const &input_line)
    else if (input_line[1] == 'L')
       size = G15_TEXT_LARGE;
    else if (input_line[1] == 'O') {
-      get_params(params, input_line, 3, 3);
+      get_params(params, input_line, 3, 4);
       size = params[2];
+      center = params[3];
    }
    
    if (size == -1)
@@ -292,7 +293,7 @@ void handleTextCommand(string const &input_line)
       parse_line = input_line.substr(2,input_line.length() - 2);
    }
    else
-      parse_line = input_line.substr(3,input_line.length() - 3);
+      parse_line = input_line.substr(4,input_line.length() - 4);
  
    int i;
    
@@ -329,11 +330,22 @@ void handleTextCommand(string const &input_line)
    
    for (row = 0; row < lines.size(); ++row)
    {
-      for (col=0;col<lines[row].length();++col)  // we take care about drawing too much in setPixel
+      unsigned int len = lines[row].length();
+      for (col=0;col<len;++col)  // we take care about drawing too much in setPixel
          if (lines[row][col] != '\r')
          	stringOut[col] = lines[row][col];
       stringOut[col] = (unsigned char)NULL;
-      g15r_renderString(canvas, stringOut, row, size, params[0], params[1]);
+      
+      if (center)
+      {
+      	 unsigned int dispcol = 0;
+      	 if (size == 0)  dispcol=(80-((len*4)/2));
+    	 if (size == 1)  dispcol=(80-((len*5)/2));
+    	 if (size == 2)  dispcol=(80-((len*8)/2));
+      	 g15r_renderString(canvas, stringOut, row, size, dispcol, params[1]);
+      }
+      else
+      	 g15r_renderString(canvas, stringOut, row, size, params[0], params[1]);
    }
    
    updateScreen(false);

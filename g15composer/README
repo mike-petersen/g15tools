@@ -21,8 +21,8 @@ Ts "line 1" "line 2" ....
    where s is the size of the font (S, M and L are supported).
    To insert a double-quote, prefix it with a backslash
 
-TO X Y s "line 1" "line 2" ... 
-   Overlays text of the given size at (X,Y)
+TO X Y S C "line 1" "line 2" ... 
+   Overlays text of the given size at (X,Y), centered if C=1
 
 
 *** Pixel Commands:
