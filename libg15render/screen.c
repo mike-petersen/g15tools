@@ -86,4 +86,6 @@ void g15r_initCanvas(g15canvas * canvas)
    canvas->mode_cache = 0;
    canvas->mode_reverse = 0;
    canvas->mode_xor = 0;
+   if (FT_Init_FreeType( &canvas->ftLib ))
+      printf("Freetype couldnt initialise\n");
 }

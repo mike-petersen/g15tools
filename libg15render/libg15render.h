@@ -7,6 +7,9 @@ extern "C"
 #endif
 
 #include <string.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_BITMAP_H
 
 #define BYTE_SIZE 			8
 #define G15_BUFFER_LEN  	1048
@@ -20,6 +23,7 @@ extern "C"
 #define G15_TEXT_LARGE  	2
 #define G15_PIXEL_NOFILL 	0
 #define G15_PIXEL_FILL  	1
+#define G15_MAX_FACE		5
 
 /// \brief This structure holds the data need to render objects to the LCD screen.
 typedef struct g15canvas {
@@ -31,6 +35,9 @@ typedef struct g15canvas {
     int mode_cache;  
 /// g15canvas::mode_reverse determines whether color values passed to g15r_setPixel are reversed.
     int mode_reverse;  
+    FT_Library ftLib;
+    FT_Face ttf_face[G15_MAX_FACE][sizeof(FT_Face)];
+    int ttf_fontsize[G15_MAX_FACE];
 } g15canvas;
 
 /// \brief Fills an area bounded by (x1, y1) and (x2, y2)
@@ -69,6 +76,9 @@ void g15r_renderCharacterMedium(g15canvas * canvas, int x, int y, unsigned char 
 void g15r_renderCharacterSmall(g15canvas * canvas, int x, int y, unsigned char character, unsigned int sx, unsigned int sy);
 /// \brief Renders a string with font size in row
 void g15r_renderString(g15canvas * canvas, unsigned char stringOut[], int row, int size, unsigned int sx, unsigned int sy);
+
+void g15r_ttfLoad(g15canvas * canvas, char *fontname, int fontsize, int face_num);
+void g15r_ttfPrint(g15canvas * canvas, int x, int y, int fontsize, int face_num, int color, int center, char *print_string);
 
 #ifdef __cplusplus
 }

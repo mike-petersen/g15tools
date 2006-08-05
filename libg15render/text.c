@@ -113,3 +113,125 @@ void g15r_renderString(g15canvas *canvas, unsigned char stringOut[], int row, in
    }
    
 }
+
+void g15r_ttfLoad(g15canvas * canvas, char *fontname, int fontsize, int face_num)
+{
+	int errcode = 0;
+
+    if(face_num<0) 
+        face_num=0;
+    if(face_num>G15_MAX_FACE) 
+        face_num=G15_MAX_FACE; 
+
+    if(canvas->ttf_fontsize[face_num])
+        FT_Done_Face(canvas->ttf_face[face_num][0]); // destroy the last face
+
+    if(!canvas->ttf_fontsize[face_num] && !fontsize) 
+        canvas->ttf_fontsize[face_num] = 10;
+    else
+    	canvas->ttf_fontsize[face_num] = fontsize;
+
+    errcode = FT_New_Face (canvas->ftLib,fontname,0,&canvas->ttf_face[face_num][0]);
+    if(errcode) {
+        canvas->ttf_fontsize[face_num]=0;
+    }else{
+        if(canvas->ttf_fontsize[face_num] && FT_IS_SCALABLE(canvas->ttf_face[face_num][0]))
+            errcode = FT_Set_Char_Size(canvas->ttf_face[face_num][0],0,canvas->ttf_fontsize[face_num]*64,90,0);
+    }
+}
+
+int calc_ttf_true_ypos(FT_Face face, int y, int ttf_fontsize){
+
+    if(!FT_IS_SCALABLE(face))
+        ttf_fontsize = face->available_sizes->height;
+
+    y+=ttf_fontsize - (ttf_fontsize*.25);
+
+    return y;
+}
+
+int calc_ttf_totalstringwidth(FT_Face face, char *str)
+{
+    FT_GlyphSlot slot = face->glyph;
+    FT_UInt glyph_index;
+    int i,errcode;
+    unsigned int len = strlen(str);
+    int width=0;
+
+    for(i=0;i<len;i++)
+    {
+        glyph_index = FT_Get_Char_Index( face, str[i] );
+        errcode = FT_Load_Glyph(face, glyph_index, 0);
+        if(errcode)
+            continue;
+        width += slot->advance.x >> 6;
+    }
+    return width;
+}
+
+int calc_ttf_centering(FT_Face face, char *str)
+{
+    int leftpos;
+
+    leftpos = 80-(calc_ttf_totalstringwidth(face,str)/2);
+    if (leftpos<1) 
+        leftpos = 1;
+
+    return leftpos;
+}
+
+void draw_ttf_char(g15canvas *canvas, FT_Bitmap charbitmap, unsigned char character, int x, int y, int color)
+{
+    FT_Int  char_x, char_y, p, q;
+    FT_Int  x_max = x + charbitmap.width;
+    FT_Int  y_max = y + charbitmap.rows;
+    static   FT_Bitmap tmpbuffer;
+
+// convert to 8bit format.. 
+    FT_Bitmap_Convert(canvas->ftLib, &charbitmap,&tmpbuffer,1);
+
+    for ( char_y=y,q = 0; char_y < y_max; char_y++, q++ )
+    {
+        
+            for ( char_x=x,p = 0; char_x < x_max; char_x++, p++ )
+        {
+            if(tmpbuffer.buffer[q * tmpbuffer.width + p])
+                g15r_setPixel(canvas,char_x,char_y,color);
+        }
+    }
+}
+
+void draw_ttf_str(g15canvas *canvas, char *str, int x, int y, int color, FT_Face face)
+{
+    FT_GlyphSlot	slot = face->glyph;
+    int i,errcode;
+    unsigned int len = strlen(str);
+
+    for(i=0;i<len;i++)
+    {
+        errcode = FT_Load_Char(face, str[i], FT_LOAD_RENDER|FT_LOAD_MONOCHROME|FT_LOAD_TARGET_MONO|FT_LOAD_FORCE_AUTOHINT);
+        //if(errcode)	
+          //  continue;
+        draw_ttf_char(canvas, slot->bitmap, str[i], x+slot->bitmap_left, y-slot->bitmap_top, color);
+        x += slot->advance.x >> 6;
+    }
+}
+
+void g15r_ttfPrint(g15canvas * canvas, int x, int y, int fontsize, int face_num, int color, int center, char *print_string)
+{
+	int errcode = 0;
+	
+	if ( canvas->ttf_fontsize[face_num] ) 
+	{
+        if(fontsize > 0 && FT_IS_SCALABLE(canvas->ttf_face[face_num][0]))
+        {
+            canvas->ttf_fontsize[face_num] = fontsize;
+            int errcode = FT_Set_Pixel_Sizes(canvas->ttf_face[face_num][0],0,canvas->ttf_fontsize[face_num]);
+            if (errcode) printf("Trouble setting the Glyph size!\n");
+        }
+        y=calc_ttf_true_ypos(canvas->ttf_face[face_num][0], y, canvas->ttf_fontsize[face_num]);
+        if (center > 0)
+        	x=calc_ttf_centering(canvas->ttf_face[face_num][0], print_string);
+        draw_ttf_str(canvas, print_string, x, y, color, canvas->ttf_face[face_num][0]);
+    }
+}

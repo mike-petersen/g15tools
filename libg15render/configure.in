@@ -20,7 +20,7 @@ AC_C_CONST
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([string.h])
+AC_CHECK_HEADERS([string.h ft2build.h])
 
 # Checks for library functions.
 AC_HEADER_STDC
