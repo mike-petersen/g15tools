@@ -269,6 +269,70 @@ void handleModeCommand(string const &input_line)
    }
 }
 
+void handleFontCommand(string const &input_line)
+{
+   string parse_line;
+   int params[6] = { 0, 0, 0, 0, 0, 0 };
+   parse_line = input_line.substr(3,input_line.length() - 3);
+   
+   const char *fontname;
+   
+   vector <string> lines;
+   bool in_line = false;
+   int line_start = -1, i;
+   for (i=0;i<(int)parse_line.length();++i)
+   {
+      if (parse_line[i] == '\"')
+      {
+         if (i-2 >= 0 && parse_line[i-1] == '\\')
+         {
+            parse_line = parse_line.substr(0, i-1) + '"' + parse_line.substr(i+1);
+            --i;
+         }
+         else if (in_line)
+         {
+            in_line = false;
+            string temp = parse_line.substr(line_start,i-line_start);
+            if (input_line[1] == 'L')
+            	fontname = temp.c_str();
+            else
+            	lines.push_back(temp);
+         }
+         else
+         {
+            in_line = true;
+            line_start = i+1;
+         }
+         
+      }
+   }
+   
+   if (input_line[1] == 'L')
+   {
+   		get_params(params, input_line, 3, 2);
+   
+   		int fontface = params[0];
+   		int fontsize = params[1];
+   		g15r_ttfLoad(canvas, (char *)fontname, fontsize, fontface);
+   }
+   else if (input_line[1] == 'P')
+   {
+   		get_params(params, input_line, 3, 6);
+   
+   		int fontface = params[0];
+   		int fontsize = params[1];
+   		int x = params[2];
+   		int y = params[3];
+   		int color = params[4];
+   		int center = params[5];
+   		
+   		for (unsigned int row = 0; row < lines.size(); ++row)
+   		{
+   			g15r_ttfPrint(canvas, x, y, fontsize, fontface, color, center, lines[row].c_str());
+   		}
+   }
+}
+
 void handleTextCommand(string const &input_line)
 {
    string parse_line;
@@ -400,6 +464,10 @@ void parseCommandLine(string cmdline)
 	  else if( cmdline[i] == 'D' )
 	  {
 	     handleDrawCommand(cmdline.substr(i) );         
+	  }
+	  else if( cmdline[i] == 'F' )
+	  {
+	  	 handleFontCommand(cmdline.substr(i) );
 	  }
 }
 

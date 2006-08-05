@@ -16,8 +16,8 @@
 
 all:
 
-	g++ -g -O2 -Wall -pedantic -c main.cpp
-	g++ -g -O2 -Wall -pedantic -c util.cpp
+	g++ -I/usr/include/freetype2 -g -O2 -Wall -pedantic -c main.cpp
+	g++ -I/usr/include/freetype2 -g -O2 -Wall -pedantic -c util.cpp
 	g++ -g util.o main.o -lg15daemon_client -lg15render -o g15composer 
 	
 clean:

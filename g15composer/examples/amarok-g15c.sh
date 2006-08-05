@@ -21,11 +21,13 @@
 # screen, and the song name above.  Not usable as an inbuilt amarok script
 # any more, I think.  Runs from the cmd line fine though.
 
-#load the truetype font we want to use..
-#echo G "Loadfont '$PWD/mc__.ttf',0;" >/tmp/g15 
-#echo G "Loadfont '$PWD/lotusf__.ttf',1;" >/tmp/g15 
-
 PIPE="/var/run/lcdpipe"
+
+#load the truetype font we want to use..
+#echo 'FL 0 10 "'$PWD'/mc__.ttf"' > ${PIPE} 
+#echo 'FL 1 10 "'$PWD'/lotusf__.ttf"' > ${PIPE} 
+echo 'FL 0 10 "/usr/share/fonts/ttf-bitstream-vera/Vera.ttf"' > ${PIPE}
+echo 'FL 1 10 "/usr/share/fonts/ttf-bitstream-vera/Vera.ttf"' > ${PIPE}
 
 while [ 1 ]
 do
@@ -45,10 +47,8 @@ if [ "$STATUS" == "2" ]; then
 	DR 0 0 159 43 1 1
 	DR 3 22 157 40 1 0
 	PB 3 22 157 24 0
-	MR 1
-	TO 0 1 2 1 "$ARTIST"
-	TO 0 11 1 1 "$TITLE"
-	MR 0
+	FP 0 14 0 0 0 1 "$ARTIST"
+	FP 0 9 0 15 0 1 "$TITLE"
 	DB 3 27 157 35 2 $CURTIME $MAXTIME 3
 	TO 0 35 0 1 "$FCURTIME / $FMAXTIME"
 	MC 0
