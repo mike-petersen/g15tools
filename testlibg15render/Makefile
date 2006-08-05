@@ -15,7 +15,7 @@
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 all:
-	g++ -O2 -fpic -Wall -pedantic -c testlibg15render.cpp 
+	g++ -I/usr/include/freetype2 -O2 -fpic -Wall -pedantic -c testlibg15render.cpp 
 	g++ testlibg15render.o -lg15daemon_client -lg15render -o testlibg15render
 	
 clean:

@@ -132,6 +132,15 @@ int main(int argc, char *argv[])
   sleep(6);
 
   g15r_clearScreen(canvas, 0);
+  
+  g15r_ttfLoad(canvas, "/usr/share/fonts/ttf-bitstream-vera/Vera.ttf", 16, 1);
+  g15r_ttfPrint(canvas, 0, 0, 16, 1, 1, 0, "This   is a     test");
+  g15r_pixelBox(canvas, 0, 22, 159, 42, 1, 1, 1);
+  g15r_ttfPrint(canvas, 0, 25, 16, 1, 0, 1, "This   is a     test");
+  updateScreen();
+  sleep(6);
+
+  g15r_clearScreen(canvas, 0);
   g15r_pixelOverlay(canvas, 0, 0, 160, 43, logo_data);
   updateScreen();
   sleep(3);
