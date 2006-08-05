@@ -328,7 +328,7 @@ void handleFontCommand(string const &input_line)
    		
    		for (unsigned int row = 0; row < lines.size(); ++row)
    		{
-   			g15r_ttfPrint(canvas, x, y, fontsize, fontface, color, center, lines[row].c_str());
+   			g15r_ttfPrint(canvas, x, y, fontsize, fontface, color, center, (char *)lines[row].c_str());
    		}
    }
 }
