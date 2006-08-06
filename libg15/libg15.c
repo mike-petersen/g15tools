@@ -50,10 +50,11 @@ static usb_dev_handle * findAndOpenG15()
     for (dev = bus->devices; dev; dev = dev->next)
     {
 
-      if (dev->descriptor.idVendor == 1133 && dev->descriptor.idProduct == 49698)
+      if (dev->descriptor.idVendor == 0x046d && dev->descriptor.idProduct == 0x0c222)
       {
         int ret=0;
         char name_buffer[65535];
+        name_buffer[0] = 0;
         usb_dev_handle *devh = 0;
         printf("Found g15, trying to open it\n");
         devh = usb_open(dev);
@@ -71,8 +72,10 @@ static usb_dev_handle * findAndOpenG15()
   
         
         ret = usb_get_driver_np(devh, 0, name_buffer, 65535);
-        
-        if (!ret)
+        /* some kernel versions say that a driver is attached even though there is none
+            in this case the name buffer has not been changed
+            thanks to RobEngle for pointing this out */
+        if (!ret && name_buffer[0])
         {
           printf("Trying to detach drive currentl attached: \"%s\"\n",name_buffer);
 
