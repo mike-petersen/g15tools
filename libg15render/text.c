@@ -162,8 +162,8 @@ int calc_ttf_totalstringwidth(FT_Face face, char *str)
     {
         glyph_index = FT_Get_Char_Index( face, str[i] );
         errcode = FT_Load_Glyph(face, glyph_index, 0);
-        if(errcode)
-            continue;
+        //if(errcode)
+            //continue;
         width += slot->advance.x >> 6;
     }
     return width;
@@ -209,7 +209,7 @@ void draw_ttf_str(g15canvas *canvas, char *str, int x, int y, int color, FT_Face
 
     for(i=0;i<len;i++)
     {
-        errcode = FT_Load_Char(face, str[i], FT_LOAD_RENDER|FT_LOAD_MONOCHROME|FT_LOAD_TARGET_MONO|FT_LOAD_FORCE_AUTOHINT);
+        errcode = FT_Load_Char(face, str[i], FT_LOAD_RENDER|FT_LOAD_MONOCHROME|FT_LOAD_TARGET_MONO);
         //if(errcode)	
           //  continue;
         draw_ttf_char(canvas, slot->bitmap, str[i], x+slot->bitmap_left, y-slot->bitmap_top, color);
