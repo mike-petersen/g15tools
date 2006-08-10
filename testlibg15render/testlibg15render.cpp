@@ -1,4 +1,4 @@
-
+#define TTF_SUPPORT 1
 #include <iostream>
 #include <libg15.h>
 #include <g15daemon_client.h>
