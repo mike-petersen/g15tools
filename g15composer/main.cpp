@@ -25,6 +25,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#define TTF_SUPPORT 1
+
 #include <libg15.h>
 #include <g15daemon_client.h>
 #include <libg15render.h>
