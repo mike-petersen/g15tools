@@ -114,6 +114,7 @@ void g15r_renderString(g15canvas *canvas, unsigned char stringOut[], int row, in
    
 }
 
+#ifdef TTF_SUPPORT
 void g15r_ttfLoad(g15canvas * canvas, char *fontname, int fontsize, int face_num)
 {
 	int errcode = 0;
@@ -235,3 +236,4 @@ void g15r_ttfPrint(g15canvas * canvas, int x, int y, int fontsize, int face_num,
         draw_ttf_str(canvas, print_string, x, y, color, canvas->ttf_face[face_num][0]);
     }
 }
+#endif /* TTF_SUPPORT */

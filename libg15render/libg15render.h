@@ -7,9 +7,16 @@ extern "C"
 #endif
 
 #include <string.h>
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef TTF_SUPPORT
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_BITMAP_H
+#endif
 
 #define BYTE_SIZE 			8
 #define G15_BUFFER_LEN  	1048
@@ -35,9 +42,11 @@ typedef struct g15canvas {
     int mode_cache;  
 /// g15canvas::mode_reverse determines whether color values passed to g15r_setPixel are reversed.
     int mode_reverse;  
+#ifdef TTF_SUPPORT
     FT_Library ftLib;
     FT_Face ttf_face[G15_MAX_FACE][sizeof(FT_Face)];
     int ttf_fontsize[G15_MAX_FACE];
+#endif
 } g15canvas;
 
 /// \brief Fills an area bounded by (x1, y1) and (x2, y2)
@@ -77,8 +86,10 @@ void g15r_renderCharacterSmall(g15canvas * canvas, int x, int y, unsigned char c
 /// \brief Renders a string with font size in row
 void g15r_renderString(g15canvas * canvas, unsigned char stringOut[], int row, int size, unsigned int sx, unsigned int sy);
 
+#ifdef TTF_SUPPORT
 void g15r_ttfLoad(g15canvas * canvas, char *fontname, int fontsize, int face_num);
 void g15r_ttfPrint(g15canvas * canvas, int x, int y, int fontsize, int face_num, int color, int center, char *print_string);
+#endif
 
 #ifdef __cplusplus
 }
