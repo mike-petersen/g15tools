@@ -1,6 +1,7 @@
 1.1
 * Lower buffer size from 7k to 1k
 * Add drawCircle, drawRoundBox, and drawBar routines
+* Add FreeType2 support
 
 1.0 
 * Initial Release
