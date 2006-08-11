@@ -16,7 +16,7 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-// This font was provided by Sebastian XXX (sorry bastl, i still cant spell your last name )
+/* This font was provided by Sebastian XXX (sorry bastl, i still cant spell your last name ) */
 unsigned char fontdata_7x5[] = {0x00, 0x00, 0x00, 0x00, 0x00, 
 0x01, 0x00, 0x01, 0x00, 0x01, 
 0x00, 0x00, 0x00, 0x00, 0x00, 

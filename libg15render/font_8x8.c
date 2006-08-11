@@ -22,7 +22,7 @@
 /*                                            */
 /**********************************************/
 
-// This file was taken from the linux kernel in compliance with the gpl
+/* This file was taken from the linux kernel in compliance with the gpl */
 
 #define FONTDATAMAX 2048
 

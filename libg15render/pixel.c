@@ -90,8 +90,10 @@ void g15r_pixelOverlay(g15canvas * canvas, int x1, int y1, int width, int height
  */
 void g15r_drawLine(g15canvas * canvas, int px1, int py1, int px2, int py2, const int color)
 {
-   // Bresenham's Line Algorithm
-   // http://en.wikipedia.org/wiki/Bresenham's_algorithm
+   /* 
+    * Bresenham's Line Algorithm
+    * http://en.wikipedia.org/wiki/Bresenham's_algorithm
+    */
    
    int steep=0;
    
@@ -153,10 +155,10 @@ void g15r_pixelBox(g15canvas * canvas, int x1, int y1, int x2, int y2, int color
    int i=0;
    for(i=0; i<thick; ++i)
    {
-      g15r_drawLine(canvas, x1,y1,x2,y1,color); // Top
-      g15r_drawLine(canvas, x1,y1,x1,y2,color); // Left
-      g15r_drawLine(canvas, x2,y1,x2,y2,color); // Right
-      g15r_drawLine(canvas, x1,y2,x2,y2,color); // Bottom
+      g15r_drawLine(canvas, x1,y1,x2,y1,color); /* Top    */ 
+      g15r_drawLine(canvas, x1,y1,x1,y2,color); /* Left   */
+      g15r_drawLine(canvas, x2,y1,x2,y2,color); /* Right  */
+      g15r_drawLine(canvas, x1,y2,x2,y2,color); /* Bottom */
       x1++; y1++;
       x2--; y2--;
   }
@@ -172,6 +174,18 @@ void g15r_pixelBox(g15canvas * canvas, int x1, int y1, int x2, int y2, int color
 
 }
 
+/**
+ * Draws a circle centered at (x, y) with a radius of r.
+ * 
+ * The circle will be filled if fill != 0.
+ * 
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found. 
+ * \param x Defines horizontal center of the circle.
+ * \param y Defines vertical center of circle.
+ * \param r Defines radius of circle.
+ * \param fill The circle will be filled with color if fill != 0.
+ * \param color Lines defining the circle will be drawn this color.
+ */
 void g15r_drawCircle(g15canvas * canvas, int x, int y, int r, int fill, int color)
 {
     int xx, yy, dd;
@@ -207,6 +221,19 @@ void g15r_drawCircle(g15canvas * canvas, int x, int y, int r, int fill, int colo
     }
 }
 
+/**
+ * Draws a rounded box around the area bounded by (x1, y1) and (x2, y2).
+ * 
+ * The box will be filled if fill != 0.
+ * 
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found. 
+ * \param x1 Defines leftmost bound of the box.
+ * \param y1 Defines uppermost bound of the box.
+ * \param x2 Defines rightmost bound of the box.
+ * \param y2 Defines bottommost bound of the box.
+ * \param fill The box will be filled with color if fill != 0.
+ * \param color Lines defining the box will be drawn this color.
+ */
 void g15r_drawRoundBox (g15canvas * canvas, int x1, int y1, int x2, int y2, int fill, int color)
 {
     int y, shave=3;
@@ -257,7 +284,19 @@ void g15r_drawRoundBox (g15canvas * canvas, int x1, int y1, int x2, int y2, int 
     }
 }
 
-// given a maximum value, and a value between 0 and that maximum value, calculate and draw a bar showing that percentage
+/**
+ * Given a maximum value, and a value between 0 and that maximum value, calculate and draw a bar showing that percentage.
+ * 
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
+ * \param x1 Defines leftmost bound of the bar.
+ * \param y1 Defines uppermost bound of the bar.
+ * \param x2 Defines rightmost bound of the bar.
+ * \param y2 Defines bottommost bound of the bar.
+ * \param color The bar will be drawn this color.
+ * \param num Number of units relative to max filled.
+ * \param max Number of units equal to 100% filled.
+ * \param type Type of bar.  1=solid bar, 2=solid bar with border, 3 = solid bar with I-frame.
+ */ 
 void g15r_drawBar (g15canvas * canvas, int x1, int y1, int x2, int y2, int color, int num, int max, int type)
 {
     float len, length;

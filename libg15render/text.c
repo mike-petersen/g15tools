@@ -20,10 +20,10 @@
 
 void g15r_renderCharacterLarge(g15canvas *canvas, int col, int row, unsigned char character, unsigned int sx, unsigned int sy)
 {
-   int helper = character * 8; // for our font which is 8x8
+   int helper = character * 8; /* for our font which is 8x8 */
    
-   int top_left_pixel_x = sx+col*(8); // 1 pixel spacing
-   int top_left_pixel_y = sy+row*(8); // once again 1 pixel spacing
+   int top_left_pixel_x = sx+col*(8); /* 1 pixel spacing */
+   int top_left_pixel_y = sy+row*(8); /* once again 1 pixel spacing */
    
    int x, y;
    for (y=0;y<8;++y)
@@ -43,10 +43,10 @@ void g15r_renderCharacterLarge(g15canvas *canvas, int col, int row, unsigned cha
 
 void g15r_renderCharacterMedium(g15canvas *canvas, int col, int row, unsigned char character, unsigned int sx, unsigned int sy)
 {
-   int helper = character * 7 * 5; // for our font which is 6x4
+   int helper = character * 7 * 5; /* for our font which is 6x4 */
    
-   int top_left_pixel_x = sx+col*(5); // 1 pixel spacing
-   int top_left_pixel_y = sy+row*(7); // once again 1 pixel spacing
+   int top_left_pixel_x = sx+col*(5); /* 1 pixel spacing */
+   int top_left_pixel_y = sy+row*(7); /* once again 1 pixel spacing */
    
    int x, y;
    for (y=0;y<7;++y)
@@ -65,10 +65,10 @@ void g15r_renderCharacterMedium(g15canvas *canvas, int col, int row, unsigned ch
 
 void g15r_renderCharacterSmall(g15canvas *canvas, int col, int row, unsigned char character, unsigned int sx, unsigned int sy)
 {
-   int helper = character * 6 * 4; // for our font which is 6x4
+   int helper = character * 6 * 4; /* for our font which is 6x4 */
    
-   int top_left_pixel_x = sx+col*(4); // 1 pixel spacing
-   int top_left_pixel_y = sy+row*(6); // once again 1 pixel spacing
+   int top_left_pixel_x = sx+col*(4); /* 1 pixel spacing */
+   int top_left_pixel_y = sy+row*(6); /* once again 1 pixel spacing */
    
    int x, y;
    for (y=0;y<6;++y)
@@ -115,6 +115,13 @@ void g15r_renderString(g15canvas *canvas, unsigned char stringOut[], int row, in
 }
 
 #ifdef TTF_SUPPORT
+/**
+ * Load a font for use with FreeType2 font support
+ * 
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
+ * \param fontname Absolute pathname to font file to be loaded.
+ * \param face_num Slot into which font face will be loaded.
+ */ 
 void g15r_ttfLoad(g15canvas * canvas, char *fontname, int fontsize, int face_num)
 {
 	int errcode = 0;
@@ -125,7 +132,7 @@ void g15r_ttfLoad(g15canvas * canvas, char *fontname, int fontsize, int face_num
         face_num=G15_MAX_FACE; 
 
     if(canvas->ttf_fontsize[face_num])
-        FT_Done_Face(canvas->ttf_face[face_num][0]); // destroy the last face
+        FT_Done_Face(canvas->ttf_face[face_num][0]); /* destroy the last face */
 
     if(!canvas->ttf_fontsize[face_num] && !fontsize) 
         canvas->ttf_fontsize[face_num] = 10;
@@ -163,8 +170,8 @@ int calc_ttf_totalstringwidth(FT_Face face, char *str)
     {
         glyph_index = FT_Get_Char_Index( face, str[i] );
         errcode = FT_Load_Glyph(face, glyph_index, 0);
-        //if(errcode)
-            //continue;
+        /*if(errcode)
+            continue; */
         width += slot->advance.x >> 6;
     }
     return width;
@@ -188,7 +195,7 @@ void draw_ttf_char(g15canvas *canvas, FT_Bitmap charbitmap, unsigned char charac
     FT_Int  y_max = y + charbitmap.rows;
     static   FT_Bitmap tmpbuffer;
 
-// convert to 8bit format.. 
+ 	/* convert to 8bit format.. */ 
     FT_Bitmap_Convert(canvas->ftLib, &charbitmap,&tmpbuffer,1);
 
     for ( char_y=y,q = 0; char_y < y_max; char_y++, q++ )
@@ -211,13 +218,25 @@ void draw_ttf_str(g15canvas *canvas, char *str, int x, int y, int color, FT_Face
     for(i=0;i<len;i++)
     {
         errcode = FT_Load_Char(face, str[i], FT_LOAD_RENDER|FT_LOAD_MONOCHROME|FT_LOAD_TARGET_MONO);
-        //if(errcode)	
-          //  continue;
+        /*if(errcode)	
+            continue; */
         draw_ttf_char(canvas, slot->bitmap, str[i], x+slot->bitmap_left, y-slot->bitmap_top, color);
         x += slot->advance.x >> 6;
     }
 }
 
+/**
+ * Render a string with a FreeType2 font
+ * 
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
+ * \param x initial x position for string.
+ * \param y initial y position for string.
+ * \param fontsize Size of string in points.
+ * \param face_num Font to be used is loaded in this slot.
+ * \param color Text will be drawn this color.
+ * \param center Text will be centered if center > 0.
+ * \param print_string Pointer to the string to be printed.
+ */
 void g15r_ttfPrint(g15canvas * canvas, int x, int y, int fontsize, int face_num, int color, int center, char *print_string)
 {
 	int errcode = 0;
