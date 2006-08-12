@@ -1,7 +1,7 @@
 1.1
-* Lower buffer size from 7k to 1k
+* Lower buffer size from 7k to 1k (recompile programs linked against v1.0)
 * Add drawCircle, drawRoundBox, and drawBar routines
-* Add FreeType2 support
+* Add FreeType2 support (configure with --enable-ttf)
 
 1.0 
 * Initial Release
