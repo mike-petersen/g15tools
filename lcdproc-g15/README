@@ -1,7 +1,7 @@
-This is a patch against lcdproc CVS HEAD.  Apply the patch and add g15*.{c,h} to
-<lcdproc root>/server/drivers.  Configure with --enable-drivers=g15.  This
-driver requires g15daemon-1.2 and libg15render.  This driver is nearly feature
-complete, and will soon be submitted for inclusion in lcdproc.
+This is a patch against lcdproc CVS HEAD.  Apply the patch and configure with 
+--enable-drivers=g15.  This driver requires g15daemon-1.2 and libg15render.  
+This driver is nearly feature complete, and will soon be submitted for 
+inclusion in lcdproc.
 
 The Keymap is as follows:
 

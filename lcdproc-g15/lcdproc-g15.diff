@@ -1,37 +1,93 @@
-Index: LCDd.conf
+Index: docs/LCDd.8
 ===================================================================
-RCS file: /cvsroot/lcdproc/lcdproc/LCDd.conf,v
-retrieving revision 1.78
-diff -u -r1.78 LCDd.conf
---- LCDd.conf	16 Jul 2006 11:26:38 -0000	1.78
-+++ LCDd.conf	30 Jul 2006 08:27:01 -0000
-@@ -36,6 +36,7 @@
- #Driver=CFontz633
- #Driver=CFontzPacket
- #Driver=CwLnx
-+#Driver=g15
- #Driver=glcdlib
- #Driver=IOWarrior
- #Driver=imon
-@@ -277,7 +278,11 @@
- # Default value is no
- #keypad_test_mode=yes
+RCS file: /cvsroot/lcdproc/lcdproc/docs/LCDd.8,v
+retrieving revision 1.11
+diff -u -r1.11 LCDd.8
+--- docs/LCDd.8	18 Jun 2006 20:29:56 -0000	1.11
++++ docs/LCDd.8	12 Aug 2006 02:18:10 -0000
+@@ -81,6 +81,9 @@
+ .B CwLnx
+ serial/USB displays by Cwlinux (http://www.cwlinux.com)
+ .TP
++.B g15
++LCD display on the Logitech G15 keyboard
++.TP
+ .B glcdlib
+ graphical LCDs supported by graphlcd-base
+ .TP
+Index: server/drivers/Makefile.am
+===================================================================
+RCS file: /cvsroot/lcdproc/lcdproc/server/drivers/Makefile.am,v
+retrieving revision 1.58
+diff -u -r1.58 Makefile.am
+--- server/drivers/Makefile.am	25 Jun 2006 15:08:42 -0000	1.58
++++ server/drivers/Makefile.am	12 Aug 2006 02:18:10 -0000
+@@ -19,17 +19,19 @@
+ LIBS =
  
-+## g15 driver for Logitech G15 Keyboard LCDs ##
-+[g15]
+ pkglib_PROGRAMS = @DRIVERS@
+-EXTRA_PROGRAMS = bayrad CFontz CFontz633 CFontzPacket curses CwLnx glcdlib glk hd44780 icp_a106 imon IOWarrior irman joy lb216 lcdm001 lcterm lirc MD8800 ms6931 mtc_s16209x MtxOrb NoritakeVFD pyramid sed1330 sed1520 serialVFD stv5730 svga t6963 text tyan sli ula200 xosd
++EXTRA_PROGRAMS = bayrad CFontz CFontz633 CFontzPacket curses CwLnx g15 glcdlib glk hd44780 icp_a106 imon IOWarrior irman joy lb216 lcdm001 lcterm lirc MD8800 ms6931 mtc_s16209x MtxOrb NoritakeVFD pyramid sed1330 sed1520 serialVFD stv5730 svga t6963 text tyan sli ula200 xosd
+ noinst_LIBRARIES = libLCD.a libbignum.a
  
-+# Display size
-+size=20x5
+ IOWarrior_CFLAGS =   @libusb_cflags@ $(AM_CFLAGS)
+ hd44780_CFLAGS =     @libusb_cflags@ $(AM_CFLAGS)
++g15_CFLAGS =         @libusb_cflags@ $(AM_CFLAGS)
  
- ## glcdlib meta driver for graphical LCDs ##
- [glcdlib]
+ CFontz_LDADD =       libLCD.a libbignum.a
+ CFontz633_LDADD =    libLCD.a libbignum.a
+ CFontzPacket_LDADD = libLCD.a libbignum.a
+ curses_LDADD =       @LIBCURSES@
+ CwLnx_LDADD =        libLCD.a
++g15_LDADD =          libLCD.a @LIBG15@
+ glcdlib_LDADD =      libLCD.a @LIBGLCD@
+ hd44780_LDADD =      libLCD.a @HD44780_DRIVERS@ @libusb_libs@ libbignum.a
+ hd44780_DEPENDENCIES = @HD44780_DRIVERS@
+@@ -60,6 +62,7 @@
+ CFontzPacket_SOURCES = lcd.h lcd_lib.h CFontzPacket.c CFontzPacket.h CFontz-charmap.h CFontz633io.c CFontz633io.h report.h adv_bignum.h
+ curses_SOURCES =     lcd.h curses_drv.h curses_drv.c report.h
+ CwLnx_SOURCES =      lcd.h lcd_lib.h CwLnx.c CwLnx.h report.h
++g15_SOURCES = 	      lcd.h lcd_lib.h g15.h g15-num.c g15.c report.h
+ glcdlib_SOURCES =    lcd.h lcd_lib.h glcdlib.h glcdlib.c report.h
+ glk_SOURCES =        lcd.h glk.c glk.h glkproto.c glkproto.h report.h
+ hd44780_SOURCES =    lcd.h lcd_lib.h hd44780.h hd44780.c hd44780-drivers.h hd44780-low.h hd44780-charmap.h report.h adv_bignum.h
+Index: docs/lcdproc-user/lcdproc-user.docbook
+===================================================================
+RCS file: /cvsroot/lcdproc/lcdproc/docs/lcdproc-user/lcdproc-user.docbook,v
+retrieving revision 1.7
+diff -u -r1.7 lcdproc-user.docbook
+--- docs/lcdproc-user/lcdproc-user.docbook	18 Jun 2006 17:28:57 -0000	1.7
++++ docs/lcdproc-user/lcdproc-user.docbook	12 Aug 2006 02:18:10 -0000
+@@ -19,6 +19,7 @@
+   <!ENTITY CFontzPacket SYSTEM "drivers/CFontzPacket.docbook">
+   <!ENTITY curses SYSTEM "drivers/curses.docbook">
+   <!ENTITY CwLnx SYSTEM "drivers/CwLnx.docbook">
++  <!ENTITY g15 SYSTEM "drivers/g15.docbook">
+   <!ENTITY glcdlib SYSTEM "drivers/glcdlib.docbook">
+   <!ENTITY glk SYSTEM "drivers/glk.docbook">
+   <!ENTITY hd44780 SYSTEM "drivers/hd44780.docbook">
+Index: docs/lcdproc-user/drivers.docbook
+===================================================================
+RCS file: /cvsroot/lcdproc/lcdproc/docs/lcdproc-user/drivers.docbook,v
+retrieving revision 1.5
+diff -u -r1.5 drivers.docbook
+--- docs/lcdproc-user/drivers.docbook	18 Jun 2006 17:28:57 -0000	1.5
++++ docs/lcdproc-user/drivers.docbook	12 Aug 2006 02:18:10 -0000
+@@ -13,6 +13,7 @@
+ &CFontzPacket;
+ &curses;
+ &CwLnx;
++&g15;
+ &glcdlib;
+ &glk;
+ &hd44780;
 Index: acinclude.m4
 ===================================================================
 RCS file: /cvsroot/lcdproc/lcdproc/acinclude.m4,v
 retrieving revision 1.74
 diff -u -r1.74 acinclude.m4
 --- acinclude.m4	20 May 2006 15:46:30 -0000	1.74
-+++ acinclude.m4	30 Jul 2006 08:27:01 -0000
++++ acinclude.m4	12 Aug 2006 02:18:09 -0000
 @@ -6,7 +6,7 @@
  	[                  drivers may be separated with commas.]
  	[                  Possible choices are:]
@@ -95,56 +151,1146 @@ diff -u -r1.74 acinclude.m4
  AC_SUBST(LIBGLCD)
  AC_SUBST(LIBFTDI)
  AC_SUBST(LIBXOSD)
-Index: docs/LCDd.8
+Index: LCDd.conf
 ===================================================================
-RCS file: /cvsroot/lcdproc/lcdproc/docs/LCDd.8,v
-retrieving revision 1.11
-diff -u -r1.11 LCDd.8
---- docs/LCDd.8	18 Jun 2006 20:29:56 -0000	1.11
-+++ docs/LCDd.8	30 Jul 2006 08:27:03 -0000
-@@ -81,6 +81,9 @@
- .B CwLnx
- serial/USB displays by Cwlinux (http://www.cwlinux.com)
- .TP
-+.B g15
-+LCD display on the Logitech G15 keyboard
-+.TP
- .B glcdlib
- graphical LCDs supported by graphlcd-base
- .TP
-Index: server/drivers/Makefile.am
+RCS file: /cvsroot/lcdproc/lcdproc/LCDd.conf,v
+retrieving revision 1.78
+diff -u -r1.78 LCDd.conf
+--- LCDd.conf	16 Jul 2006 11:26:38 -0000	1.78
++++ LCDd.conf	12 Aug 2006 02:18:07 -0000
+@@ -36,6 +36,7 @@
+ #Driver=CFontz633
+ #Driver=CFontzPacket
+ #Driver=CwLnx
++#Driver=g15
+ #Driver=glcdlib
+ #Driver=IOWarrior
+ #Driver=imon
+@@ -277,7 +278,11 @@
+ # Default value is no
+ #keypad_test_mode=yes
+ 
++## g15 driver for Logitech G15 Keyboard LCDs ##
++[g15]
+ 
++# Display size
++size=20x5
+ 
+ ## glcdlib meta driver for graphical LCDs ##
+ [glcdlib]
+Index: server/drivers/g15.c
 ===================================================================
-RCS file: /cvsroot/lcdproc/lcdproc/server/drivers/Makefile.am,v
-retrieving revision 1.58
-diff -u -r1.58 Makefile.am
---- server/drivers/Makefile.am	25 Jun 2006 15:08:42 -0000	1.58
-+++ server/drivers/Makefile.am	30 Jul 2006 08:27:03 -0000
-@@ -19,17 +19,19 @@
- LIBS =
- 
- pkglib_PROGRAMS = @DRIVERS@
--EXTRA_PROGRAMS = bayrad CFontz CFontz633 CFontzPacket curses CwLnx glcdlib glk hd44780 icp_a106 imon IOWarrior irman joy lb216 lcdm001 lcterm lirc MD8800 ms6931 mtc_s16209x MtxOrb NoritakeVFD pyramid sed1330 sed1520 serialVFD stv5730 svga t6963 text tyan sli ula200 xosd
-+EXTRA_PROGRAMS = bayrad CFontz CFontz633 CFontzPacket curses CwLnx g15 glcdlib glk hd44780 icp_a106 imon IOWarrior irman joy lb216 lcdm001 lcterm lirc MD8800 ms6931 mtc_s16209x MtxOrb NoritakeVFD pyramid sed1330 sed1520 serialVFD stv5730 svga t6963 text tyan sli ula200 xosd
- noinst_LIBRARIES = libLCD.a libbignum.a
- 
- IOWarrior_CFLAGS =   @libusb_cflags@ $(AM_CFLAGS)
- hd44780_CFLAGS =     @libusb_cflags@ $(AM_CFLAGS)
-+g15_CFLAGS =         @libusb_cflags@ $(AM_CFLAGS)
- 
- CFontz_LDADD =       libLCD.a libbignum.a
- CFontz633_LDADD =    libLCD.a libbignum.a
- CFontzPacket_LDADD = libLCD.a libbignum.a
- curses_LDADD =       @LIBCURSES@
- CwLnx_LDADD =        libLCD.a
-+g15_LDADD =          libLCD.a @LIBG15@
- glcdlib_LDADD =      libLCD.a @LIBGLCD@
- hd44780_LDADD =      libLCD.a @HD44780_DRIVERS@ @libusb_libs@ libbignum.a
- hd44780_DEPENDENCIES = @HD44780_DRIVERS@
-@@ -60,6 +62,7 @@
- CFontzPacket_SOURCES = lcd.h lcd_lib.h CFontzPacket.c CFontzPacket.h CFontz-charmap.h CFontz633io.c CFontz633io.h report.h adv_bignum.h
- curses_SOURCES =     lcd.h curses_drv.h curses_drv.c report.h
- CwLnx_SOURCES =      lcd.h lcd_lib.h CwLnx.c CwLnx.h report.h
-+g15_SOURCES = 	      lcd.h lcd_lib.h g15.h g15-num.c g15.c report.h
- glcdlib_SOURCES =    lcd.h lcd_lib.h glcdlib.h glcdlib.c report.h
- glk_SOURCES =        lcd.h glk.c glk.h glkproto.c glkproto.h report.h
- hd44780_SOURCES =    lcd.h lcd_lib.h hd44780.h hd44780.c hd44780-drivers.h hd44780-low.h hd44780-charmap.h report.h adv_bignum.h
+RCS file: server/drivers/g15.c
+diff -N server/drivers/g15.c
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ server/drivers/g15.c	1 Jan 1970 00:00:00 -0000
+@@ -0,0 +1,459 @@
++/*  This is the LCDproc driver for the LCD on the Logitech G15 keyboard
++
++    Copyright (C) 2006 Anthony J. Mirabella.
++
++    2006-07-23 Version 1.0: Most functions should be implemented and working
++
++    This program is free software; you can redistribute it and/or modify
++    it under the terms of the GNU General Public License as published by
++    the Free Software Foundation; either version 2 of the License, or
++    any later version.
++
++    This program is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++    GNU General Public License for more details.
++
++    You should have received a copy of the GNU General Public License
++    along with this program; if not, write to the Free Software
++    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
++
++
++    ==============================================================================
++*/
++
++#include <stdlib.h>
++#include <stdio.h>
++#include <unistd.h>
++#include <fcntl.h>
++#include <string.h>
++#include <errno.h>
++#include <syslog.h>
++#include <sys/socket.h>
++#include <libg15.h>
++#include <g15daemon_client.h>
++#include <libg15render.h>
++
++#ifdef HAVE_CONFIG_H
++# include "config.h"
++#endif
++
++#include "lcd.h"
++#include "g15.h"
++
++#include "report.h"
++#include "lcd_lib.h"
++
++/* Vars for the server core */
++MODULE_EXPORT char *api_version = API_VERSION;
++MODULE_EXPORT int stay_in_foreground = 0;
++MODULE_EXPORT int supports_multiple = 0;
++MODULE_EXPORT char *symbol_prefix = "g15_";
++
++// Find the proper usb device and initialize it
++//
++MODULE_EXPORT int g15_init (Driver *drvthis)
++{
++   PrivateData *p;
++
++   /* Allocate and store private data */
++   p = (PrivateData *) calloc(1, sizeof(PrivateData));
++   if (p == NULL)
++		return -1;
++   if (drvthis->store_private_ptr(drvthis, p))
++		return -1;
++
++   /* Initialize the PrivateData structure */
++   p->width = G15_CHAR_WIDTH;
++   p->height = G15_CHAR_HEIGHT;
++   p->cellwidth = G15_CELL_WIDTH;
++   p->cellheight = G15_CELL_HEIGHT;
++   p->backlight_state = BACKLIGHT_ON;
++   p->g15screen_fd = 0;
++
++   if((p->g15screen_fd = new_g15_screen(G15_G15RBUF)) < 0)
++   {
++        report(RPT_ERR, "%s: Sorry, cant connect to the G15daemon", drvthis->name);
++        return -1;
++   }
++   
++	/* make sure the canvas is there... */
++	p->canvas = (g15canvas *) malloc(sizeof(g15canvas));
++	if (p->canvas == NULL) {
++		report(RPT_ERR, "%s: unable to create canvas", drvthis->name);
++		return -1;
++	}
++	
++	/* make sure the backingstore is there... */
++	p->backingstore = (g15canvas *) malloc(sizeof(g15canvas));
++	if (p->backingstore == NULL) {
++		report(RPT_ERR, "%s: unable to create framebuffer backing store", drvthis->name);
++		return -1;
++	}
++	
++	g15r_initCanvas(p->canvas);
++	g15r_initCanvas(p->backingstore);
++	p->canvas->buffer[0] = G15_LCD_WRITE_CMD;
++	p->backingstore->buffer[0] = G15_LCD_WRITE_CMD;
++	
++//	ret = setLCDBrightness(G15_BRIGHTNESS_BRIGHT);
++	   
++   return 0;
++}
++
++// Close the connection to the LCD
++//
++MODULE_EXPORT void g15_close (Driver *drvthis)
++{
++	PrivateData *p = drvthis->private_data;
++	
++	g15_close_screen(p->g15screen_fd);
++	
++	if (p != NULL) {
++		if (p->canvas)
++			free(p->canvas);
++		
++		if (p->backingstore)
++			free(p->backingstore);
++
++		free(p);
++	}
++	drvthis->store_private_ptr(drvthis, NULL);
++}
++
++// Returns the display width in characters
++//
++MODULE_EXPORT int g15_width (Driver *drvthis)
++{
++	PrivateData *p = drvthis->private_data;
++
++	return p->width;
++}
++
++// Returns the display height in characters
++//
++MODULE_EXPORT int g15_height (Driver *drvthis)
++{
++	PrivateData *p = drvthis->private_data;
++
++	return p->height;
++}
++
++// Returns the width of a character in pixels
++//
++MODULE_EXPORT int g15_cellwidth (Driver *drvthis)
++{
++	PrivateData *p = drvthis->private_data;
++
++	return p->cellwidth;
++}
++
++// Returns the height of a character in pixels
++//
++MODULE_EXPORT int g15_cellheight (Driver *drvthis)
++{
++	PrivateData *p = drvthis->private_data;
++
++	return p->cellheight;
++}
++
++// Clears the LCD screen
++//
++MODULE_EXPORT void g15_clear (Driver *drvthis)
++{
++	PrivateData *p = drvthis->private_data;
++
++	g15r_clearScreen(p->canvas, 0);
++	g15r_clearScreen(p->backingstore, 0);
++}
++
++// Blasts a single frame onscreen, to the lcd...
++//
++MODULE_EXPORT void g15_flush (Driver *drvthis)
++{
++	PrivateData *p = drvthis->private_data;
++
++	if (memcmp(p->backingstore->buffer, p->canvas->buffer, G15_BUFFER_LEN * sizeof(unsigned char)) == 0)
++		return;
++
++	memcpy(p->backingstore->buffer, p->canvas->buffer, G15_BUFFER_LEN * sizeof(unsigned char));
++
++	g15_send(p->g15screen_fd,(char*)p->canvas->buffer,1048);
++}
++
++// Character function for the lcdproc driver API
++//
++MODULE_EXPORT void g15_chr (Driver *drvthis, int x, int y, char c)
++{
++	PrivateData *p = drvthis->private_data;
++	
++	y--;
++	x--;
++	if ((x > p->width) || (y > p->height))
++		return;
++		
++	g15r_renderCharacterLarge(p->canvas, x, y, c, 0, 0);
++}
++
++// Prints a string on the lcd display, at position (x,y).  The
++// upper-left is (1,1), and the lower right should be (20,5).
++//
++MODULE_EXPORT void g15_string (Driver *drvthis, int x, int y, char string[])
++{
++	PrivateData *p = drvthis->private_data;
++	int i;
++
++	x--;
++	y--;
++
++	for (i = 0; string[i] != '\0'; i++) {
++		// Check for buffer overflows...
++		if ((y * p->width) + x + i > (p->width * p->height))
++			break;
++		g15r_renderCharacterLarge(p->canvas, x + i, y, string[i], 0, 0);
++	}
++}
++
++// Draws an icon on the screen
++MODULE_EXPORT int g15_icon (Driver *drvthis, int x, int y, int icon)
++{
++	PrivateData *p = drvthis->private_data;
++	
++	x--;
++	y--;
++	
++	switch (icon) {
++		case ICON_BLOCK_FILLED:
++			{
++			int px1 = x * p->cellwidth;
++			int py1 = y * p->cellheight;
++			int px2 = px1 + (p->cellwidth - 2);
++			int py2 = py1 + (p->cellheight - 2);
++			g15r_pixelBox(p->canvas, px1, py1, px2, py2, G15_COLOR_BLACK, 1, G15_PIXEL_FILL);
++			break;
++			}
++		case ICON_HEART_FILLED:
++			{
++			g15r_renderCharacterLarge(p->canvas, x, y, G15_ICON_HEART_FILLED, 0, 0);
++			break;
++			}
++		case ICON_HEART_OPEN:
++			{
++			p->canvas->mode_reverse = 1;
++			g15r_renderCharacterLarge(p->canvas, x, y, G15_ICON_HEART_OPEN, 0, 0);
++			p->canvas->mode_reverse = 0;
++			break;
++			}
++		case ICON_ARROW_UP:
++			{
++			g15r_renderCharacterLarge(p->canvas, x , y, G15_ICON_ARROW_UP, 0, 0);
++			break;
++			}
++		case ICON_ARROW_DOWN:
++			{
++			g15r_renderCharacterLarge(p->canvas, x, y, G15_ICON_ARROW_DOWN, 0, 0);
++			break;
++			}
++		case ICON_ARROW_LEFT:
++			{
++			g15r_renderCharacterLarge(p->canvas, x, y, G15_ICON_ARROW_LEFT, 0, 0);
++			break;
++			}
++		case ICON_ARROW_RIGHT:
++			{
++			g15r_renderCharacterLarge(p->canvas, x, y, G15_ICON_ARROW_RIGHT, 0, 0);
++			break;
++			}
++		case ICON_CHECKBOX_OFF:
++			{
++			g15r_renderCharacterLarge(p->canvas, x, y, G15_ICON_CHECKBOX_OFF, 0, 0);
++			break;
++			}
++		case ICON_CHECKBOX_ON:
++			{
++			g15r_renderCharacterLarge(p->canvas, x, y, G15_ICON_CHECKBOX_ON, 0, 0);
++			break;
++			}
++		case ICON_CHECKBOX_GRAY:
++			{
++			g15r_renderCharacterLarge(p->canvas, x, y, G15_ICON_CHECKBOX_GRAY, 0, 0);
++			break;
++			}
++		case ICON_STOP:
++			{
++			g15r_renderCharacterLarge(p->canvas, x, y, G15_ICON_STOP, 0, 0);
++			break;
++			}
++		case ICON_PAUSE:
++			{
++			g15r_renderCharacterLarge(p->canvas, x, y, G15_ICON_PAUSE, 0, 0);
++			break;
++			}
++		case ICON_PLAY:
++			{
++			g15r_renderCharacterLarge(p->canvas, x, y, G15_ICON_PLAY, 0, 0);
++			break;
++			}
++		case ICON_PLAYR:
++			{
++			g15r_renderCharacterLarge(p->canvas, x, y, G15_ICON_PLAYR, 0, 0);
++			break;
++			}
++		case ICON_FF:
++			{
++			g15r_renderCharacterLarge(p->canvas, x, y, G15_ICON_FF, 0, 0);
++			break;
++			}
++		case ICON_FR:
++			{
++			g15r_renderCharacterLarge(p->canvas, x, y, G15_ICON_FR, 0, 0);
++			break;
++			}
++		case ICON_NEXT:
++			{
++			g15r_renderCharacterLarge(p->canvas, x, y, G15_ICON_NEXT, 0, 0);
++			break;
++			}
++		case ICON_PREV:
++			{
++			g15r_renderCharacterLarge(p->canvas, x, y, G15_ICON_PREV, 0, 0);
++			break;
++			}
++		case ICON_REC:
++			{
++			g15r_renderCharacterLarge(p->canvas, x, y, G15_ICON_REC, 0, 0);
++			break;
++			}
++		default:
++			return -1; /* Let the core do other icons */
++	}
++	
++	return 0;
++}
++
++// Draws a horizontal bar growing to the right
++// 
++MODULE_EXPORT void g15_hbar(Driver *drvthis, int x, int y, int len, int promille, int options)
++{
++	PrivateData *p = drvthis->private_data;
++	
++	x--;
++	y--;
++	
++	int total_pixels = ((long) 2 * len * p->cellwidth + 1) * promille / 2000;
++	int px1 = x * p->cellwidth;
++	int py1 = y * p->cellheight;
++	int px2 = px1 + total_pixels;
++	int py2 = py1 + (p->cellheight - 2);
++	
++	g15r_pixelBox(p->canvas, px1, py1, px2, py2, G15_COLOR_BLACK, 1, G15_PIXEL_FILL);
++}
++
++// Draws a vertical bar growing up
++//
++MODULE_EXPORT void g15_vbar(Driver *drvthis, int x, int y, int len, int promille, int options)
++{
++	PrivateData *p = drvthis->private_data;
++	
++	x--;
++	
++	int total_pixels = ((long) 2 * len * p->cellwidth + 1) * promille / 2000;
++	int px1 = x * p->cellwidth;
++	int py1 = y * p->cellheight - total_pixels;
++	int px2 = px1 + (p->cellwidth - 2);
++	int py2 = py1 + total_pixels;
++	
++	g15r_pixelBox(p->canvas, px1, py1, px2, py2, G15_COLOR_BLACK, 1, G15_PIXEL_FILL);
++	
++}
++
++//  Return one char from the Keyboard
++//
++MODULE_EXPORT const char * g15_get_key (Driver *drvthis)
++{
++	PrivateData *p = drvthis->private_data;
++	
++	unsigned int key_state = 0;
++	
++	if(send(p->g15screen_fd, "k", 1, MSG_OOB)<1) /* request key status */
++        report(RPT_INFO, "%s: Error in send to g15daemon", drvthis->name);    
++
++    	recv(p->g15screen_fd, &key_state , sizeof(key_state),0);
++	
++	if (key_state & G15_KEY_G1)
++		return "Escape";
++	else if (key_state & G15_KEY_L1)
++	    return "Enter";
++	else if (key_state & G15_KEY_L2)
++	    return "Left";
++	else if (key_state & G15_KEY_L3)
++	    return "Up";
++	else if (key_state & G15_KEY_L4)
++	    return "Down";
++	else if (key_state & G15_KEY_L5)
++	    return "Right";
++	else
++	    return NULL;
++}
++
++// Set the backlight
++//
++MODULE_EXPORT void g15_backlight(Driver *drvthis, int on)
++{
++	PrivateData *p = drvthis->private_data;
++	
++	if (p->backlight_state == on)
++		return;
++
++	p->backlight_state = on;
++
++	char msgbuf[256];
++	
++	switch (on) {
++		case BACKLIGHT_ON:
++			{
++			msgbuf[0]=G15_BRIGHTNESS_BRIGHT|G15DAEMON_BACKLIGHT;
++			send(p->g15screen_fd,msgbuf,1,MSG_OOB);
++			break;
++			}
++		case BACKLIGHT_OFF:
++			{
++			msgbuf[0]=G15_BRIGHTNESS_DARK|G15DAEMON_BACKLIGHT;
++			send(p->g15screen_fd,msgbuf,1,MSG_OOB);
++			break;
++			}
++		default: 
++			{
++			break;
++			}
++		}
++}
++
++MODULE_EXPORT void g15_num(Driver * drvthis, int x, int num)
++{
++	PrivateData *p = drvthis->private_data;
++	
++	x--;
++	int ox = x * p->cellwidth;
++	
++	if ((num < 0) || (num > 10))
++		return;
++		
++	int width = 0;
++	int height = 43;
++	
++	if ((num >= 0) && (num <=9))
++		width = 24;
++	else
++		width = 9;
++	
++	int i=0;
++   
++   	for (i=0;i<(width*height);++i)
++   	{
++      	int color = (g15_bignum_data[num][i] ? G15_COLOR_WHITE : G15_COLOR_BLACK);
++      	int px = ox + i % width;
++      	int py = i / width;
++      	g15r_setPixel(p->canvas, px, py, color);
++   	}
++}
+Index: server/drivers/g15-num.c
+===================================================================
+RCS file: server/drivers/g15-num.c
+diff -N server/drivers/g15-num.c
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ server/drivers/g15-num.c	1 Jan 1970 00:00:00 -0000
+@@ -0,0 +1,505 @@
++#define G15_BIGNUM_LEN			1032
++
++/* 
++ * This data should really be inverted so that 1=black 
++ * but, for now, make sure to set canvas->mode_reverse
++ * before drawing one of these overlays.
++ */
++ 
++short g15_bignum_data[11][G15_BIGNUM_LEN] = {
++	{ /* 0 */
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,
++	1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,
++	1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,
++	1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,
++	1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,
++	1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,
++	1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,
++	1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,
++	1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,
++	1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,
++	1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,
++	1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,
++	1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,
++	1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,
++	1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,
++	1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,1,1,1,
++	1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,1,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
++	},
++	{ /* 1 */
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,
++	1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
++	},
++	{ /* 2 */
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,
++	1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,
++	1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,
++	1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,
++	1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,
++	1,1,0,0,0,0,0,1,1,1,1,1,0,1,1,1,1,0,0,0,0,0,0,1,
++	1,1,0,0,0,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,0,0,1,
++	1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,
++	1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,
++	1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1,1,
++	1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,1,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
++	},
++	{ /* 3 */
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,1,
++	1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,1,
++	1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,
++	1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,
++	1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,
++	1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,
++	1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,
++	1,1,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,
++	1,1,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
++	},
++	{ /* 4 */
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,1,1,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,0,1,1,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,0,1,1,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,
++	1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,
++	1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,0,1,1,1,
++	1,1,1,1,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1,1,0,0,0,1,
++	1,1,1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1,1,0,0,0,1,
++	1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,1,1,0,0,0,1,
++	1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,
++	1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,
++	1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,
++	1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
++	},
++	{ /* 5 */
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,0,0,0,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,
++	1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,
++	1,1,1,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,
++	1,1,1,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
++	},
++	{ /* 6 */
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,0,1,1,1,0,0,0,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,
++	1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,
++	1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,
++	1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,
++	1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,
++	1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,
++	1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,
++	1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,
++	1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,
++	1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,1,
++	1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,1,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
++	},
++	{ /* 7 */
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,1,
++	1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
++	1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
++	1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,
++	1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1,
++	1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1,1,
++	1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,1,1,1,
++	1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
++	},
++	{ /* 8 */
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,
++	1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,
++	1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,
++	1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,
++	1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,
++	1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,
++	1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,
++	1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,
++	1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,
++	1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,
++	1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,
++	1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,
++	1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,
++	1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,
++	1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,
++	1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,
++	1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
++	},
++	{ /* 9 */
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,
++	1,1,1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,
++	1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,
++	1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,
++	1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,
++	1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,
++	1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,
++	1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,
++	1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,
++	1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,
++	1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,
++	1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1,
++	1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1,1,
++	1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1,1,
++	1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1,1,1,
++	1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
++	},
++	{ /* colon */
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,0,0,0,1,1,1,
++	1,1,1,0,0,0,0,1,1,
++	1,1,0,0,0,0,0,0,1,
++	1,1,0,0,0,0,0,0,0,
++	1,0,0,0,0,0,0,0,0,
++	0,0,0,0,0,0,0,0,0,
++	0,0,0,0,0,0,0,0,0,
++	1,1,0,0,0,0,0,0,1,
++	1,1,1,0,0,0,0,0,1,
++	1,1,1,1,0,0,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,0,1,1,1,1,
++	1,1,1,0,0,0,1,1,1,
++	1,1,0,0,0,0,0,1,1,
++	1,1,0,0,0,0,0,0,1,
++	1,1,0,0,0,0,0,0,0,
++	1,0,0,0,0,0,0,0,0,
++	0,0,0,0,0,0,0,0,0,
++	1,0,0,0,0,0,0,0,0,
++	1,1,0,0,0,0,0,0,1,
++	1,1,1,0,0,0,0,1,1,
++	1,1,1,1,0,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1,
++	1,1,1,1,1,1,1,1,1
++	}
++};
+Index: server/drivers/g15.h
+===================================================================
+RCS file: server/drivers/g15.h
+diff -N server/drivers/g15.h
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ server/drivers/g15.h	1 Jan 1970 00:00:00 -0000
+@@ -0,0 +1,90 @@
++/*  This is the LCDproc driver for the LCD on the Logitech G15 keyboard
++
++    Copyright (C) 2006 Anthony J. Mirabella.
++
++    2006-07-23 Version 1.0: Most functions should be implemented and working
++
++    This program is free software; you can redistribute it and/or modify
++    it under the terms of the GNU General Public License as published by
++    the Free Software Foundation; either version 2 of the License, or
++    any later version.
++
++    This program is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++    GNU General Public License for more details.
++
++    You should have received a copy of the GNU General Public License
++    along with this program; if not, write to the Free Software
++    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 */
++
++#ifndef G15_H_
++#define G15_H_
++
++//#include <usb.h>
++#include <libg15.h>
++#include <libg15render.h>
++#include "lcd.h"
++
++typedef struct driver_private_data {
++	/* dimensions */
++	int width, height;
++	int cellwidth, cellheight;
++	/* file descriptor for g15daemon socket */
++	int g15screen_fd;
++	/* canvas for LCD contents */
++	g15canvas *canvas;
++	g15canvas *backingstore;
++	/* status indicators */
++	int backlight_state;
++} PrivateData;
++
++#define G15_OFFSET				32
++#define G15_PX_WIDTH			160
++#define G15_PX_HEIGHT			43
++#define G15_CHAR_WIDTH				20
++#define G15_CHAR_HEIGHT				5
++#define G15_CELL_WIDTH			8
++#define G15_CELL_HEIGHT			8
++#define G15_LCD_WRITE_CMD 		0x03
++#define G15_USB_ENDPT 			2
++#define G15_ICON_HEART_FILLED	3
++#define G15_ICON_HEART_OPEN		3
++#define G15_ICON_ARROW_UP		24
++#define G15_ICON_ARROW_DOWN		25
++#define G15_ICON_ARROW_RIGHT	26
++#define G15_ICON_ARROW_LEFT		27
++#define G15_ICON_CHECKBOX_ON	7
++#define G15_ICON_CHECKBOX_OFF	9
++#define G15_ICON_CHECKBOX_GRAY	10
++#define G15_ICON_STOP			254
++#define G15_ICON_PAUSE			186
++#define G15_ICON_PLAY			16
++#define G15_ICON_PLAYR			17
++#define G15_ICON_FF				175
++#define G15_ICON_FR				174
++#define G15_ICON_NEXT			242
++#define G15_ICON_PREV			243
++#define G15_ICON_REC			7
++#define G15_BIGNUM_LEN			1032
++
++extern short g15_bignum_data[11][G15_BIGNUM_LEN];
++
++MODULE_EXPORT int  g15_init (Driver *drvthis);
++MODULE_EXPORT void g15_close (Driver *drvthis);
++MODULE_EXPORT int  g15_width (Driver *drvthis);
++MODULE_EXPORT int  g15_height (Driver *drvthis);
++MODULE_EXPORT int  g15_cellwidth (Driver *drvthis);
++MODULE_EXPORT int  g15_cellheight (Driver *drvthis);
++MODULE_EXPORT void g15_clear (Driver *drvthis);
++MODULE_EXPORT void g15_flush (Driver *drvthis);
++MODULE_EXPORT void g15_string (Driver *drvthis, int x, int y, char string[]);
++MODULE_EXPORT void g15_chr (Driver *drvthis, int x, int y, char c);
++MODULE_EXPORT int g15_icon (Driver *drvthis, int x, int y, int icon);
++MODULE_EXPORT void g15_hbar(Driver *drvthis, int x, int y, int len, int promille, int options);
++MODULE_EXPORT void g15_vbar(Driver *drvthis, int x, int y, int len, int promille, int options);
++MODULE_EXPORT const char * g15_get_key (Driver *drvthis);
++MODULE_EXPORT void g15_backlight(Driver *drvthis, int on);
++MODULE_EXPORT void g15_num(Driver * drvthis, int x, int num);
++
++#endif /*G15_H_*/
+Index: docs/lcdproc-user/drivers/g15.docbook
+===================================================================
+RCS file: docs/lcdproc-user/drivers/g15.docbook
+diff -N docs/lcdproc-user/drivers/g15.docbook
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ docs/lcdproc-user/drivers/g15.docbook	1 Jan 1970 00:00:00 -0000
+@@ -0,0 +1,34 @@
++<sect1 id="G15-howto">
++<title>The G15 Driver</title>
++
++<para>
++This section talks about using LCDproc with LCD displays on Logitech G15 
++gaming keyboards.
++</para>
++
++<sect2 id="G15-features">
++<title>Features</title>
++
++<para>
++This driver uses g15daemon's virtual screen capabilities to enable 
++multiple LCDd instances to display on the LCD of the Logitech G15
++gaming keyboard.  Text and other rendering services are provided by
++libg15render from the g15tools project.  Input is provided by g15daemon, 
++enabling use of the L1-L5 and G1 keys.  The required libraries are
++available from the g15daemon and g15tools projects at sourceforge.net.
++</para>
++
++<sect3 id="G15-config">
++<title>Configuration in LCDd.conf</title>
++
++<para>
++Currently there aren't really any configuration options to be set.
++The width and height are hardcoded based on the font currently used.
++In the future, now that libg15render has FreeType2 support, there may
++be options to adjust the font used and the display size.
++</para>
++
++</sect3>
++</sect2>
++</sect1>
++
