@@ -27,7 +27,6 @@ PIPE="/var/run/lcdpipe"
 #echo 'FL 0 10 "'$PWD'/mc__.ttf"' > ${PIPE} 
 #echo 'FL 1 10 "'$PWD'/lotusf__.ttf"' > ${PIPE} 
 echo 'FL 0 10 "/usr/share/fonts/ttf-bitstream-vera/Vera.ttf"' > ${PIPE}
-echo 'FL 1 10 "/usr/share/fonts/ttf-bitstream-vera/Vera.ttf"' > ${PIPE}
 
 while [ 1 ]
 do
@@ -47,7 +46,7 @@ if [ "$STATUS" == "2" ]; then
 	DR 0 0 159 43 1 1
 	DR 3 22 157 40 1 0
 	PB 3 22 157 24 0
-	FP 0 14 0 0 0 1 "$ARTIST"
+	FP 0 15 0 0 0 1 "$ARTIST"
 	FP 0 9 0 15 0 1 "$TITLE"
 	DB 3 27 157 35 2 $CURTIME $MAXTIME 3
 	TO 0 35 0 1 "$FCURTIME / $FMAXTIME"

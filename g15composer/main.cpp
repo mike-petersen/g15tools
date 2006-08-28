@@ -25,13 +25,15 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#define TTF_SUPPORT 1
-
 #include <libg15.h>
 #include <g15daemon_client.h>
 #include <libg15render.h>
 #include "composer.h"
 #include "g15c_logo.h"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 using namespace std;
 
@@ -271,6 +273,7 @@ void handleModeCommand(string const &input_line)
    }
 }
 
+#ifdef TTF_SUPPORT
 void handleFontCommand(string const &input_line)
 {
    string parse_line;
@@ -334,6 +337,7 @@ void handleFontCommand(string const &input_line)
    		}
    }
 }
+#endif /* TTF_SUPPORT */
 
 void handleTextCommand(string const &input_line)
 {
@@ -467,10 +471,12 @@ void parseCommandLine(string cmdline)
 	  {
 	     handleDrawCommand(cmdline.substr(i) );         
 	  }
+#ifdef TTF_SUPPORT
 	  else if( cmdline[i] == 'F' )
 	  {
 	  	 handleFontCommand(cmdline.substr(i) );
 	  }
+#endif
 }
 
 void fifoProcessingWorkflow(bool is_script, string const &filename)

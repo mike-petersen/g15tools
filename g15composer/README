@@ -17,14 +17,22 @@ nohup ./g15composer /path/to/pipe &
 
 *** Text Commands:
 
-Ts "line 1" "line 2" ....
+Ts "line 1" "line 2" ...
    where s is the size of the font (S, M and L are supported).
    To insert a double-quote, prefix it with a backslash
 
 TO X Y S C "line 1" "line 2" ... 
    Overlays text of the given size at (X,Y), centered if C=1
 
+*** Font Command: (NB., G15Composer and libg15render must both be configured with --enable-ttf to use font commands)
 
+FL F S "/path/to/font" 
+   Loads a font into Face Slot F with size S.
+
+FP F S X Y Co Ce "line 1" "line 2" ...
+   Prints text using the font is Slot F with size S at position (X,Y).
+   Text will be printed in color Co and will be centered if Ce=1.
+   
 *** Pixel Commands:
 
 PO X Y W H 100101101... 
