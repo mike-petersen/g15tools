@@ -46,7 +46,8 @@ ifstream script;
    
 void printUsage()
 {
-   cout << "Usage: cat instructions | g15composer" << endl;
+   cout << "Usage: g15composer /path/to/fifo [/path/to/script]" << endl;
+   cout << "       cat instructions > /path/to/fifo" << endl;
    cout << endl;
    cout << "Display composer for the Logitech G15 LCD" << endl;
 }
@@ -225,6 +226,7 @@ void handleModeCommand(string const &input_line)
    string cmdval = input_line.substr(3,1);
    bool fore = cmdval == "0";
    bool stat = cmdval == "1";
+   bool rear = stat;
    bool revert = cmdval == "2";
    char msgbuf[1];
 
@@ -240,17 +242,17 @@ void handleModeCommand(string const &input_line)
    else if(input_line[1] == 'X')
       canvas->mode_xor = stat;
    else if(input_line[1] == 'P') {
-      msgbuf[0] = 'v';
+      msgbuf[0] = 'v'; /* Is the display visible? */
       send(g15screen_fd,msgbuf,1,MSG_OOB);
       recv(g15screen_fd,msgbuf,1,0);
       bool at_front = (msgbuf[0] == '1') ? true : false;
-      msgbuf[0] = 'u';
+      msgbuf[0] = 'u'; /* Did the user make the display visible? */
       send(g15screen_fd,msgbuf,1,MSG_OOB);
       recv(g15screen_fd,msgbuf,1,0);      
       bool user_to_front = (msgbuf[0] == '1') ? true : false;
-      msgbuf[0] = 'p';
+      msgbuf[0] = 'p'; /* We now want to change the priority */
       if(at_front) {
-      	if(stat) /* we want to go to the back */
+      	if(rear) /* we want to go to the back */
       	{
       		send(g15screen_fd,msgbuf,1,MSG_OOB);
       	}      	

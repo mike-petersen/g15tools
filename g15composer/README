@@ -101,13 +101,7 @@ MP 0|1|2
 
 ----------------------
 
-For convenience, here are the commands relayed to g15daemon:
-
-*** Pixel Commands:
-
-P 10010101001 .... with exactly (!) 6880 (160x43) 1 or 0's. The first 160
-values are for line 0, the next 160 for line 1 etc
-
+The following commands are relayed to g15daemon:
 
 *** LCD Commands:
 
