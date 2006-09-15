@@ -415,6 +415,7 @@ void handleTextCommand(string const &input_line)
       	 if (size == 0)  dispcol=(80-((len*4)/2));
     	 if (size == 1)  dispcol=(80-((len*5)/2));
     	 if (size == 2)  dispcol=(80-((len*8)/2));
+    	 if (dispcol < 0) dispcol = 0;
       	 g15r_renderString(canvas, stringOut, row, size, dispcol, params[1]);
       }
       else
@@ -422,6 +423,101 @@ void handleTextCommand(string const &input_line)
    }
    
    updateScreen(false);
+}
+
+void handleKeyCommand(string const &input_line)
+{
+	int params[2] = { 0, 0 };
+	get_params(params, input_line, 3, 2);
+	
+	char msgbuf[1];
+	switch(input_line[1])
+	{
+		case 'L':
+		{
+			break;
+		}
+		case 'M':
+		{
+			bool sendCmd = true;
+			bool LEDon = params[1];
+			msgbuf[1] |= G15DAEMON_MKEYLEDS;
+			switch(params[0])
+			{
+				case '0':
+				{
+					if (LEDon)
+						msgbuf[1] |= G15_LED_M1 | G15_LED_M2 | G15_LED_M3;
+					else
+						msgbuf[1] &= ~G15_LED_M1 | ~G15_LED_M2 | ~G15_LED_M3;
+					break;
+				}
+				case '1':
+				{
+					if (LEDon)
+						msgbuf[1] |= G15_LED_M1;
+					else
+						msgbuf[1] &= ~G15_LED_M1;
+					break;
+				}
+				case '2':
+				{
+					if (LEDon)
+						msgbuf[1] |= G15_LED_M2;
+					else
+						msgbuf[1] &= ~G15_LED_M2;
+					break;
+				}
+				case '3':
+				{
+					if (LEDon)
+						msgbuf[1] |= G15_LED_M3;
+					else
+						msgbuf[1] &= ~G15_LED_M3;
+					break;
+				}
+				default:
+				{
+					sendCmd = false;
+					break;
+				}
+			}
+			if (sendCmd) send(g15screen_fd,msgbuf,1,MSG_OOB);
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+}
+
+void handleLCDCommand(string const &input_line)
+{
+	int params[1] = { 0 };
+	get_params(params, input_line, 3, 1);
+	
+	char msgbuf[1];
+	bool sendCmd = true;
+	switch(input_line[1])
+	{
+		case 'B':
+		{
+			msgbuf[1] |= G15DAEMON_BACKLIGHT | params[0];
+			break;
+		}
+		case 'C':
+		{
+			msgbuf[1] |= G15DAEMON_CONTRAST | params[0];
+			break;
+		}
+		default:
+		{
+			sendCmd = false;
+			break;
+		}	
+	}
+	if (sendCmd) send(g15screen_fd,msgbuf,1,MSG_OOB);
 }
 
 void updateScreen(bool force)
@@ -457,28 +553,50 @@ void parseCommandLine(string cmdline)
 	  if( i+1 >= len || cmdline[i] == '#' )
 	     return;
 	
-	  if( cmdline[i] == 'P' && cmdline[i+1] != ' ' ) 
-	  {
-	     handlePixelCommand(cmdline.substr(i) );
-	  }
-	  else if( cmdline[i] == 'T' ) 
-	  {
-	     handleTextCommand(cmdline.substr(i) );
-	  }
-	  else if( cmdline[i] == 'M' ) 
-	  {
-	     handleModeCommand(cmdline.substr(i) );
-	  }
-	  else if( cmdline[i] == 'D' )
-	  {
-	     handleDrawCommand(cmdline.substr(i) );         
-	  }
+	  char cmdType = cmdline[i];
+	  switch(cmdType) {
+	  	case 'D':
+	  	{
+	     	handleDrawCommand(cmdline.substr(i) );
+	     	break;         
+	  	}
 #ifdef TTF_SUPPORT
-	  else if( cmdline[i] == 'F' )
-	  {
-	  	 handleFontCommand(cmdline.substr(i) );
-	  }
+	  	case 'F':
+	  	{
+	  	 	handleFontCommand(cmdline.substr(i) );
+	  	 	break;
+	  	}
 #endif
+		case 'K':
+		{
+			handleKeyCommand(cmdline.substr(i) );
+			break;
+		}
+		case 'L':
+		{
+			handleLCDCommand(cmdline.substr(i) );
+			break;
+		}
+		case 'M':
+		{
+	     	handleModeCommand(cmdline.substr(i) );
+	     	break;
+	  	}
+	  	case 'P':
+	  	{
+	  		handlePixelCommand(cmdline.substr(i) );
+	  		break;
+	  	}
+	  	case 'T':
+	  	{
+	     	handleTextCommand(cmdline.substr(i) );
+	     	break;
+	  	}
+		default:
+		{
+			break;
+		}
+	  }
 }
 
 void fifoProcessingWorkflow(bool is_script, string const &filename)

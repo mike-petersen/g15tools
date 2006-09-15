@@ -116,9 +116,10 @@ LC 0|1|2
 
 KL 0|1|2
    Sets LED mode: 0=app-controlled 1=normal 2=sticky.
+   Not currently implemented.
 
 KM x 0|1
-   Sets the Mx-light off or on. x=0,1,2,3,4|R where 0 is all M-lights.
+   Sets the Mx-light off or on. x=0,1,2,3 where 0 is all M-lights (minus MR).
    Only has an effect if KL is set to 0.
 
 
