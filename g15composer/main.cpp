@@ -441,39 +441,40 @@ void handleKeyCommand(string const &input_line)
 		{
 			bool sendCmd = true;
 			bool LEDon = params[1];
-			msgbuf[1] |= G15DAEMON_MKEYLEDS;
+			memset(msgbuf, 0, 1);
+			msgbuf[0] |= G15DAEMON_MKEYLEDS;
 			switch(params[0])
 			{
 				case '0':
 				{
 					if (LEDon)
-						msgbuf[1] |= G15_LED_M1 | G15_LED_M2 | G15_LED_M3;
+						msgbuf[0] |= G15_LED_M1 | G15_LED_M2 | G15_LED_M3;
 					else
-						msgbuf[1] &= ~G15_LED_M1 | ~G15_LED_M2 | ~G15_LED_M3;
+						msgbuf[0] &= ~G15_LED_M1 & ~G15_LED_M2 & ~G15_LED_M3;
 					break;
 				}
 				case '1':
 				{
 					if (LEDon)
-						msgbuf[1] |= G15_LED_M1;
+						msgbuf[0] |= G15_LED_M1;
 					else
-						msgbuf[1] &= ~G15_LED_M1;
+						msgbuf[0] &= ~G15_LED_M1;
 					break;
 				}
 				case '2':
 				{
 					if (LEDon)
-						msgbuf[1] |= G15_LED_M2;
+						msgbuf[0] |= G15_LED_M2;
 					else
-						msgbuf[1] &= ~G15_LED_M2;
+						msgbuf[0] &= ~G15_LED_M2;
 					break;
 				}
 				case '3':
 				{
 					if (LEDon)
-						msgbuf[1] |= G15_LED_M3;
+						msgbuf[0] |= G15_LED_M3;
 					else
-						msgbuf[1] &= ~G15_LED_M3;
+						msgbuf[0] &= ~G15_LED_M3;
 					break;
 				}
 				default:
@@ -498,17 +499,18 @@ void handleLCDCommand(string const &input_line)
 	get_params(params, input_line, 3, 1);
 	
 	char msgbuf[1];
+	memset(msgbuf, 0, 1);
 	bool sendCmd = true;
 	switch(input_line[1])
 	{
 		case 'B':
 		{
-			msgbuf[1] |= G15DAEMON_BACKLIGHT | params[0];
+			msgbuf[0] |= G15DAEMON_BACKLIGHT | params[0];
 			break;
 		}
 		case 'C':
 		{
-			msgbuf[1] |= G15DAEMON_CONTRAST | params[0];
+			msgbuf[0] |= G15DAEMON_CONTRAST | params[0];
 			break;
 		}
 		default:
