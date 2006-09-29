@@ -1,0 +1,21 @@
+Source: libg15render
+Priority: optional
+Maintainer: Anthony J. Mirabella <mirabeaj@gmail.com>
+Build-Depends: debhelper (>= 4.0.0), autotools-dev, libg15-dev, libfreetype6-dev
+Standards-Version: 3.6.2
+Section: libs
+
+Package: libg15render-dev
+Section: libdevel
+Architecture: any
+Depends: libg15render (= ${Source-Version})
+Description: Development packages for libg15render
+ Includes the files needed for developing software that uses libg15render.
+
+Package: libg15render
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: Library for rendering displays for the Logitech G15 Keyboard
+ Provides simple graphics primitives and text services for the display on the
+ Logitech G15 keyboard.

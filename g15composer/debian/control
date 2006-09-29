@@ -1,0 +1,13 @@
+Source: g15composer
+Section: utils
+Priority: optional
+Maintainer: Anthony J. Mirabella <mirabeaj@gmail.com>
+Build-Depends: debhelper (>= 4.0.0), autotools-dev, libg15-dev, libg15daemon-client-dev, libg15render-dev, libfreetype6-dev
+Standards-Version: 3.6.2
+
+Package: g15composer
+Architecture: any
+Depends: ${shlibs:Depends}, g15daemon
+Description: Scriptable command interface to libg15render
+ G15composer provides a scriptable command interface to libg15render that exposes all of the
+ text and graphics functions of libg15render to shell and other scripts.
