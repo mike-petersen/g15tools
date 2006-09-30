@@ -5,4 +5,7 @@ libg15render_la_SOURCES = libg15render.h text.c pixel.c screen.c font_6x4.c font
 libg15render_la_LIBADD = @FTLIB@ -lm
 libg15render_la_LDFLAGS = -version-info 1:0:0
 include_HEADERS= libg15render.h
+EXTRA_DIST = debian
 
+dist-hook:
+	rm -rf `find $(distdir)/debian -name .svn`
