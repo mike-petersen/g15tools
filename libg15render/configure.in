@@ -29,6 +29,7 @@ AC_MSG_RESULT($ttf_support)
 
 # Checks for libraries.
 AC_CHECK_LIB([g15], [writePixmapToLCD], ,AC_MSG_ERROR(["libg15 not found. please install it"]))
+AC_CHECK_LIB([m], [ceil], ,AC_MSG_ERROR(["libm not found.  Please install it"]))
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
