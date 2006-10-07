@@ -44,6 +44,7 @@ g15canvas *canvas;
 bool is_script = false;
 extern short g15c_logo_data[];
 ifstream script;
+char mkey_state = 0;
    
 void printUsage()
 {
@@ -431,7 +432,6 @@ void handleKeyCommand(string const &input_line)
 	int params[2] = { 0, 0 };
 	get_params(params, input_line, 3, 2);
 	
-	char msgbuf[1];
 	switch(input_line[1])
 	{
 		case 'L':
@@ -442,40 +442,39 @@ void handleKeyCommand(string const &input_line)
 		{
 			bool sendCmd = true;
 			bool LEDon = params[1];
-			memset(msgbuf, 0, 1);
-			msgbuf[0] |= G15DAEMON_MKEYLEDS;
+			mkey_state |= G15DAEMON_MKEYLEDS;
 			switch(params[0])
 			{
-				case '0':
+				case 0:
 				{
 					if (LEDon)
-						msgbuf[0] |= G15_LED_M1 | G15_LED_M2 | G15_LED_M3;
+						mkey_state |= G15_LED_M1 | G15_LED_M2 | G15_LED_M3;
 					else
-						msgbuf[0] &= ~G15_LED_M1 & ~G15_LED_M2 & ~G15_LED_M3;
+						mkey_state &= ~G15_LED_M1 & ~G15_LED_M2 & ~G15_LED_M3;
 					break;
 				}
-				case '1':
+				case 1:
 				{
 					if (LEDon)
-						msgbuf[0] |= G15_LED_M1;
+						mkey_state |= G15_LED_M1;
 					else
-						msgbuf[0] &= ~G15_LED_M1;
+						mkey_state &= ~G15_LED_M1;
 					break;
 				}
-				case '2':
+				case 2:
 				{
 					if (LEDon)
-						msgbuf[0] |= G15_LED_M2;
+						mkey_state |= G15_LED_M2;
 					else
-						msgbuf[0] &= ~G15_LED_M2;
+						mkey_state &= ~G15_LED_M2;
 					break;
 				}
-				case '3':
+				case 3:
 				{
 					if (LEDon)
-						msgbuf[0] |= G15_LED_M3;
+						mkey_state |= G15_LED_M3;
 					else
-						msgbuf[0] &= ~G15_LED_M3;
+						mkey_state &= ~G15_LED_M3;
 					break;
 				}
 				default:
@@ -484,7 +483,7 @@ void handleKeyCommand(string const &input_line)
 					break;
 				}
 			}
-			if (sendCmd) send(g15screen_fd,msgbuf,1,MSG_OOB);
+			if (sendCmd) send(g15screen_fd,&mkey_state,1,MSG_OOB);
 			break;
 		}
 		default:
