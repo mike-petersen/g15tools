@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 
 #include <libg15.h>
 #include <g15daemon_client.h>
@@ -540,6 +541,20 @@ int doOpen(string const &filename)
       if (fd == -1)
       {
          cout << "Error, could not open " << filename << " aborting" << endl;
+         exit(EXIT_FAILURE);
+      }
+      struct stat sb;
+      if (fstat(fd, &sb))
+      {
+      	 cout << "Error, unable to stat " << filename << " aborting" << endl;
+      	 fd = -1;
+      	 exit(EXIT_FAILURE);
+      }
+      if (!S_ISFIFO(sb.st_mode))
+      {
+      	 cout << "Error, " << filename << " is not a named pipe, aborting" << endl;
+      	 fd = -1;
+      	 exit(EXIT_FAILURE);
       }
    }
    return fd;
