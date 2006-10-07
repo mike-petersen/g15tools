@@ -1,4 +1,12 @@
-g15composer (1.0.1-1) breezy; urgency=low
+g15composer (1.1-1) dapper; urgency=low
+
+  * Enable control of LCD contrast and backlight
+  * Enable control of M1-M3 LEDs
+  * Verify that we are actually give a fifo to read from
+
+ -- Anthony J. Mirabella <mirabeaj@gmail.com>  Sat, 07 Oct 2006 01:51:29 -0400
+
+g15composer (1.0.1-1) dapper; urgency=low
 
   * Initial release 
 

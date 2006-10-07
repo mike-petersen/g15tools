@@ -1,5 +1,7 @@
 1.1
 * Enable control of LCD contrast and backlight
+* Enable control of M1-M3 LEDs
+* Verify that we are actually give a fifo to read from
 
 1.0
 * Initial Release

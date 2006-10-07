@@ -33,14 +33,11 @@ AC_CHECK_LIB([g15daemon_client], [g15_send], ,AC_MSG_ERROR(["libg15daemon_client
 AC_CHECK_LIB([g15render], [g15r_initCanvas], ,AC_MSG_ERROR(["libg15render not found. please install it"]))
 
 # Checks for header files.
-AC_CHECK_HEADERS([fcntl.h sys/socket.h libg15.h libg15render.h g15daemon_client.h])
+AC_CHECK_HEADERS([fcntl.h sys/socket.h sys/stat.h libg15.h libg15render.h g15daemon_client.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_C_CONST
-
-# Checks for library functions.
-#AC_FUNC_MALLOC
 
 AC_SUBST(FTLIB)
 AC_CONFIG_FILES([Makefile])
