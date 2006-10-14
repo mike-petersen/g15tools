@@ -120,6 +120,7 @@ void g15r_renderString(g15canvas *canvas, unsigned char stringOut[], int row, in
  * 
  * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
  * \param fontname Absolute pathname to font file to be loaded.
+ * \param fontsize Size in points for font to be loaded.
  * \param face_num Slot into which font face will be loaded.
  */ 
 void g15r_ttfLoad(g15canvas * canvas, char *fontname, int fontsize, int face_num)
