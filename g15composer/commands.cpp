@@ -36,9 +36,9 @@
 
 using namespace std;
 
-extern int g15screen_fd = 0;
+extern int g15screen_fd;
 extern g15canvas *canvas;
-extern char mkey_state = 0;
+extern char mkey_state;
 
 void handlePixelCommand(string const &input_line)
 {
