@@ -30,7 +30,7 @@
 #include <g15daemon_client.h>
 #include <libg15render.h>
 #include "composer.h"
-#include "g15c_logo.h"
+#include "G15Composer.h"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -42,7 +42,6 @@ int g15screen_fd = 0;
 static string fifo_filename = "";
 g15canvas *canvas;
 bool is_script = false;
-extern short g15c_logo_data[];
 ifstream script;
 char mkey_state = 0;
    
@@ -89,42 +88,21 @@ int main(int argc, char *argv[])
       is_script = script.is_open();
    }
 
-   if(!is_script)
-   {   
-	   if((g15screen_fd = new_g15_screen(G15_G15RBUF)) < 0)
-	   {
-	        cout << "Sorry, cant connect to the G15daemon" << endl;
-	        return -1;
-	   }
-	
-	   canvas = (g15canvas *) malloc(sizeof(g15canvas));
-	
-	   g15r_initCanvas(canvas);
-	   canvas->mode_reverse = 1;
-	   g15r_pixelOverlay(canvas, 0, 0, 160, 43, g15c_logo_data);
-	   canvas->mode_reverse = 0;
-	   updateScreen(true);
-	   g15r_clearScreen(canvas, G15_COLOR_WHITE);
-   }
+   //if(!is_script)
+   //{   
+		G15Composer *g15c = new G15Composer;
+   //}
    
    if (fifo_filename != "")
-    fifoProcessingWorkflow(is_script, fifo_filename);
+    g15c->fifoProcessingWorkflow(is_script, fifo_filename);
 
    if(is_script)
       script.close();
    else
    {   
-   	  g15_close_screen(g15screen_fd);
-   	  free(canvas->buffer);
-   	  free(canvas);
+		delete g15c;
    }
    return EXIT_SUCCESS;
-}
-
-void updateScreen(bool force)
-{
-   if(force || !canvas->mode_cache)
-      g15_send(g15screen_fd,(char*)canvas->buffer,1048);
 }
 
 int doOpen(string const &filename)
@@ -158,62 +136,4 @@ int doOpen(string const &filename)
    return fd;
 }
 
-void fifoProcessingWorkflow(bool is_script, string const &filename)
-{
-   string line = "";
-   if(!is_script)
-   {
-	   int fd = doOpen(filename);
-	   
-	   if (fd != -1)
-	   {
-	      bool read_something = true;
-	      while (read_something)
-	      {
-	         char buffer_character[1];
-	         int ret = read(fd,buffer_character,1);
-	         if (ret == 0)
-	         {
-	            close(fd);
-	            fd = doOpen(filename);
-	            if (fd < 0)
-	            {
-	               cout << "Error, reopening failed" << endl;
-	               break;
-	            }
-	            if (!canvas->mode_cache)
-	            	g15r_clearScreen(canvas, G15_COLOR_WHITE);
-	         }
-	         else if (ret == -1)
-	         {
-	            cout << "Reading failed, aborting fifo thread" << endl;
-	            break;
-	         }
-	         else
-	         {
-	            if (buffer_character[0] == '\r')
-	            {
-	            }
-	            else if (buffer_character[0] == '\n')
-	            {
-	 			  parseCommandLine(line);
-	              line = "";
-	            }
-	            else
-	            {
-	               line = line + buffer_character[0];
-	            }
-	         }
-	      }
-	   }
-   }
-   else /* is_script */
-   {
-   		ofstream fifo(filename.c_str());
-   		while (getline(script, line))
-   		{
-   			fifo << line << endl;
-   		}
-   } 
-}
 

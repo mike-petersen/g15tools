@@ -6,13 +6,9 @@
 
 using namespace std;
 
-void handlePixelCommand(std::string const &input_line);
-void handleModeCommand(std::string const &input_line);
-void handleTextCommand(std::string const &input_line);
-void updateScreen(bool);
-int get_params(int*, std::string const &, int, int);
-void fifoProcessingWorkflow(bool is_script, string const &filename);
-void parseCommandLine(string cmdline);
 
+int get_params(int*, std::string const &, int, int);
+//void fifoProcessingWorkflow(bool is_script, string const &filename);
+int doOpen(string const &filename);
 
 #endif /*COMPOSER_H_*/

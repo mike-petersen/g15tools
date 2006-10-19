@@ -1,46 +1,47 @@
-/*
-    This file is part of g15tools.
-
-    g15tools is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    g15tools is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with g15lcd; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
-
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
-#include <string>
-#include <getopt.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-
-#include <libg15.h>
-#include <g15daemon_client.h>
-#include <libg15render.h>
-#include "composer.h"
+#include "G15Composer.h"
+#include "g15c_logo.h"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-using namespace std;
+G15Composer::G15Composer()
+{
+	   g15screen_fd = 0;
+	   //fifo_filename = "";
+	   mkey_state = 0;
+	   extern short g15c_logo_data[6880];
 
-extern int g15screen_fd;
-extern g15canvas *canvas;
-extern char mkey_state;
+	   if((g15screen_fd = new_g15_screen(G15_G15RBUF)) < 0)
+	   {
+	        cout << "Sorry, cant connect to the G15daemon" << endl;
+	        exit(-1);
+	   }
+	
+	   canvas = (g15canvas *) malloc(sizeof(g15canvas));
+	
+	   g15r_initCanvas(canvas);
+	   canvas->mode_reverse = 1;
+	   g15r_pixelOverlay(canvas, 0, 0, 160, 43, g15c_logo_data);
+	   canvas->mode_reverse = 0;
+	   updateScreen(true);
+	   g15r_clearScreen(canvas, G15_COLOR_WHITE);
+}
 
-void handlePixelCommand(string const &input_line)
+G15Composer::~G15Composer()
+{
+   	  g15_close_screen(g15screen_fd);
+   	  free(canvas->buffer);
+   	  free(canvas);
+}
+
+void G15Composer::updateScreen(bool force)
+{
+   if(force || !canvas->mode_cache)
+      g15_send(g15screen_fd,(char*)canvas->buffer,1048);
+}
+
+void G15Composer::handlePixelCommand(string const &input_line)
 {
 	switch(input_line[1])
 	{
@@ -122,7 +123,7 @@ void handlePixelCommand(string const &input_line)
    	updateScreen(false);
 }
 
-void handleDrawCommand(string const &input_line)
+void G15Composer::handleDrawCommand(string const &input_line)
 {
 	switch(input_line[1])
 	{
@@ -166,7 +167,7 @@ void handleDrawCommand(string const &input_line)
    	updateScreen(false);
 }
 
-void handleModeCommand(string const &input_line)
+void G15Composer::handleModeCommand(string const &input_line)
 {
 	string cmdval = input_line.substr(3,1);
 	bool fore = cmdval == "0";
@@ -237,7 +238,7 @@ void handleModeCommand(string const &input_line)
 }
 
 #ifdef TTF_SUPPORT
-void handleFontCommand(string const &input_line)
+void G15Composer::handleFontCommand(string const &input_line)
 {
    string parse_line;
    int params[6] = { 0, 0, 0, 0, 0, 0 };
@@ -301,6 +302,7 @@ void handleFontCommand(string const &input_line)
    			{
    				g15r_ttfPrint(canvas, x, y, fontsize, fontface, color, center, (char *)lines[row].c_str());
    			}
+   			updateScreen(false);
    			break;
    		}
    		default:
@@ -311,7 +313,7 @@ void handleFontCommand(string const &input_line)
 }
 #endif /* TTF_SUPPORT */
 
-void handleTextCommand(string const &input_line)
+void G15Composer::handleTextCommand(string const &input_line)
 {
    string parse_line;
    int params[4] = { 0, 0, 0, 0 };
@@ -395,7 +397,7 @@ void handleTextCommand(string const &input_line)
    updateScreen(false);
 }
 
-void handleKeyCommand(string const &input_line)
+void G15Composer::handleKeyCommand(string const &input_line)
 {
 	int params[2] = { 0, 0 };
 	get_params(params, input_line, 3, 2);
@@ -461,7 +463,7 @@ void handleKeyCommand(string const &input_line)
 	}
 }
 
-void handleLCDCommand(string const &input_line)
+void G15Composer::handleLCDCommand(string const &input_line)
 {
 	int params[1] = { 0 };
 	get_params(params, input_line, 3, 1);
@@ -490,7 +492,7 @@ void handleLCDCommand(string const &input_line)
 	if (sendCmd) send(g15screen_fd,msgbuf,1,MSG_OOB);
 }
 
-void parseCommandLine(string cmdline)
+void G15Composer::parseCommandLine(string cmdline)
 {
 	  int i = 0;
 	  int len = cmdline.length();
@@ -544,4 +546,63 @@ void parseCommandLine(string cmdline)
 			break;
 		}
 	  }
+}
+
+void G15Composer::fifoProcessingWorkflow(bool is_script, string const &filename)
+{
+   string line = "";
+   if(!is_script)
+   {
+	   int fd = doOpen(filename);
+	   
+	   if (fd != -1)
+	   {
+	      bool read_something = true;
+	      while (read_something)
+	      {
+	         char buffer_character[1];
+	         int ret = read(fd,buffer_character,1);
+	         if (ret == 0)
+	         {
+	            close(fd);
+	            fd = doOpen(filename);
+	            if (fd < 0)
+	            {
+	               cout << "Error, reopening failed" << endl;
+	               break;
+	            }
+	            if (!canvas->mode_cache)
+	            	g15r_clearScreen(canvas, G15_COLOR_WHITE);
+	         }
+	         else if (ret == -1)
+	         {
+	            cout << "Reading failed, aborting fifo thread" << endl;
+	            break;
+	         }
+	         else
+	         {
+	            if (buffer_character[0] == '\r')
+	            {
+	            }
+	            else if (buffer_character[0] == '\n')
+	            {
+	 			  parseCommandLine(line);
+	              line = "";
+	            }
+	            else
+	            {
+	               line = line + buffer_character[0];
+	            }
+	         }
+	      }
+	   }
+   }
+   else /* is_script */
+   {
+   		//ofstream fifo(filename.c_str());
+   		//while (getline(script, line))
+   		//{
+   		//	fifo << line << endl;
+   		//}
+   } 
 }
