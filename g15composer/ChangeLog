@@ -1,6 +1,7 @@
 2.0
 * Refactor code into G15Composer class
 * Fix font rendering bug
+* Add SN and SC commands to create and destry screens
 - Remove g15script support (this can be done with shell scripts and/or cat)
 
 1.1
