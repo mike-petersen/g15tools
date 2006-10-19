@@ -36,8 +36,6 @@
 
 using namespace std;
 
-static string fifo_filename = "";
-  
 void printUsage()
 {
    cout << "Usage: g15composer /path/to/fifo" << endl;
@@ -50,6 +48,8 @@ void printUsage()
 
 int main(int argc, char *argv[])
 {
+   static string fifo_filename = "";
+  
    int i=1;
    for (i=1;(i<argc && fifo_filename == "");++i)
    {
