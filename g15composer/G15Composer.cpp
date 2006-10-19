@@ -25,47 +25,13 @@
 
 G15Composer::G15Composer()
 {
-	   g15screen_fd = 0;
-	   mkey_state = 0;
-	   extern short g15c_logo_data[6880];
-
-	   if((g15screen_fd = new_g15_screen(G15_G15RBUF)) < 0)
-	   {
-	        cout << "Sorry, cant connect to the G15daemon" << endl;
-	        exit(-1);
-	   }
-	
-	   canvas = (g15canvas *) malloc(sizeof(g15canvas));
-	
-	   g15r_initCanvas(canvas);
-	   canvas->mode_reverse = 1;
-	   g15r_pixelOverlay(canvas, 0, 0, 160, 43, g15c_logo_data);
-	   canvas->mode_reverse = 0;
-	   updateScreen(true);
-	   g15r_clearScreen(canvas, G15_COLOR_WHITE);
+	g15composerInit();
 }
 
 G15Composer::G15Composer(string filename)
 {
-	   g15screen_fd = 0;
-	   fifo_filename = filename;
-	   mkey_state = 0;
-	   extern short g15c_logo_data[6880];
-
-	   if((g15screen_fd = new_g15_screen(G15_G15RBUF)) < 0)
-	   {
-	        cout << "Sorry, cant connect to the G15daemon" << endl;
-	        exit(-1);
-	   }
-	
-	   canvas = (g15canvas *) malloc(sizeof(g15canvas));
-	
-	   g15r_initCanvas(canvas);
-	   canvas->mode_reverse = 1;
-	   g15r_pixelOverlay(canvas, 0, 0, 160, 43, g15c_logo_data);
-	   canvas->mode_reverse = 0;
-	   updateScreen(true);
-	   g15r_clearScreen(canvas, G15_COLOR_WHITE);
+	g15composerInit();
+	fifo_filename = filename;
 }
 
 G15Composer::~G15Composer()
@@ -73,6 +39,28 @@ G15Composer::~G15Composer()
    	  g15_close_screen(g15screen_fd);
    	  free(canvas->buffer);
    	  free(canvas);
+}
+
+void G15Composer::g15composerInit()
+{
+	   g15screen_fd = 0;
+	   mkey_state = 0;
+	   extern short g15c_logo_data[6880];
+
+	   if((g15screen_fd = new_g15_screen(G15_G15RBUF)) < 0)
+	   {
+	        cout << "Sorry, cant connect to the G15daemon" << endl;
+	        exit(-1);
+	   }
+	
+	   canvas = (g15canvas *) malloc(sizeof(g15canvas));
+	
+	   g15r_initCanvas(canvas);
+	   canvas->mode_reverse = 1;
+	   g15r_pixelOverlay(canvas, 0, 0, 160, 43, g15c_logo_data);
+	   canvas->mode_reverse = 0;
+	   updateScreen(true);
+	   g15r_clearScreen(canvas, G15_COLOR_WHITE);
 }
 
 void G15Composer::run()

@@ -63,6 +63,7 @@ private:
 	void parseCommandLine(string cmdline);
 	void fifoProcessingWorkflow();
 	void updateScreen(bool);
+	void g15composerInit();
 	int doOpen(string const &filename);
 	int get_params(int*, std::string const &, int, int);
 	int g15screen_fd;
