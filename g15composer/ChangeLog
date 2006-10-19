@@ -1,7 +1,12 @@
+2.0
+* Refactor code into G15Composer class
+* Fix font rendering bug
+- Remove g15script support (this can be done with shell scripts and/or cat)
+
 1.1
 * Enable control of LCD contrast and backlight
 * Enable control of M1-M3 LEDs
-* Verify that we are actually give a fifo to read from
+* Verify that we are actually given a fifo to read from
 
 1.0
 * Initial Release

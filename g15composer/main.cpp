@@ -17,7 +17,6 @@
 */
 
 #include <iostream>
-#include <fstream>
 #include <cstdlib>
 #include <string>
 #include <getopt.h>
@@ -29,7 +28,6 @@
 #include <libg15.h>
 #include <g15daemon_client.h>
 #include <libg15render.h>
-#include "composer.h"
 #include "G15Composer.h"
 
 #ifdef HAVE_CONFIG_H
@@ -38,16 +36,11 @@
 
 using namespace std;
 
-int g15screen_fd = 0;
 static string fifo_filename = "";
-g15canvas *canvas;
-bool is_script = false;
-ifstream script;
-char mkey_state = 0;
-   
+  
 void printUsage()
 {
-   cout << "Usage: g15composer /path/to/fifo [/path/to/script]" << endl;
+   cout << "Usage: g15composer /path/to/fifo" << endl;
    cout << "       cat instructions > /path/to/fifo" << endl;
    cout << endl;
    cout << "Display composer for the Logitech G15 LCD" << endl;
@@ -83,57 +76,15 @@ int main(int argc, char *argv[])
       return -1;
    }
    
-  if( argc > i ) {
-      script.open(argv[i]);
-      is_script = script.is_open();
-   }
-
-   //if(!is_script)
-   //{   
-		G15Composer *g15c = new G15Composer;
-   //}
-   
    if (fifo_filename != "")
-    g15c->fifoProcessingWorkflow(is_script, fifo_filename);
-
-   if(is_script)
-      script.close();
-   else
-   {   
-		delete g15c;
+   {
+   		G15Composer *g15c = new G15Composer(fifo_filename);
+    	g15c->run();
+    	delete g15c;
+    	return EXIT_SUCCESS;
    }
-   return EXIT_SUCCESS;
-}
-
-int doOpen(string const &filename)
-{
-   int fd = -1;
-
-   if (filename == "-")
-      fd = 0;
    else
    {
-      fd = open(filename.c_str(),O_RDONLY);
-      if (fd == -1)
-      {
-         cout << "Error, could not open " << filename << " aborting" << endl;
-         exit(EXIT_FAILURE);
-      }
-      struct stat sb;
-      if (fstat(fd, &sb))
-      {
-      	 cout << "Error, unable to stat " << filename << " aborting" << endl;
-      	 fd = -1;
-      	 exit(EXIT_FAILURE);
-      }
-      if (!S_ISFIFO(sb.st_mode))
-      {
-      	 cout << "Error, " << filename << " is not a named pipe, aborting" << endl;
-      	 fd = -1;
-      	 exit(EXIT_FAILURE);
-      }
+   		return EXIT_FAILURE;
    }
-   return fd;
 }
-
-

@@ -6,13 +6,8 @@ nohup ./g15composer /path/to/pipe &
 
 2) cat instructions > /path/to/pipe
 
-3) ./g15_script
-     where g15_script starts with "#!/path/to/g15composer /path/to/pipe" and is executable
-     There must be a running instance of g15composer listening at /path/to/pipe
-     The rest of the lines should be made up of the commands listed below.
-
-4) ./other_script > /path/to/pipe
-     where other_script is a bash, Perl, etc. script or application which outputs
+3) ./some_script > /path/to/pipe
+     where some_script is a bash, Perl, etc. script or application which outputs
      one or more of the commands listed below.
 
 *** Text Commands:
