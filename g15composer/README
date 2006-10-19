@@ -93,6 +93,13 @@ MP 0|1|2
    Set screen to foreground if 0 and background if 1
    If 2, set screen to background if and only if user hasn't set it to foreground
 
+*** Screen Commands:
+
+SN "/path/to/pipe"
+   Create a new G15Comopser instance reading from /path/to/pipe
+
+SC
+   Close the current screen.  Closing the initial screen will close all other screens
 
 ----------------------
 

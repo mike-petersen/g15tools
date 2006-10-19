@@ -37,7 +37,6 @@ G15Composer::G15Composer(string filename)
 G15Composer::~G15Composer()
 {
    	  g15_close_screen(g15screen_fd);
-   	  free(canvas->buffer);
    	  free(canvas);
 	  pthread_exit(&thread);
 }
@@ -275,45 +274,45 @@ void G15Composer::handleModeCommand(string const &input_line)
 
 void G15Composer::handleScreenCommand(std::string const &input_line)
 {
-   string parse_line;
-   parse_line = input_line.substr(3,input_line.length() - 3);
-
-   const char *newpipe;
-   
-   bool in_line = false;
-   int line_start = -1, i;
-   for (i=0;i<(int)parse_line.length();++i)
-   {
-      if (parse_line[i] == '\"')
-      {
-         if (i-2 >= 0 && parse_line[i-1] == '\\')
-         {
-            parse_line = parse_line.substr(0, i-1) + '"' + parse_line.substr(i+1);
-            --i;
-         }
-         else if (in_line)
-         {
-            in_line = false;
-            string temp = parse_line.substr(line_start,i-line_start);
-            	newpipe = temp.c_str();
-         }
-         else
-         {
-            in_line = true;
-            line_start = i+1;
-         }
-         
-      }
-   }
-
    switch(input_line[1])
    {
    	case 'N':
 	{
-   		G15Composer *g15c = new G15Composer(newpipe);
-   		g15c->run();
-   		pthread_detach(g15c->getThread());
-		break;
+	   string parse_line;
+	   parse_line = input_line.substr(3,input_line.length() - 3);
+
+	   const char *newpipe;
+   
+  	   bool in_line = false;
+	   int line_start = -1, i;
+	   for (i=0;i<(int)parse_line.length();++i)
+	   {
+	     if (parse_line[i] == '\"')
+	     {
+	        if (i-2 >= 0 && parse_line[i-1] == '\\')
+	        {
+	           parse_line = parse_line.substr(0, i-1) + '"' + parse_line.substr(i+1);
+	           --i;
+	        }
+	        else if (in_line)
+	        {
+	           in_line = false;
+	           string temp = parse_line.substr(line_start,i-line_start);
+	      	   newpipe = temp.c_str();
+	        }
+	        else
+	        {
+	           in_line = true;
+	           line_start = i+1;
+	        }
+         
+	     }
+	   }
+
+   	   G15Composer *g15c = new G15Composer(newpipe);
+   	   g15c->run();
+   	   pthread_detach(g15c->getThread());
+	   break;
 	}
 	case 'C':
 	{
@@ -777,6 +776,6 @@ void * G15Composer::threadEntry(void * pthis)
 {
 	G15Composer * g15c = (G15Composer*)pthis;
 	g15c->fifoProcessingWorkflow();
-	pthread_detach(pthread_self());
+	g15c->G15Composer::~G15Composer();
 }
 

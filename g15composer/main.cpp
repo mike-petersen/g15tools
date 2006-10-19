@@ -81,7 +81,6 @@ int main(int argc, char *argv[])
    		G15Composer *g15c = new G15Composer(fifo_filename);
     	g15c->run();
 	pthread_join(g15c->getThread(), NULL);
-    	delete g15c;
     	return EXIT_SUCCESS;
    }
    else
