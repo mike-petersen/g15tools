@@ -39,6 +39,7 @@ G15Composer::~G15Composer()
    	  g15_close_screen(g15screen_fd);
    	  free(canvas->buffer);
    	  free(canvas);
+	  pthread_exit(&thread);
 }
 
 void G15Composer::g15composerInit()
@@ -46,6 +47,7 @@ void G15Composer::g15composerInit()
 	   g15screen_fd = 0;
 	   mkey_state = 0;
 	   extern short g15c_logo_data[6880];
+	   leaving = false;
 
 	   if((g15screen_fd = new_g15_screen(G15_G15RBUF)) < 0)
 	   {
@@ -63,9 +65,10 @@ void G15Composer::g15composerInit()
 	   g15r_clearScreen(canvas, G15_COLOR_WHITE);
 }
 
-void G15Composer::run()
+int G15Composer::run()
 {
-	fifoProcessingWorkflow();
+	int retval = pthread_create(&this->thread, NULL, G15Composer::threadEntry, (void*)this);
+	return retval;
 }
 
 void G15Composer::updateScreen(bool force)
@@ -267,6 +270,60 @@ void G15Composer::handleModeCommand(string const &input_line)
    		{
    			break;
    		}
+   }
+}
+
+void G15Composer::handleScreenCommand(std::string const &input_line)
+{
+   string parse_line;
+   parse_line = input_line.substr(3,input_line.length() - 3);
+
+   const char *newpipe;
+   
+   bool in_line = false;
+   int line_start = -1, i;
+   for (i=0;i<(int)parse_line.length();++i)
+   {
+      if (parse_line[i] == '\"')
+      {
+         if (i-2 >= 0 && parse_line[i-1] == '\\')
+         {
+            parse_line = parse_line.substr(0, i-1) + '"' + parse_line.substr(i+1);
+            --i;
+         }
+         else if (in_line)
+         {
+            in_line = false;
+            string temp = parse_line.substr(line_start,i-line_start);
+            	newpipe = temp.c_str();
+         }
+         else
+         {
+            in_line = true;
+            line_start = i+1;
+         }
+         
+      }
+   }
+
+   switch(input_line[1])
+   {
+   	case 'N':
+	{
+   		G15Composer *g15c = new G15Composer(newpipe);
+   		g15c->run();
+   		pthread_detach(g15c->getThread());
+		break;
+	}
+	case 'C':
+	{
+		leaving = true;
+		break;
+	}
+	default:
+	{
+		break;
+	}
    }
 }
 
@@ -569,6 +626,11 @@ void G15Composer::parseCommandLine(string cmdline)
 	  		handlePixelCommand(cmdline.substr(i) );
 	  		break;
 	  	}
+		case 'S':
+		{
+			handleScreenCommand(cmdline.substr(i) );
+			break;
+		}
 	  	case 'T':
 	  	{
 	     	handleTextCommand(cmdline.substr(i) );
@@ -588,8 +650,7 @@ void G15Composer::fifoProcessingWorkflow()
    
    if (fd != -1)
    {
-      bool read_something = true;
-      while (read_something)
+      while (!leaving)
       {
          char buffer_character[1];
          int ret = read(fd,buffer_character,1);
@@ -710,3 +771,12 @@ int G15Composer::get_params(int* params, string const &input_line, int start, in
    }
    return ofs;
 }
+
+/* static */
+void * G15Composer::threadEntry(void * pthis)
+{
+	G15Composer * g15c = (G15Composer*)pthis;
+	g15c->fifoProcessingWorkflow();
+	pthread_detach(pthread_self());
+}
+

@@ -31,6 +31,7 @@ AC_MSG_RESULT($ttf_support)
 # Checks for libraries.
 AC_CHECK_LIB([g15daemon_client], [g15_send], ,AC_MSG_ERROR(["libg15daemon_client not found. please install it"]))
 AC_CHECK_LIB([g15render], [g15r_initCanvas], ,AC_MSG_ERROR(["libg15render not found. please install it"]))
+AC_CHECK_LIB([pthread], [pthread_create], ,AC_MSG_ERROR(["lpthread not found.  please install it"]))
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h sys/socket.h sys/stat.h libg15.h libg15render.h g15daemon_client.h])

@@ -24,6 +24,7 @@
 #include <string>
 #include <getopt.h>
 #include <fcntl.h>
+#include <pthread.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -48,12 +49,14 @@ public:
 	virtual ~G15Composer();
 	string filename() {return fifo_filename;}
 	void filename(string filename) {fifo_filename = filename;}
-	void run();
+	pthread_t getThread() {return thread;}
+	int run();
 	
 private:
 	void handlePixelCommand(std::string const &input_line);
 	void handleDrawCommand(string const &input_line);
 	void handleModeCommand(std::string const &input_line);
+	void handleScreenCommand(std::string const &input_line);
 #ifdef TTF_SUPPORT
 	void handleFontCommand(string const &input_line);
 #endif
@@ -64,12 +67,15 @@ private:
 	void fifoProcessingWorkflow();
 	void updateScreen(bool);
 	void g15composerInit();
+	static void * threadEntry(void * pthis);
 	int doOpen(string const &filename);
 	int get_params(int*, std::string const &, int, int);
 	int g15screen_fd;
 	string fifo_filename;
 	g15canvas *canvas;
 	char mkey_state;	
+	pthread_t thread;
+	bool leaving;
 };
 
 #endif /*G15COMPOSER_H_*/
