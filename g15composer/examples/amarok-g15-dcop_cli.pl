@@ -4,17 +4,20 @@ use strict;
 use threads;
 use threads::shared;
 
+my $controlPipe = "/dev/g15composer";
 my $pipe = "$ENV{HOME}/.g15amaroklcdpipe";
 
 my $mknod = system("mknod $pipe p");
-
-my $G15Cpid : shared = open(G15COMPOSER, "| g15composer $pipe");
 
 my $vol : shared = `dcop amarok player getVolume`;
 chomp $vol;
 my $tmpStatus = `dcop amarok player status`;
 chomp $tmpStatus;
 my $status  :  shared = ( $tmpStatus > 1 ) ? 1 : 0;
+
+open(CPIPE, ">>$controlPipe");
+print CPIPE "SN \"$pipe\"\n";
+close(CPIPE);
 
 open(PIPE, ">>$pipe");
 print PIPE "FL 0 10 \"/usr/share/fonts/ttf-bitstream-vera/Vera.ttf\"\n";
@@ -87,6 +90,7 @@ while(1) {
 		chomp $trackTotalTime;
 		chomp $trackCurTime;
 		initScreen();
+		bringToFront();
 	} elsif ( /engineStateChange/ ) {
                 if( /playing/ ) {
                         $status = 1;
@@ -105,6 +109,12 @@ while(1) {
         }
 	exit if( /exit/ );
 	&bye() if( /kill/ );
+}
+
+sub bringToFront {
+	print PIPE "MP 0\n";
+	sleep 3;
+	print PIPE "MP 2\n";
 }
 
 sub initScreen {
@@ -138,10 +148,8 @@ sub progress {
 sub bye {
 	$status = -1;
 	sleep 2;
-	print PIPE "PC 0\n";
-	system("kill 15 $G15Cpid");
+	print PIPE "SC\n";
 	close(PIPE);
-	close(G15COMPOSER);
 	$mknod = system("rm $pipe");
 	exit 0;
 }
