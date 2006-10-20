@@ -28,6 +28,7 @@
 #include <libg15.h>
 #include <g15daemon_client.h>
 #include <libg15render.h>
+#include "G15Composer.h"
 #include "G15Control.h"
 
 #ifdef HAVE_CONFIG_H
@@ -49,6 +50,7 @@ void printUsage()
 int main(int argc, char *argv[])
 {
    static string fifo_filename = "";
+   bool background = false;
   
    int i=1;
    for (i=1;(i<argc && fifo_filename == "");++i)
@@ -58,6 +60,10 @@ int main(int argc, char *argv[])
       {
          printUsage();
          return 0;
+      }
+      else if (arg == "-b")
+      {
+      	 background = true;
       }
       else
       {
@@ -78,7 +84,11 @@ int main(int argc, char *argv[])
    
    if (fifo_filename != "")
    {
-   		G15Control *g15c = new G15Control(fifo_filename);
+   		G15Base *g15c;
+   		if(background)
+   			g15c = new G15Control(fifo_filename);
+   		else
+   			g15c = new G15Composer(fifo_filename);
     	g15c->run();
 		pthread_join(g15c->getThread(), NULL);
     	return EXIT_SUCCESS;
