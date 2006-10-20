@@ -3,6 +3,7 @@ g15composer (2.1-1) dapper; urgency=low
   * Move parts of G15Composer to G15Base
   * Implement simplified G15Control
   * Handle FIFO creation and deletion
+  * Use simplified control pipe if started with -b
 
  -- Anthony J. Mirabella <mirabeaj@gmail.com>  Fri, 20 Oct 2006 05:29:31 -0400
 

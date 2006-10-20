@@ -2,6 +2,7 @@
 * Move parts of G15Composer to G15Base
 * Implement simplified G15Control
 * Handle FIFO creation and deletion
+* Use simplified control pipe if started with -b
 
 2.0
 * Refactor code into G15Composer class
