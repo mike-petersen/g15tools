@@ -44,12 +44,17 @@ public:
 	G15Base();
 	G15Base(string filename);
 	virtual ~G15Base();
+	virtual int run();
 	string filename() {return fifo_filename;}
 	void filename(string filename) {fifo_filename = filename;}
+	pthread_t getThread() {return thread;}
 	
 protected:
 	int doOpen();
 	int get_params(int*, std::string const &, int, int);
+	void handleScreenCommand(std::string const &input_line);
+	bool leaving;
+	pthread_t thread;
 	string fifo_filename;
 };
 

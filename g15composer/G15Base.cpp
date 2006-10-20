@@ -17,26 +17,88 @@
 */
 
 #include "G15Base.h"
+#include "G15Composer.h"
 
 G15Base::G15Base()
 {
+	leaving = false;
 }
 
 G15Base::G15Base(string filename)
 {
 	fifo_filename = filename;
-	umask(0);
 	mode_t mode = S_IRUSR | S_IWUSR | S_IWGRP | S_IWOTH;
 	if(mkfifo(fifo_filename.c_str(), mode))
 	{
 		cout << "Error, could not create FIFO " << fifo_filename << " aborting" << endl;
 		exit(EXIT_FAILURE);
 	}
+	chmod(fifo_filename.c_str(), mode);
+	leaving = false;
 }
 
 G15Base::~G15Base()
 {
 	unlink(fifo_filename.c_str());
+}
+
+int G15Base::run()
+{
+	return 0;
+}
+
+void G15Base::handleScreenCommand(std::string const &input_line)
+{
+   switch(input_line[1])
+   {
+   	case 'N':
+	{
+	   string parse_line;
+	   parse_line = input_line.substr(3,input_line.length() - 3);
+
+	   const char *newpipe;
+   
+  	   bool in_line = false;
+	   int line_start = -1, i;
+	   for (i=0;i<(int)parse_line.length();++i)
+	   {
+	     if (parse_line[i] == '\"')
+	     {
+	        if (i-2 >= 0 && parse_line[i-1] == '\\')
+	        {
+	           parse_line = parse_line.substr(0, i-1) + '"' + parse_line.substr(i+1);
+	           --i;
+	        }
+	        else if (in_line)
+	        {
+	           in_line = false;
+	           string temp = parse_line.substr(line_start,i-line_start);
+	      	   newpipe = temp.c_str();
+	        }
+	        else
+	        {
+	           in_line = true;
+	           line_start = i+1;
+	        }
+         
+	     }
+	   }
+
+   	   G15Composer *g15c = new G15Composer(newpipe);
+   	   g15c->run();
+   	   pthread_detach(g15c->getThread());
+	   break;
+	}
+	case 'C':
+	{
+		leaving = true;
+		break;
+	}
+	default:
+	{
+		break;
+	}
+   }
 }
 
 int G15Base::doOpen()

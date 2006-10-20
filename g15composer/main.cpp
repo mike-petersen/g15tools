@@ -12,7 +12,7 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with g15lcd; if not, write to the Free Software
+    along with g15tools; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
@@ -28,7 +28,7 @@
 #include <libg15.h>
 #include <g15daemon_client.h>
 #include <libg15render.h>
-#include "G15Composer.h"
+#include "G15Control.h"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -78,9 +78,9 @@ int main(int argc, char *argv[])
    
    if (fifo_filename != "")
    {
-   		G15Composer *g15c = new G15Composer(fifo_filename);
+   		G15Control *g15c = new G15Control(fifo_filename);
     	g15c->run();
-	pthread_join(g15c->getThread(), NULL);
+		pthread_join(g15c->getThread(), NULL);
     	return EXIT_SUCCESS;
    }
    else
