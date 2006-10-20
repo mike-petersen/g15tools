@@ -72,13 +72,12 @@ int main(int argc, char *argv[])
    }
    if (fifo_filename == "")
    {
-      cout << "You didnt specify a fifo filename, I'm this disabling writing text to the lcd" << endl;
-      cout << "This is a change in behaviour from previous version, I will _NOT_ read data from stdin anymore" << endl;
+      cout << "You did not specify a fifo filename.  Aborting." << endl;
       return -1;
    }
    if (fifo_filename == "-")
    {
-      cout << "Dont try to trick me, I wont read input from stdin anymore" << endl;
+      cout << "Please don't try to get me to read from stdin." << endl;
       return -1;
    }
    
