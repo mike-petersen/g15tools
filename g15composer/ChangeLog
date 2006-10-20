@@ -1,3 +1,8 @@
+2.1
+* Move parts of G15Composer to G15Base
+* Implement simplified G15Control
+* Handle FIFO creation and deletion
+
 2.0
 * Refactor code into G15Composer class
 * Fix font rendering bug

@@ -39,7 +39,7 @@ using namespace std;
 
 void printUsage()
 {
-   cout << "Usage: g15composer /path/to/fifo" << endl;
+   cout << "Usage: g15composer [-b] /path/to/fifo" << endl;
    cout << "       cat instructions > /path/to/fifo" << endl;
    cout << endl;
    cout << "Display composer for the Logitech G15 LCD" << endl;

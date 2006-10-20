@@ -1,0 +1,47 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          g15composer
+# Required-Start:    $g15daemon
+# Required-Stop:
+# Default-Start:     S
+# Default-Stop:
+# Short-Description: Starts the G15 Composer pipe
+# Description:       Starts the G15 Composer pipe
+#
+### END INIT INFO
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+
+pidfile=/var/run/g15composer.pid
+binpath=/usr/bin/g15composer
+pipe=/var/run/g15composer
+
+test -f $binpath || exit 0
+. /lib/lsb/init-functions
+
+case "$1" in
+  start)
+    log_begin_msg "Starting G15 Composer..."
+
+    # start g15composer
+    start-stop-daemon --start --background --pidfile $pidfile --make-pidfile --exec $binpath -- -b $pipe
+    log_end_msg $?
+    ;;
+  stop)
+    log_begin_msg "Stopping G15 Composer..."
+    start-stop-daemon --stop --pidfile $pidfile --name g15composer
+    rm $pipe
+
+    log_end_msg $?
+    ;;
+  restart|force-reload)
+    $0 stop
+    sleep 1
+    $0 start
+    ;;
+  *)
+    log_success_msg "Usage: /etc/init.d/g15composer {start|stop|restart|force-reload}"
+    exit 1
+esac
+
+exit 0
