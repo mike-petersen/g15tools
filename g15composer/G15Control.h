@@ -21,18 +21,18 @@
 
 #include "G15Base.h"
 
-class G15Control : public G15Base
+class G15Control:public G15Base
 {
 public:
-	G15Control();
-	G15Control(string filename);
-	int run();
-	virtual ~G15Control();
-	
+  G15Control ();
+  G15Control (string filename);
+  virtual ~ G15Control ();
+  int run ();
+
 protected:
-	void parseCommandLine(string cmdline);
-	void fifoProcessingWorkflow();
-	static void * threadEntry(void * pthis);
+  void parseCommandLine (string cmdline);
+  void fifoProcessingWorkflow ();
+  static void *threadEntry (void *pthis);
 };
 
-#endif /*G15CONTROL_H_*/
+#endif /*G15CONTROL_H_ */

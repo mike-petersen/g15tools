@@ -41,22 +41,31 @@ using namespace std;
 class G15Base
 {
 public:
-	G15Base();
-	G15Base(string filename);
-	virtual ~G15Base();
-	virtual int run();
-	string filename() {return fifo_filename;}
-	void filename(string filename) {fifo_filename = filename;}
-	pthread_t getThread() {return thread;}
-	
+  G15Base ();
+  G15Base (string filename);
+  virtual ~ G15Base ();
+  virtual int run ();
+  string filename ()
+  {
+    return fifo_filename;
+  }
+  void filename (string filename)
+  {
+    fifo_filename = filename;
+  }
+  pthread_t getThread ()
+  {
+    return thread;
+  }
+
 protected:
-	int doOpen();
-	int get_params(int*, std::string const &, int, int);
-	void handleScreenCommand(std::string const &input_line);
-	bool leaving;
-	bool keepFifo;
-	pthread_t thread;
-	string fifo_filename;
+  int doOpen ();
+  int get_params (int *, std::string const &, int, int);
+  void handleScreenCommand (std::string const &input_line);
+  bool leaving;
+  bool keepFifo;
+  pthread_t thread;
+  string fifo_filename;
 };
 
-#endif /*G15BASE_H_*/
+#endif /*G15BASE_H_ */

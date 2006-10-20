@@ -25,16 +25,17 @@
  * \param x X offset for pixel to be retrieved.
  * \param y Y offset for pixel to be retrieved.
  */
-int g15r_getPixel(g15canvas * canvas, unsigned int x, unsigned int y)
+int
+g15r_getPixel (g15canvas * canvas, unsigned int x, unsigned int y)
 {
-   if (x >= G15_LCD_WIDTH || y >= G15_LCD_HEIGHT)
-      return 0;
-   
-   unsigned int pixel_offset = y * G15_LCD_WIDTH + x;
-   unsigned int byte_offset = pixel_offset / BYTE_SIZE;
-   unsigned int bit_offset = 7-(pixel_offset % BYTE_SIZE);
-    
-   return (canvas->buffer[byte_offset] & (1 << bit_offset)) >> bit_offset;
+  if (x >= G15_LCD_WIDTH || y >= G15_LCD_HEIGHT)
+    return 0;
+
+  unsigned int pixel_offset = y * G15_LCD_WIDTH + x;
+  unsigned int byte_offset = pixel_offset / BYTE_SIZE;
+  unsigned int bit_offset = 7 - (pixel_offset % BYTE_SIZE);
+
+  return (canvas->buffer[byte_offset] & (1 << bit_offset)) >> bit_offset;
 }
 
 /**
@@ -45,23 +46,28 @@ int g15r_getPixel(g15canvas * canvas, unsigned int x, unsigned int y)
  * \param y Y offset for pixel to be set.
  * \param val Value to which pixel should be set.
  */
-void g15r_setPixel(g15canvas * canvas, unsigned int x, unsigned int y, int val)
+void
+g15r_setPixel (g15canvas * canvas, unsigned int x, unsigned int y, int val)
 {
-   if (x >= G15_LCD_WIDTH || y >= G15_LCD_HEIGHT)
-      return;
-   
-   unsigned int pixel_offset = y * G15_LCD_WIDTH + x;
-   unsigned int byte_offset = pixel_offset / BYTE_SIZE;
-   unsigned int bit_offset = 7-(pixel_offset % BYTE_SIZE);
+  if (x >= G15_LCD_WIDTH || y >= G15_LCD_HEIGHT)
+    return;
 
-   if (canvas->mode_xor) val ^= g15r_getPixel(canvas, x, y);
-   if (canvas->mode_reverse) val = !val;
+  unsigned int pixel_offset = y * G15_LCD_WIDTH + x;
+  unsigned int byte_offset = pixel_offset / BYTE_SIZE;
+  unsigned int bit_offset = 7 - (pixel_offset % BYTE_SIZE);
 
-   if (val)
-      canvas->buffer[byte_offset] = canvas->buffer[byte_offset] | 1 << bit_offset;
-   else
-      canvas->buffer[byte_offset] = canvas->buffer[byte_offset]  &  ~(1 << bit_offset);
-   
+  if (canvas->mode_xor)
+    val ^= g15r_getPixel (canvas, x, y);
+  if (canvas->mode_reverse)
+    val = !val;
+
+  if (val)
+    canvas->buffer[byte_offset] =
+      canvas->buffer[byte_offset] | 1 << bit_offset;
+  else
+    canvas->buffer[byte_offset] =
+      canvas->buffer[byte_offset] & ~(1 << bit_offset);
+
 }
 
 /**
@@ -70,9 +76,10 @@ void g15r_setPixel(g15canvas * canvas, unsigned int x, unsigned int y, int val)
  * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
  * \param color Screen will be filled with this color.
  */
-void g15r_clearScreen(g15canvas * canvas, int color)
+void
+g15r_clearScreen (g15canvas * canvas, int color)
 {
-   memset(canvas->buffer, (color ? 0xFF: 0), G15_BUFFER_LEN);
+  memset (canvas->buffer, (color ? 0xFF : 0), G15_BUFFER_LEN);
 }
 
 /**
@@ -80,14 +87,15 @@ void g15r_clearScreen(g15canvas * canvas, int color)
  * 
  * \param canvas A pointer to a g15canvas struct
  */
-void g15r_initCanvas(g15canvas * canvas)
+void
+g15r_initCanvas (g15canvas * canvas)
 {
-   memset(canvas->buffer, 0, G15_BUFFER_LEN);
-   canvas->mode_cache = 0;
-   canvas->mode_reverse = 0;
-   canvas->mode_xor = 0;
+  memset (canvas->buffer, 0, G15_BUFFER_LEN);
+  canvas->mode_cache = 0;
+  canvas->mode_reverse = 0;
+  canvas->mode_xor = 0;
 #ifdef TTF_SUPPORT
-   if (FT_Init_FreeType( &canvas->ftLib ))
-      printf("Freetype couldnt initialise\n");
+  if (FT_Init_FreeType (&canvas->ftLib))
+    printf ("Freetype couldnt initialise\n");
 #endif
 }

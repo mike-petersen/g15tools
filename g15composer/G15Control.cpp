@@ -18,99 +18,103 @@
 
 #include "G15Control.h"
 
-G15Control::G15Control():
-G15Base()
+G15Control::G15Control ():
+G15Base ()
 {
 }
 
-G15Control::G15Control(string filename):
-G15Base(filename)
+G15Control::G15Control (string filename):
+G15Base (filename)
 {
 }
 
-G15Control::~G15Control()
+G15Control::~G15Control ()
 {
 }
 
-int G15Control::run()
+int
+G15Control::run ()
 {
-	int retval = pthread_create(&this->thread, NULL, G15Control::threadEntry, (void*)this);
-	return retval;
+  int retval = pthread_create (&this->thread, NULL, G15Control::threadEntry,
+			       (void *) this);
+  return retval;
 }
 
-void G15Control::parseCommandLine(string cmdline)
+void
+G15Control::parseCommandLine (string cmdline)
 {
-	  int i = 0;
-	  int len = cmdline.length();
-	  while( i < len && (cmdline[i] == ' ' || cmdline[i] == '\t') )
-	     ++i;
-	  
-	  if( i+1 >= len || cmdline[i] == '#' )
-	     return;
-	
-	  char cmdType = cmdline[i];
-	  switch(cmdType) {
-		case 'S':
-		{
-			handleScreenCommand(cmdline.substr(i) );
-			break;
-		}
-		default:
-		{
-			break;
-		}
-	  }
-}
+  int i = 0;
+  int len = cmdline.length ();
+  while (i < len && (cmdline[i] == ' ' || cmdline[i] == '\t'))
+    ++i;
 
-void G15Control::fifoProcessingWorkflow()
-{
-   string line = "";
-   int fd = doOpen();
-   
-   if (fd != -1)
-   {
-      while (!leaving)
+  if (i + 1 >= len || cmdline[i] == '#')
+    return;
+
+  char cmdType = cmdline[i];
+  switch (cmdType)
+    {
+    case 'S':
       {
-         char buffer_character[1];
-         int ret = read(fd,buffer_character,1);
-         if (ret == 0)
-         {
-            close(fd);
-            fd = doOpen();
-            if (fd < 0)
-            {
-               cout << "Error, reopening failed" << endl;
-               break;
-            }
-         }
-         else if (ret == -1)
-         {
-            cout << "Reading failed, aborting fifo thread" << endl;
-            break;
-         }
-         else
-         {
-            if (buffer_character[0] == '\r')
-            {
-            }
-            else if (buffer_character[0] == '\n')
-            {
- 			  parseCommandLine(line);
-              line = "";
-            }
-            else
-            {
-               line = line + buffer_character[0];
-            }
-         }
+	handleScreenCommand (cmdline.substr (i));
+	break;
       }
-   }
+    default:
+      break;
+    }
+}
+
+void
+G15Control::fifoProcessingWorkflow ()
+{
+  string line = "";
+  int fd = doOpen ();
+
+  if (fd != -1)
+    {
+      while (!leaving)
+	{
+	  char buffer_character[1];
+	  int ret = read (fd, buffer_character, 1);
+	  if (ret == 0)
+	    {
+	      close (fd);
+	      fd = doOpen ();
+	      if (fd < 0)
+		{
+		  cout << "Error, reopening failed" << endl;
+		  break;
+		}
+	    }
+	  else if (ret == -1)
+	    {
+	      cout << "Reading failed, aborting fifo thread" << endl;
+	      break;
+	    }
+	  else
+	    {
+	      if (buffer_character[0] == '\r')
+		{
+		}
+	      else if (buffer_character[0] == '\n')
+		{
+		  parseCommandLine (line);
+		  line = "";
+		}
+	      else
+		{
+		  line = line + buffer_character[0];
+		}
+	    }
+	}
+    }
 }
 
 /* static */
-void * G15Control::threadEntry(void * pthis)
+void *
+G15Control::threadEntry (void *pthis)
 {
-	G15Control * g15c = (G15Control*)pthis;
-	g15c->fifoProcessingWorkflow();
-	g15c->G15Control::~G15Control();
+  G15Control *g15c = (G15Control *) pthis;
+  g15c->fifoProcessingWorkflow ();
+  g15c->G15Control::~G15Control ();
 }

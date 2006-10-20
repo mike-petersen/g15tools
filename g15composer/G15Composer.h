@@ -30,32 +30,32 @@
 
 using namespace std;
 
-class G15Composer : public G15Base
+class G15Composer:public G15Base
 {
 public:
-	G15Composer();
-	G15Composer(string filename);
-	virtual ~G15Composer();
-	int run();
-	
+  G15Composer ();
+  G15Composer (string filename);
+  virtual ~ G15Composer ();
+  int run ();
+
 protected:
-	void handlePixelCommand(std::string const &input_line);
-	void handleDrawCommand(string const &input_line);
-	void handleModeCommand(std::string const &input_line);
+  void handlePixelCommand (std::string const &input_line);
+  void handleDrawCommand (string const &input_line);
+  void handleModeCommand (std::string const &input_line);
 #ifdef TTF_SUPPORT
-	void handleFontCommand(string const &input_line);
+  void handleFontCommand (string const &input_line);
 #endif
-	void handleTextCommand(std::string const &input_line);
-	void handleKeyCommand(string const &input_line);
-	void handleLCDCommand(string const &input_line);
-	void parseCommandLine(string cmdline);
-	void fifoProcessingWorkflow();
-	void updateScreen(bool);
-	void g15composerInit();
-	static void * threadEntry(void * pthis);
-	int g15screen_fd;
-	g15canvas *canvas;
-	char mkey_state;	
+  void handleTextCommand (std::string const &input_line);
+  void handleKeyCommand (string const &input_line);
+  void handleLCDCommand (string const &input_line);
+  void parseCommandLine (string cmdline);
+  void fifoProcessingWorkflow ();
+  void updateScreen (bool);
+  void g15composerInit ();
+  static void *threadEntry (void *pthis);
+  int g15screen_fd;
+  g15canvas *canvas;
+  char mkey_state;
 };
 
-#endif /*G15COMPOSER_H_*/
+#endif /*G15COMPOSER_H_ */

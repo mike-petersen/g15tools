@@ -25,63 +25,63 @@
 
 using namespace std;
 
-void printUsage()
+void
+printUsage ()
 {
-   cout << "Usage: g15composer [-b] /path/to/fifo" << endl;
-   cout << "       cat instructions > /path/to/fifo" << endl;
-   cout << endl;
-   cout << "Display composer for the Logitech G15 LCD" << endl;
+  cout << "Usage: g15composer [-b] /path/to/fifo" << endl;
+  cout << "       cat instructions > /path/to/fifo" << endl;
+  cout << endl;
+  cout << "Display composer for the Logitech G15 LCD" << endl;
 }
 
 /********************************************************/
 
-int main(int argc, char *argv[])
+int
+main (int argc, char *argv[])
 {
-   static string fifo_filename = "";
-   bool background = false;
-  
-   int i=1;
-   for (i=1;(i<argc && fifo_filename == "");++i)
-   {
-      string arg(argv[i]);
+  static string fifo_filename = "";
+  bool background = false;
+
+  int i = 1;
+  for (i = 1; (i < argc && fifo_filename == ""); ++i)
+    {
+      string arg (argv[i]);
       if (arg == "-h" || arg == "--help")
-      {
-         printUsage();
-         return 0;
-      }
+	{
+	  printUsage ();
+	  return 0;
+	}
       else if (arg == "-b")
-      {
-      	 background = true;
-      }
+	{
+	  background = true;
+	}
       else
-      {
-         fifo_filename = argv[i];
-      }
-   }
-   if (fifo_filename == "")
-   {
+	{
+	  fifo_filename = argv[i];
+	}
+    }
+  if (fifo_filename == "")
+    {
       cout << "You did not specify a fifo filename.  Aborting." << endl;
       return -1;
-   }
-   if (fifo_filename == "-")
-   {
+    }
+  if (fifo_filename == "-")
+    {
       cout << "Please don't try to get me to read from stdin." << endl;
       return -1;
-   }
-   
-   if (fifo_filename != "")
-   {
-   		G15Base *g15c;
-   		if(background)
-   			g15c = new G15Control(fifo_filename);
-   		else
-   			g15c = new G15Composer(fifo_filename);
-    	g15c->run();
-		pthread_join(g15c->getThread(), NULL);
-    	return EXIT_SUCCESS;
-   }
-   else
-   {
-   		return EXIT_FAILURE;
-   }
+    }
+
+  if (fifo_filename != "")
+    {
+      G15Base *g15c;
+      if (background)
+	g15c = new G15Control (fifo_filename);
+      else
+	g15c = new G15Composer (fifo_filename);
+      g15c->run ();
+      pthread_join (g15c->getThread (), NULL);
+      return EXIT_SUCCESS;
+    }
+  else
+    return EXIT_FAILURE;
 }
