@@ -16,18 +16,6 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include <iostream>
-#include <cstdlib>
-#include <string>
-#include <getopt.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/stat.h>
-
-#include <libg15.h>
-#include <g15daemon_client.h>
-#include <libg15render.h>
 #include "G15Composer.h"
 #include "G15Control.h"
 
