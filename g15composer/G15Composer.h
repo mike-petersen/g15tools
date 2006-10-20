@@ -12,28 +12,17 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with g15lcd; if not, write to the Free Software
+    along with g15tools; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 #ifndef G15COMPOSER_H_
 #define G15COMPOSER_H_
 
-#include <iostream>
-#include <cstdlib>
-#include <string>
-#include <getopt.h>
-#include <fcntl.h>
-#include <pthread.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/stat.h>
-#include <string>
-#include <vector>
-
 #include <libg15.h>
 #include <g15daemon_client.h>
 #include <libg15render.h>
+#include "G15Base.h"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -41,18 +30,16 @@
 
 using namespace std;
 
-class G15Composer
+class G15Composer : public G15Base
 {
 public:
 	G15Composer();
 	G15Composer(string filename);
 	virtual ~G15Composer();
-	string filename() {return fifo_filename;}
-	void filename(string filename) {fifo_filename = filename;}
 	pthread_t getThread() {return thread;}
 	int run();
 	
-private:
+protected:
 	void handlePixelCommand(std::string const &input_line);
 	void handleDrawCommand(string const &input_line);
 	void handleModeCommand(std::string const &input_line);
@@ -68,14 +55,11 @@ private:
 	void updateScreen(bool);
 	void g15composerInit();
 	static void * threadEntry(void * pthis);
-	int doOpen(string const &filename);
-	int get_params(int*, std::string const &, int, int);
 	int g15screen_fd;
-	string fifo_filename;
 	g15canvas *canvas;
 	char mkey_state;	
-	pthread_t thread;
 	bool leaving;
+	pthread_t thread;
 };
 
 #endif /*G15COMPOSER_H_*/

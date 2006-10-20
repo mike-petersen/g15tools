@@ -7,10 +7,8 @@ use threads::shared;
 
 my $user = "$ENV{USER}";
 my $player = DCOP::Amarok::Player->new( user => $user ) or die "Couldn't Attach DCOP Interface: $!\n";
-my $controlPipe = "/dev/g15composer";
+my $controlPipe = "/var/run/g15composer";
 my $pipe = "$ENV{HOME}/.g15amaroklcdpipe";
-
-my $mknod = system("mknod $pipe p");
 
 my $vol : shared = $player->getVolume;
 my $status  :  shared = ( $player->status() > 1 ) ? 1 : 0;
@@ -123,9 +121,8 @@ sub progress {
 	
 sub bye {
 	$status = -1;
-	sleep 2;
+	sleep 1;
 	print PIPE "SC\n";
 	close(PIPE);
-	$mknod = system("rm $pipe");
 	exit 0;
 }

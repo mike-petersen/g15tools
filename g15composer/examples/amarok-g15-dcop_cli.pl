@@ -4,10 +4,8 @@ use strict;
 use threads;
 use threads::shared;
 
-my $controlPipe = "/dev/g15composer";
+my $controlPipe = "/var/run/g15composer";
 my $pipe = "$ENV{HOME}/.g15amaroklcdpipe";
-
-my $mknod = system("mknod $pipe p");
 
 my $vol : shared = `dcop amarok player getVolume`;
 chomp $vol;
@@ -147,9 +145,8 @@ sub progress {
 	
 sub bye {
 	$status = -1;
-	sleep 2;
+	sleep 1;
 	print PIPE "SC\n";
 	close(PIPE);
-	$mknod = system("rm $pipe");
 	exit 0;
 }

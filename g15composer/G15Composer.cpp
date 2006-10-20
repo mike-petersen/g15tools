@@ -12,7 +12,7 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with g15lcd; if not, write to the Free Software
+    along with g15tools; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
@@ -23,15 +23,16 @@
 #include "config.h"
 #endif
 
-G15Composer::G15Composer()
+G15Composer::G15Composer():
+G15Base()
 {
 	g15composerInit();
 }
 
-G15Composer::G15Composer(string filename)
+G15Composer::G15Composer(string filename):
+G15Base(filename)
 {
 	g15composerInit();
-	fifo_filename = filename;
 }
 
 G15Composer::~G15Composer()
@@ -645,7 +646,7 @@ void G15Composer::parseCommandLine(string cmdline)
 void G15Composer::fifoProcessingWorkflow()
 {
    string line = "";
-   int fd = doOpen(fifo_filename);
+   int fd = doOpen();
    
    if (fd != -1)
    {
@@ -656,7 +657,7 @@ void G15Composer::fifoProcessingWorkflow()
          if (ret == 0)
          {
             close(fd);
-            fd = doOpen(fifo_filename);
+            fd = doOpen();
             if (fd < 0)
             {
                cout << "Error, reopening failed" << endl;
@@ -689,88 +690,6 @@ void G15Composer::fifoProcessingWorkflow()
    }
 }
 
-int G15Composer::doOpen(string const &filename)
-{
-   int fd = -1;
-
-   if (filename == "-")
-      fd = 0;
-   else
-   {
-      fd = open(filename.c_str(),O_RDONLY);
-      if (fd == -1)
-      {
-         cout << "Error, could not open " << filename << " aborting" << endl;
-         exit(EXIT_FAILURE);
-      }
-      struct stat sb;
-      if (fstat(fd, &sb))
-      {
-      	 cout << "Error, unable to stat " << filename << " aborting" << endl;
-      	 fd = -1;
-      	 exit(EXIT_FAILURE);
-      }
-      if (!S_ISFIFO(sb.st_mode))
-      {
-      	 cout << "Error, " << filename << " is not a named pipe, aborting" << endl;
-      	 fd = -1;
-      	 exit(EXIT_FAILURE);
-      }
-   }
-   return fd;
-}
-
-int G15Composer::get_params(int* params, string const &input_line, int start, int count)
-{
-   char tmp[10];
-   int ti = 0;
-   int ofs = 0;
-
-   int limit = input_line.length();
-   int p = 0;
-
-   ofs = start;
-   for(int i=0;i<limit && p<count;++i)
-   {
-      if(ti > 9) break;
- 
-      char ch = input_line[start+i];
-      if(i+1==limit)
-      {
-         tmp[ti+1]=0;
-         ch = ' ';
-      }
-
-      if(ch==' ')
-      {
-         if(tmp[0]>='A' && tmp[0]<='Z')
-         {
-            switch(tmp[0])
-            {
-               case 'S' : params[p] = 0; break;
-               case 'M' : params[p] = 1; break;
-               case 'L' : params[p] = 2; break;
-               default: params[p] = 2;
-            }
-         }
-         else
-         {
-            params[p] = atoi(tmp);
-         }
-         ++p;
-         ti=0;
-      }
-      else
-      {
-         tmp[ti]=ch;
-         tmp[ti+1]=0;
-         ++ti;
-      }
-      ofs++;
-   }
-   return ofs;
-}
-
 /* static */
 void * G15Composer::threadEntry(void * pthis)
 {
@@ -778,4 +697,3 @@ void * G15Composer::threadEntry(void * pthis)
 	g15c->fifoProcessingWorkflow();
 	g15c->G15Composer::~G15Composer();
 }
-
