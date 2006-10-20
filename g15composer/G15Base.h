@@ -54,6 +54,7 @@ protected:
 	int get_params(int*, std::string const &, int, int);
 	void handleScreenCommand(std::string const &input_line);
 	bool leaving;
+	bool keepFifo;
 	pthread_t thread;
 	string fifo_filename;
 };

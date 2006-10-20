@@ -22,24 +22,28 @@
 G15Base::G15Base()
 {
 	leaving = false;
+	keepFifo = false;
 }
 
 G15Base::G15Base(string filename)
 {
+	leaving = false;
+	keepFifo = false;
 	fifo_filename = filename;
 	mode_t mode = S_IRUSR | S_IWUSR | S_IWGRP | S_IWOTH;
 	if(mkfifo(fifo_filename.c_str(), mode))
 	{
 		cout << "Error, could not create FIFO " << fifo_filename << " aborting" << endl;
-		exit(EXIT_FAILURE);
+		leaving = true;
+		keepFifo = true;
 	}
 	chmod(fifo_filename.c_str(), mode);
-	leaving = false;
 }
 
 G15Base::~G15Base()
 {
-	unlink(fifo_filename.c_str());
+	if(!keepFifo)
+		unlink(fifo_filename.c_str());
 }
 
 int G15Base::run()
@@ -113,20 +117,7 @@ int G15Base::doOpen()
       if (fd == -1)
       {
          cout << "Error, could not open " << fifo_filename << " aborting" << endl;
-         exit(EXIT_FAILURE);
-      }
-      struct stat sb;
-      if (fstat(fd, &sb))
-      {
-      	 cout << "Error, unable to stat " << fifo_filename << " aborting" << endl;
-      	 fd = -1;
-      	 exit(EXIT_FAILURE);
-      }
-      if (!S_ISFIFO(sb.st_mode))
-      {
-      	 cout << "Error, " << fifo_filename << " is not a named pipe, aborting" << endl;
-      	 fd = -1;
-      	 exit(EXIT_FAILURE);
+         return -1;
       }
    }
    return fd;
