@@ -119,7 +119,7 @@ sub bringToFront {
 sub initScreen {
 	print PIPE "PC 0\n";
 	print PIPE "DR 0 0 159 43 1 1\n";
-	print PIPE "DR 3 22 157 40 1 0\n";
+	print PIPE "DR 3 22 157 40 0 1\n";
 	print PIPE "PB 3 22 157 24 0\n";
 	print PIPE "FP 0 15 0 0 0 1 \"$artist\"\n";
 	print PIPE "FP 0 9 0 15 0 1 \"$title\"\n";
