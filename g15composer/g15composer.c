@@ -200,7 +200,7 @@ getDispCol (int len, int size, int type)
 			if (type == 1)
  	  		  dispcol = (80 - ((len * 4) / 2));
 			else if (type == 2)
-			  dispcol = (80 - (len * 4));
+			  dispcol = (160 - (len * 4));
 			break;
 		  }
 		case 1:
@@ -208,7 +208,7 @@ getDispCol (int len, int size, int type)
 			if (type == 1)
  	  		  dispcol = (80 - ((len * 5) / 2));
 			else if (type == 2)
-			  dispcol = (80 - (len * 5));
+			  dispcol = (160 - (len * 5));
 			break;
 		  }
 		case 2:
@@ -216,7 +216,7 @@ getDispCol (int len, int size, int type)
 			if (type == 1)
  	  		  dispcol = (80 - ((len * 8) / 2));
 			else if (type == 2)
-			  dispcol = (80 - (len * 8));
+			  dispcol = (160 - (len * 8));
 			break;
 		  }
 		default:
