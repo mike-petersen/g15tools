@@ -10,16 +10,23 @@ nohup ./g15composer /path/to/pipe &
      where some_script is a bash, Perl, etc. script or application which outputs
      one or more of the commands listed below.
 
+FIFO handling has changed as of g15composer-2.1.  /path/to/pipe should not exist when starting g15composer or when creating a 
+new screen with the SN command.  G15composer will exit or refuse to create a new screen if /path/to/pipe exists.  You should 
+check for its existence before opening a screen in any script.
+
+Note also that the color value is no longer optional for any command.  It must always be specified.
+
 *** Text Commands:
 
 Ts "line 1" "line 2" ...
    where s is the size of the font (S, M and L are supported).
    To insert a double-quote, prefix it with a backslash
 
-TO X Y S C "line 1" "line 2" ... 
-   Overlays text of the given size at (X,Y), centered if C=1
+TO X Y S F "line 1" "line 2" ... 
+   Overlays text of the given size at (X,Y)
+   Text will be centered if F=1 and right justified if F=2
 
-*** Font Command: (NB., G15Composer and libg15render must both be configured with --enable-ttf to use font commands)
+*** Font Command: (NB., g15composer must be configured with --enable-ttf to use font commands)
 
 FL F S "/path/to/font" 
    Loads a font into Face Slot F with size S.
@@ -30,8 +37,9 @@ FP F S X Y Co Ce "line 1" "line 2" ...
    
 *** Pixel Commands:
 
-PO X Y W H 100101101... 
+PO X Y W H "100101101..." 
    Overlays a pixel image of the given Width and Height at (X,Y)
+   The last argument must now be passed as a quoted string.  This is a change from previous behavior.
 
 PS X Y C
    Sets the pixel at (X,Y) to color C (0 or 1)
@@ -47,26 +55,30 @@ PR X1 Y1 X2 Y2
 
 PB X1 Y1 X2 Y2 C T F
    Draws a box from (X1,Y1) to (X2,Y2) using color C and thickness T, filling if F=1
-   C, T, and F are optional; defaults are C=1, T=1, and F=0
+   T, and F are optional, but if specified must be specified in order, i.e., you must set T to set F
+   Defaults are T=1, and F=0
 
 *** Drawing Commands:
 
 DL X1 Y1 X2 Y2 C
    Draws a line from (X1,Y1) to (X2,Y2) using color C
 
-DC X Y R F C
+DC X Y R C F 
    Draws a circle centered at (X,Y) with radius R using color C, filling if F=1
-   C and F are optional; defaults are C=1, F=0
+   F is optional and defaults to F=0
+   Note that the syntax has changed, the position of C and F has been swapped
    
-DR X1 Y1 X2 Y2 F C
+DR X1 Y1 X2 Y2 C F 
    Draws a rounded box from (X1,Y1) to (X2,Y2) using color C, filling if F=1
-   C and F are optional; defaults are C=1, F=0
+   F is optional and defaults to F=0
+   Note that the syntax has changed, the position of C and F has been swapped
+   
    
 DB X1 Y1 X2 Y2 C N M T
    Draws a percentage or progress bar from (X1,Y1) to (X2,Y2) using color C
    The bar will be filled with N units out of M
    T sets the type of the bar, valid values are 1, 2, or 3
-   T is optional; default value is T=1
+   T is optional and defaults to T=1
    
 *** Mode Commands:
 

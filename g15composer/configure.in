@@ -2,15 +2,16 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(G15Composer, 2.1, mirabeaj@gmail.com)
+AC_INIT(G15Composer, 3.0, mirabeaj@gmail.com)
 AC_CONFIG_AUX_DIR(config)
 AM_INIT_AUTOMAKE()
-AC_CONFIG_SRCDIR([g15c_logo.h])
+AC_CONFIG_SRCDIR([g15composer.h])
 AC_CONFIG_HEADER([config.h])
 
 # Checks for programs.
-AC_PROG_CXX
 AC_PROG_CC
+AC_PROG_LEX
+AC_PROG_YACC
 
 # Checks for --enable args
 AC_MSG_CHECKING(whether to enable FreeType2 support)
@@ -41,7 +42,6 @@ AC_CHECK_LIB([pthread], [pthread_create], ,AC_MSG_ERROR(["lpthread not found.  p
 AC_CHECK_HEADERS([fcntl.h sys/socket.h sys/stat.h libg15.h libg15render.h g15daemon_client.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_HEADER_STDBOOL
 AC_C_CONST
 
 AC_SUBST(FTLIB)

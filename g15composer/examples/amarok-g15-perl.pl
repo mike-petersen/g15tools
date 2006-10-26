@@ -16,6 +16,7 @@ my $status  :  shared = ( $player->status() > 1 ) ? 1 : 0;
 open(CPIPE, ">>$controlPipe");
 print CPIPE "SN \"$pipe\"\n";
 close(CPIPE);
+sleep 1;
 
 open(PIPE, ">>$pipe");
 print PIPE "FL 0 10 \"/usr/share/fonts/ttf-bitstream-vera/Vera.ttf\"\n";
@@ -24,6 +25,7 @@ sub volUpdate {
 	print PIPE "PC 0\n";
 	print PIPE "TO 0 10 2 1 \"Volume\"\n";
 	print PIPE "DB 3 27 157 35 2 $vol 100 3\n";
+	print PIPE "MC 1\n";
 }
 
 while($status == 0) {
@@ -94,16 +96,15 @@ sub bringToFront {
 }
 
 sub initScreen {
-	print PIPE "MC 1\n";
 	print PIPE "PC 0\n";
 	print PIPE "DR 0 0 159 43 1 1\n";
 	print PIPE "DR 3 22 157 40 1 0\n";
-	print PIPE "PB 3 22 157 24 0\n";
+	print PIPE "PB 3 22 157 24 0 1 1\n";
 	print PIPE "FP 0 15 0 0 0 1 \"$artist\"\n";
 	print PIPE "FP 0 9 0 15 0 1 \"$title\"\n";
 	print PIPE "DB 3 27 157 35 2 $trackCurSecs $trackTotalSecs 3\n";
 	print PIPE "TO 0 35 0 1 \"    $trackCurTime / $trackTotalTime    \"\n";
-	print PIPE "MC 0\n";
+	print PIPE "MC 1\n";
 }
 
 sub progress {
@@ -114,6 +115,7 @@ sub progress {
 			print PIPE "PB 5 27 155 35 0 1 1\n";
 			print PIPE "DB 3 27 157 35 2 $trackCurSecs $trackTotalSecs 3\n";
 			print PIPE "TO 0 35 0 1 \"    $trackCurTime / $trackTotalTime    \"\n";
+			print PIPE "MC 1\n";
 		} elsif($status == -1) {
 			return;
 		}
@@ -123,7 +125,7 @@ sub progress {
 	
 sub bye {
 	$status = -1;
-	sleep 1;
+	sleep 2;
 	print PIPE "SC\n";
 	close(PIPE);
 	exit 0;
