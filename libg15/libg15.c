@@ -69,8 +69,13 @@ static usb_dev_handle * findAndOpenG15()
   
   
         usleep(25*1000);
-  
-        
+
+        /* libusb functions ending in _np are not portable between OS's 
+         * Non-linux users will need some way to detach the HID driver from
+         * the G15 until we work out how to do this for other OS's automatically. 
+         * For the moment, we just skip this code..
+         */
+#ifdef LIBUSB_HAS_GET_DRIVER_NP
         ret = usb_get_driver_np(devh, 0, name_buffer, 65535);
         /* some kernel versions say that a driver is attached even though there is none
             in this case the name buffer has not been changed
@@ -89,9 +94,10 @@ static usb_dev_handle * findAndOpenG15()
             fprintf(stderr,"Sorry, I could not detached the driver, giving up\n");
             return 0;
           }
+
         }
         printf("Debug: %s\n",name_buffer);
-  
+#endif  
         ret = usb_set_configuration(devh, 1);
         if (ret)
         {
