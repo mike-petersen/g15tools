@@ -3,3 +3,7 @@
 1.0.1
 * Change transfer type from interrupt to bulk for keypresses, which resolves
 problems for some people
+1.1.0
+* Add header define to allow for api version changes
+* Add exitLibG15() to reset the device back to factory defaults on library exit.
+

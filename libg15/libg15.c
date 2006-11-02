@@ -134,10 +134,22 @@ int initLibG15()
   keyboard_device = findAndOpenG15();
   if (!keyboard_device)
     return G15_ERROR_OPENING_USB_DEVICE;
-  
-  
+ 
 	return retval;
 }
+
+/* reset the keyboard, returning it to a known state */
+int exitLibG15()
+{
+  int retval = G15_NO_ERROR;
+  if (keyboard_device){
+    retval = usb_release_interface (keyboard_device, 0);
+    retval = usb_reset(keyboard_device);
+    return retval;
+  }
+  return -1;
+}
+
 
 static void dumpPixmapIntoLCDFormat(unsigned char *lcd_buffer, unsigned char const *data)
 {

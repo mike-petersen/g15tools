@@ -23,6 +23,9 @@
 extern "C"
 {
 #endif
+
+  /* allow for api changes */
+#define LIBG15_VERSION 1100
 	
   enum
   {
@@ -103,11 +106,13 @@ extern "C"
     
     G15_KEY_LIGHT = 1<<27
   };
+
   
   /* this one return G15_NO_ERROR on success, something
    * else otherwise (for instance G15_ERROR_OPENING_USB_DEVICE */
   int initLibG15();
-  
+  int exitLibG15();
+    
   int writePixmapToLCD(unsigned char const *data);
   int setLCDContrast(unsigned int level);
   int setLEDs(unsigned int leds);
