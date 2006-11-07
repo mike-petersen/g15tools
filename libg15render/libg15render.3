@@ -1,0 +1,1105 @@
+.TH "libg15render" 3 "6 Nov 2006" "libg15render" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+libg15render \- Render text and graphics to a buffer usable by 
+.BR libg15 (3)
+or 
+.BR g15daemon (1).
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <libg15render.h>\fP
+.br
+
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBg15canvas\fP"
+.br
+.RI "\fIThis structure holds the data need to render objects to the LCD screen. \fP"
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBBYTE_SIZE\fP   8"
+.br
+.ti -1c
+.RI "#define \fBG15_BUFFER_LEN\fP   1048"
+.br
+.ti -1c
+.RI "#define \fBG15_COLOR_BLACK\fP   1"
+.br
+.ti -1c
+.RI "#define \fBG15_COLOR_WHITE\fP   0"
+.br
+.ti -1c
+.RI "#define \fBG15_LCD_HEIGHT\fP   43"
+.br
+.ti -1c
+.RI "#define \fBG15_LCD_OFFSET\fP   32"
+.br
+.ti -1c
+.RI "#define \fBG15_LCD_WIDTH\fP   160"
+.br
+.ti -1c
+.RI "#define \fBG15_MAX_FACE\fP   5"
+.br
+.ti -1c
+.RI "#define \fBG15_PIXEL_FILL\fP   1"
+.br
+.ti -1c
+.RI "#define \fBG15_PIXEL_NOFILL\fP   0"
+.br
+.ti -1c
+.RI "#define \fBG15_TEXT_LARGE\fP   2"
+.br
+.ti -1c
+.RI "#define \fBG15_TEXT_MED\fP   1"
+.br
+.ti -1c
+.RI "#define \fBG15_TEXT_SMALL\fP   0"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBg15r_clearScreen\fP (\fBg15canvas\fP *canvas, int color)"
+.br
+.RI "\fIFills the screen with pixels of color. \fP"
+.ti -1c
+.RI "void \fBg15r_drawBar\fP (\fBg15canvas\fP *canvas, int x1, int y1, int x2, int y2, int color, int num, int max, int type)"
+.br
+.RI "\fIDraws a completion bar. \fP"
+.ti -1c
+.RI "void \fBg15r_drawCircle\fP (\fBg15canvas\fP *canvas, int x, int y, int r, int fill, int color)"
+.br
+.RI "\fIDraws a circle centered at (x, y) with a radius of r. \fP"
+.ti -1c
+.RI "void \fBg15r_drawLine\fP (\fBg15canvas\fP *canvas, int px1, int py1, int px2, int py2, const int color)"
+.br
+.RI "\fIDraws a line from (px1, py1) to (px2, py2). \fP"
+.ti -1c
+.RI "void \fBg15r_drawRoundBox\fP (\fBg15canvas\fP *canvas, int x1, int y1, int x2, int y2, int fill, int color)"
+.br
+.RI "\fIDraws a box with rounded corners bounded by (x1, y1) and (x2, y2). \fP"
+.ti -1c
+.RI "int \fBg15r_getPixel\fP (\fBg15canvas\fP *canvas, unsigned int x, unsigned int y)"
+.br
+.RI "\fIGets the value of the pixel at (x, y). \fP"
+.ti -1c
+.RI "void \fBg15r_initCanvas\fP (\fBg15canvas\fP *canvas)"
+.br
+.RI "\fIClears the canvas and resets the mode switches. \fP"
+.ti -1c
+.RI "void \fBg15r_pixelBox\fP (\fBg15canvas\fP *canvas, int x1, int y1, int x2, int y2, int color, int thick, int fill)"
+.br
+.RI "\fIDraws a box bounded by (x1, y1) and (x2, y2). \fP"
+.ti -1c
+.RI "void \fBg15r_pixelOverlay\fP (\fBg15canvas\fP *canvas, int x1, int y1, int width, int height, short colormap[])"
+.br
+.RI "\fIOverlays a bitmap of size width x height starting at (x1, y1). \fP"
+.ti -1c
+.RI "void \fBg15r_pixelReverseFill\fP (\fBg15canvas\fP *canvas, int x1, int y1, int x2, int y2, int fill, int color)"
+.br
+.RI "\fIFills an area bounded by (x1, y1) and (x2, y2). \fP"
+.ti -1c
+.RI "void \fBg15r_renderCharacterLarge\fP (\fBg15canvas\fP *canvas, int x, int y, unsigned char character, unsigned int sx, unsigned int sy)"
+.br
+.RI "\fIRenders a character in the large font at (x, y). \fP"
+.ti -1c
+.RI "void \fBg15r_renderCharacterMedium\fP (\fBg15canvas\fP *canvas, int x, int y, unsigned char character, unsigned int sx, unsigned int sy)"
+.br
+.RI "\fIRenders a character in the meduim font at (x, y). \fP"
+.ti -1c
+.RI "void \fBg15r_renderCharacterSmall\fP (\fBg15canvas\fP *canvas, int x, int y, unsigned char character, unsigned int sx, unsigned int sy)"
+.br
+.RI "\fIRenders a character in the small font at (x, y). \fP"
+.ti -1c
+.RI "void \fBg15r_renderString\fP (\fBg15canvas\fP *canvas, unsigned char stringOut[], int row, int size, unsigned int sx, unsigned int sy)"
+.br
+.RI "\fIRenders a string with font size in row. \fP"
+.ti -1c
+.RI "void \fBg15r_setPixel\fP (\fBg15canvas\fP *canvas, unsigned int x, unsigned int y, int val)"
+.br
+.RI "\fISets the value of the pixel at (x, y). \fP"
+.ti -1c
+.RI "void \fBg15r_ttfLoad\fP (\fBg15canvas\fP *canvas, char *fontname, int fontsize, int face_num)"
+.br
+.RI "\fILoads a font through the FreeType2 library. \fP"
+.ti -1c
+.RI "void \fBg15r_ttfPrint\fP (\fBg15canvas\fP *canvas, int x, int y, int fontsize, int face_num, int color, int center, char *print_string)"
+.br
+.RI "\fIPrints a string in a given font. \fP"
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "unsigned char \fBfontdata_6x4\fP []"
+.br
+.RI "\fIFont data for the small (6x4) font. \fP"
+.ti -1c
+.RI "unsigned char \fBfontdata_7x5\fP []"
+.br
+.RI "\fIFont data for the medium (7x5) font. \fP"
+.ti -1c
+.RI "unsigned char \fBfontdata_8x8\fP []"
+.br
+.RI "\fIFont data for the large (8x8) font. \fP"
+.in -1c
+.SH "Define Documentation"
+.PP 
+.SS "#define BYTE_SIZE   8"
+.PP
+Definition at line 21 of file libg15render.h.
+.PP
+Referenced by g15r_getPixel(), and g15r_setPixel().
+.SS "#define G15_BUFFER_LEN   1048"
+.PP
+Definition at line 22 of file libg15render.h.
+.PP
+Referenced by g15r_clearScreen(), and g15r_initCanvas().
+.SS "#define G15_COLOR_BLACK   1"
+.PP
+Definition at line 27 of file libg15render.h.
+.PP
+Referenced by g15r_drawRoundBox(), g15r_pixelOverlay(), g15r_renderCharacterLarge(), g15r_renderCharacterMedium(), and g15r_renderCharacterSmall().
+.SS "#define G15_COLOR_WHITE   0"
+.PP
+Definition at line 26 of file libg15render.h.
+.PP
+Referenced by g15r_drawRoundBox(), g15r_pixelOverlay(), g15r_renderCharacterLarge(), g15r_renderCharacterMedium(), and g15r_renderCharacterSmall().
+.SS "#define G15_LCD_HEIGHT   43"
+.PP
+Definition at line 24 of file libg15render.h.
+.PP
+Referenced by g15r_getPixel(), and g15r_setPixel().
+.SS "#define G15_LCD_OFFSET   32"
+.PP
+Definition at line 23 of file libg15render.h.
+.SS "#define G15_LCD_WIDTH   160"
+.PP
+Definition at line 25 of file libg15render.h.
+.PP
+Referenced by g15r_getPixel(), and g15r_setPixel().
+.SS "#define G15_MAX_FACE   5"
+.PP
+Definition at line 33 of file libg15render.h.
+.PP
+Referenced by g15r_ttfLoad().
+.SS "#define G15_PIXEL_FILL   1"
+.PP
+Definition at line 32 of file libg15render.h.
+.SS "#define G15_PIXEL_NOFILL   0"
+.PP
+Definition at line 31 of file libg15render.h.
+.SS "#define G15_TEXT_LARGE   2"
+.PP
+Definition at line 30 of file libg15render.h.
+.PP
+Referenced by g15r_renderString().
+.SS "#define G15_TEXT_MED   1"
+.PP
+Definition at line 29 of file libg15render.h.
+.PP
+Referenced by g15r_renderString().
+.SS "#define G15_TEXT_SMALL   0"
+.PP
+Definition at line 28 of file libg15render.h.
+.PP
+Referenced by g15r_renderString().
+.SH "Function Documentation"
+.PP 
+.SS "void g15r_clearScreen (\fBg15canvas\fP * canvas, int color)"
+.PP
+Fills the screen with pixels of color. 
+.PP
+Clears the screen and fills it with pixels of color
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated on is found. 
+.br
+\fIcolor\fP Screen will be filled with this color. 
+.RE
+.PP
+
+.PP
+Definition at line 80 of file screen.c.
+.PP
+References g15canvas::buffer, and G15_BUFFER_LEN.
+.PP
+.nf
+81 {
+82   memset (canvas->buffer, (color ? 0xFF : 0), G15_BUFFER_LEN);
+83 }
+.fi
+.PP
+.SS "void g15r_drawBar (\fBg15canvas\fP * canvas, int x1, int y1, int x2, int y2, int color, int num, int max, int type)"
+.PP
+Draws a completion bar. 
+.PP
+Given a maximum value, and a value between 0 and that maximum value, calculate and draw a bar showing that percentage.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated on is found. 
+.br
+\fIx1\fP Defines leftmost bound of the bar. 
+.br
+\fIy1\fP Defines uppermost bound of the bar. 
+.br
+\fIx2\fP Defines rightmost bound of the bar. 
+.br
+\fIy2\fP Defines bottommost bound of the bar. 
+.br
+\fIcolor\fP The bar will be drawn this color. 
+.br
+\fInum\fP Number of units relative to max filled. 
+.br
+\fImax\fP Number of units equal to 100% filled. 
+.br
+\fItype\fP Type of bar. 1=solid bar, 2=solid bar with border, 3 = solid bar with I-frame. 
+.RE
+.PP
+
+.PP
+Definition at line 336 of file pixel.c.
+.PP
+References g15r_drawLine(), and g15r_pixelBox().
+.PP
+.nf
+338 {
+339   float len, length;
+340   int x;
+341   if (num > max)
+342     num = max;
+343 
+344   if (type == 2)
+345     {
+346       y1 += 2;
+347       y2 -= 2;
+348       x1 += 2;
+349       x2 -= 2;
+350     }
+351 
+352   len = ((float) max / (float) num);
+353   length = (x2 - x1) / len;
+354 
+355   if (type == 1)
+356     {
+357       g15r_pixelBox (canvas, x1, y1 - type, x2, y2 + type, color ^ 1, 1, 1);
+358       g15r_pixelBox (canvas, x1, y1 - type, x2, y2 + type, color, 1, 0);
+359     }
+360   else if (type == 2)
+361     {
+362       g15r_pixelBox (canvas, x1 - 2, y1 - type, x2 + 2, y2 + type, color ^ 1,
+363                      1, 1);
+364       g15r_pixelBox (canvas, x1 - 2, y1 - type, x2 + 2, y2 + type, color, 1,
+365                      0);
+366     }
+367   else if (type == 3)
+368     {
+369       g15r_drawLine (canvas, x1, y1 - type, x1, y2 + type, color);
+370       g15r_drawLine (canvas, x2, y1 - type, x2, y2 + type, color);
+371       g15r_drawLine (canvas, x1, y1 + ((y2 - y1) / 2), x2,
+372                      y1 + ((y2 - y1) / 2), color);
+373     }
+374   g15r_pixelBox (canvas, x1, y1, (int) ceil (x1 + length), y2, color, 1, 1);
+375 }
+.fi
+.PP
+.SS "void g15r_drawCircle (\fBg15canvas\fP * canvas, int x, int y, int r, int fill, int color)"
+.PP
+Draws a circle centered at (x, y) with a radius of r. 
+.PP
+Draws a circle centered at (x, y) with a radius of r.
+.PP
+The circle will be filled if fill != 0.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated on is found. 
+.br
+\fIx\fP Defines horizontal center of the circle. 
+.br
+\fIy\fP Defines vertical center of circle. 
+.br
+\fIr\fP Defines radius of circle. 
+.br
+\fIfill\fP The circle will be filled with color if fill != 0. 
+.br
+\fIcolor\fP Lines defining the circle will be drawn this color. 
+.RE
+.PP
+
+.PP
+Definition at line 202 of file pixel.c.
+.PP
+References g15r_drawLine(), and g15r_setPixel().
+.PP
+.nf
+203 {
+204   int xx, yy, dd;
+205 
+206   xx = 0;
+207   yy = r;
+208   dd = 2 * (1 - r);
+209 
+210   while (yy >= 0)
+211     {
+212       if (!fill)
+213         {
+214           g15r_setPixel (canvas, x + xx, y - yy, color);
+215           g15r_setPixel (canvas, x + xx, y + yy, color);
+216           g15r_setPixel (canvas, x - xx, y - yy, color);
+217           g15r_setPixel (canvas, x - xx, y + yy, color);
+218         }
+219       else
+220         {
+221           g15r_drawLine (canvas, x - xx, y - yy, x + xx, y - yy, color);
+222           g15r_drawLine (canvas, x - xx, y + yy, x + xx, y + yy, color);
+223         }
+224       if (dd + yy > 0)
+225         {
+226           yy--;
+227           dd = dd - (2 * yy + 1);
+228         }
+229       if (xx > dd)
+230         {
+231           xx++;
+232           dd = dd + (2 * xx + 1);
+233         }
+234     }
+235 }
+.fi
+.PP
+.SS "void g15r_drawLine (\fBg15canvas\fP * canvas, int px1, int py1, int px2, int py2, const int color)"
+.PP
+Draws a line from (px1, py1) to (px2, py2). 
+.PP
+A line of color is drawn from (px1, py1) to (px2, py2).
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated on is found. 
+.br
+\fIpx1\fP X component of point 1. 
+.br
+\fIpy1\fP Y component of point 1. 
+.br
+\fIpx2\fP X component of point 2. 
+.br
+\fIpy2\fP Y component of point 2. 
+.br
+\fIcolor\fP Line will be drawn this color. 
+.RE
+.PP
+
+.PP
+Definition at line 98 of file pixel.c.
+.PP
+References g15r_setPixel(), and swap().
+.PP
+Referenced by g15r_drawBar(), g15r_drawCircle(), g15r_drawRoundBox(), and g15r_pixelBox().
+.PP
+.nf
+100 {
+101   /* 
+102    * Bresenham's Line Algorithm
+103    * http://en.wikipedia.org/wiki/Bresenham's_algorithm
+104    */
+105 
+106   int steep = 0;
+107 
+108   if (abs (py2 - py1) > abs (px2 - px1))
+109     steep = 1;
+110 
+111   if (steep)
+112     {
+113       swap (&px1, &py1);
+114       swap (&px2, &py2);
+115     }
+116 
+117   if (px1 > px2)
+118     {
+119       swap (&px1, &px2);
+120       swap (&py1, &py2);
+121     }
+122 
+123   int dx = px2 - px1;
+124   int dy = abs (py2 - py1);
+125 
+126   int error = 0;
+127   int y = py1;
+128   int ystep = (py1 < py2) ? 1 : -1;
+129   int x = 0;
+130 
+131   for (x = px1; x <= px2; ++x)
+132     {
+133       if (steep)
+134         g15r_setPixel (canvas, y, x, color);
+135       else
+136         g15r_setPixel (canvas, x, y, color);
+137 
+138       error += dy;
+139       if (2 * error >= dx)
+140         {
+141           y += ystep;
+142           error -= dx;
+143         }
+144     }
+145 }
+.fi
+.PP
+.SS "void g15r_drawRoundBox (\fBg15canvas\fP * canvas, int x1, int y1, int x2, int y2, int fill, int color)"
+.PP
+Draws a box with rounded corners bounded by (x1, y1) and (x2, y2). 
+.PP
+Draws a rounded box around the area bounded by (x1, y1) and (x2, y2).
+.PP
+The box will be filled if fill != 0.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated on is found. 
+.br
+\fIx1\fP Defines leftmost bound of the box. 
+.br
+\fIy1\fP Defines uppermost bound of the box. 
+.br
+\fIx2\fP Defines rightmost bound of the box. 
+.br
+\fIy2\fP Defines bottommost bound of the box. 
+.br
+\fIfill\fP The box will be filled with color if fill != 0. 
+.br
+\fIcolor\fP Lines defining the box will be drawn this color. 
+.RE
+.PP
+
+.PP
+Definition at line 251 of file pixel.c.
+.PP
+References G15_COLOR_BLACK, G15_COLOR_WHITE, g15r_drawLine(), and g15r_setPixel().
+.PP
+.nf
+253 {
+254   int y, shave = 3;
+255 
+256   if (shave > (x2 - x1) / 2)
+257     shave = (x2 - x1) / 2;
+258   if (shave > (y2 - y1) / 2)
+259     shave = (y2 - y1) / 2;
+260 
+261   if ((x1 != x2) && (y1 != y2))
+262     {
+263       if (fill)
+264         {
+265           g15r_drawLine (canvas, x1 + shave, y1, x2 - shave, y1, color);
+266           for (y = y1 + 1; y < y1 + shave; y++)
+267             g15r_drawLine (canvas, x1 + 1, y, x2 - 1, y, color);
+268           for (y = y1 + shave; y <= y2 - shave; y++)
+269             g15r_drawLine (canvas, x1, y, x2, y, color);
+270           for (y = y2 - shave + 1; y < y2; y++)
+271             g15r_drawLine (canvas, x1 + 1, y, x2 - 1, y, color);
+272           g15r_drawLine (canvas, x1 + shave, y2, x2 - shave, y2, color);
+273           if (shave == 4)
+274             {
+275               g15r_setPixel (canvas, x1 + 1, y1 + 1,
+276                              color ==
+277                              G15_COLOR_WHITE ? G15_COLOR_BLACK :
+278                              G15_COLOR_WHITE);
+279               g15r_setPixel (canvas, x1 + 1, y2 - 1,
+280                              color ==
+281                              G15_COLOR_WHITE ? G15_COLOR_BLACK :
+282                              G15_COLOR_WHITE);
+283               g15r_setPixel (canvas, x2 - 1, y1 + 1,
+284                              color ==
+285                              G15_COLOR_WHITE ? G15_COLOR_BLACK :
+286                              G15_COLOR_WHITE);
+287               g15r_setPixel (canvas, x2 - 1, y2 - 1,
+288                              color ==
+289                              G15_COLOR_WHITE ? G15_COLOR_BLACK :
+290                              G15_COLOR_WHITE);
+291             }
+292         }
+293       else
+294         {
+295           g15r_drawLine (canvas, x1 + shave, y1, x2 - shave, y1, color);
+296           g15r_drawLine (canvas, x1, y1 + shave, x1, y2 - shave, color);
+297           g15r_drawLine (canvas, x2, y1 + shave, x2, y2 - shave, color);
+298           g15r_drawLine (canvas, x1 + shave, y2, x2 - shave, y2, color);
+299           if (shave > 1)
+300             {
+301               g15r_drawLine (canvas, x1 + 1, y1 + 1, x1 + shave - 1, y1 + 1,
+302                              color);
+303               g15r_drawLine (canvas, x2 - shave + 1, y1 + 1, x2 - 1, y1 + 1,
+304                              color);
+305               g15r_drawLine (canvas, x1 + 1, y2 - 1, x1 + shave - 1, y2 - 1,
+306                              color);
+307               g15r_drawLine (canvas, x2 - shave + 1, y2 - 1, x2 - 1, y2 - 1,
+308                              color);
+309               g15r_drawLine (canvas, x1 + 1, y1 + 1, x1 + 1, y1 + shave - 1,
+310                              color);
+311               g15r_drawLine (canvas, x1 + 1, y2 - 1, x1 + 1, y2 - shave + 1,
+312                              color);
+313               g15r_drawLine (canvas, x2 - 1, y1 + 1, x2 - 1, y1 + shave - 1,
+314                              color);
+315               g15r_drawLine (canvas, x2 - 1, y2 - 1, x2 - 1, y2 - shave + 1,
+316                              color);
+317             }
+318         }
+319     }
+320 }
+.fi
+.PP
+.SS "int g15r_getPixel (\fBg15canvas\fP * canvas, unsigned int x, unsigned int y)"
+.PP
+Gets the value of the pixel at (x, y). 
+.PP
+Retrieves the value of the pixel at (x, y)
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated on is found. 
+.br
+\fIx\fP X offset for pixel to be retrieved. 
+.br
+\fIy\fP Y offset for pixel to be retrieved. 
+.RE
+.PP
+
+.PP
+Definition at line 29 of file screen.c.
+.PP
+References g15canvas::buffer, BYTE_SIZE, G15_LCD_HEIGHT, and G15_LCD_WIDTH.
+.PP
+Referenced by g15r_pixelReverseFill(), and g15r_setPixel().
+.PP
+.nf
+30 {
+31   if (x >= G15_LCD_WIDTH || y >= G15_LCD_HEIGHT)
+32     return 0;
+33 
+34   unsigned int pixel_offset = y * G15_LCD_WIDTH + x;
+35   unsigned int byte_offset = pixel_offset / BYTE_SIZE;
+36   unsigned int bit_offset = 7 - (pixel_offset % BYTE_SIZE);
+37 
+38   return (canvas->buffer[byte_offset] & (1 << bit_offset)) >> bit_offset;
+39 }
+.fi
+.PP
+.SS "void g15r_initCanvas (\fBg15canvas\fP * canvas)"
+.PP
+Clears the canvas and resets the mode switches. 
+.PP
+Clears the screen and resets the mode values for a canvas
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct 
+.RE
+.PP
+
+.PP
+Definition at line 91 of file screen.c.
+.PP
+References g15canvas::buffer, g15canvas::ftLib, G15_BUFFER_LEN, g15canvas::mode_cache, g15canvas::mode_reverse, and g15canvas::mode_xor.
+.PP
+.nf
+92 {
+93   memset (canvas->buffer, 0, G15_BUFFER_LEN);
+94   canvas->mode_cache = 0;
+95   canvas->mode_reverse = 0;
+96   canvas->mode_xor = 0;
+97 #ifdef TTF_SUPPORT
+98   if (FT_Init_FreeType (&canvas->ftLib))
+99     printf ('Freetype couldnt initialise\n');
+100 #endif
+101 }
+.fi
+.PP
+.SS "void g15r_pixelBox (\fBg15canvas\fP * canvas, int x1, int y1, int x2, int y2, int color, int thick, int fill)"
+.PP
+Draws a box bounded by (x1, y1) and (x2, y2). 
+.PP
+Draws a box around the area bounded by (x1, y1) and (x2, y2).
+.PP
+The box will be filled if fill != 0 and the sides will be thick pixels wide.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated on is found. 
+.br
+\fIx1\fP Defines leftmost bound of the box. 
+.br
+\fIy1\fP Defines uppermost bound of the box. 
+.br
+\fIx2\fP Defines rightmost bound of the box. 
+.br
+\fIy2\fP Defines bottommost bound of the box. 
+.br
+\fIcolor\fP Lines defining the box will be drawn this color. 
+.br
+\fIthick\fP Lines defining the box will be this many pixels thick. 
+.br
+\fIfill\fP The box will be filled with color if fill != 0. 
+.RE
+.PP
+
+.PP
+Definition at line 162 of file pixel.c.
+.PP
+References g15r_drawLine(), and g15r_setPixel().
+.PP
+Referenced by g15r_drawBar().
+.PP
+.nf
+164 {
+165   int i = 0;
+166   for (i = 0; i < thick; ++i)
+167     {
+168       g15r_drawLine (canvas, x1, y1, x2, y1, color);    /* Top    */
+169       g15r_drawLine (canvas, x1, y1, x1, y2, color);    /* Left   */
+170       g15r_drawLine (canvas, x2, y1, x2, y2, color);    /* Right  */
+171       g15r_drawLine (canvas, x1, y2, x2, y2, color);    /* Bottom */
+172       x1++;
+173       y1++;
+174       x2--;
+175       y2--;
+176     }
+177 
+178   int x = 0, y = 0;
+179 
+180   if (fill)
+181     {
+182       for (x = x1; x <= x2; ++x)
+183         for (y = y1; y <= y2; ++y)
+184           g15r_setPixel (canvas, x, y, color);
+185     }
+186 
+187 }
+.fi
+.PP
+.SS "void g15r_pixelOverlay (\fBg15canvas\fP * canvas, int x1, int y1, int width, int height, short colormap[])"
+.PP
+Overlays a bitmap of size width x height starting at (x1, y1). 
+.PP
+A 1-bit bitmap defined in colormap[] is drawn to the canvas with an upper left corner at (x1, y1) and a lower right corner at (x1+width, y1+height).
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated on is found. 
+.br
+\fIx1\fP Defines the leftmost bound of the area to be drawn. 
+.br
+\fIy1\fP Defines the uppermost bound of the area to be drawn. 
+.br
+\fIwidth\fP Defines the width of the bitmap to be drawn. 
+.br
+\fIheight\fP Defines the height of the bitmap to be drawn. 
+.br
+\fIcolormap\fP An array containing width*height entries of value 0 for pixel off or != 0 for pixel on. 
+.RE
+.PP
+
+.PP
+Definition at line 73 of file pixel.c.
+.PP
+References G15_COLOR_BLACK, G15_COLOR_WHITE, and g15r_setPixel().
+.PP
+.nf
+75 {
+76   int i = 0;
+77 
+78   for (i = 0; i < (width * height); ++i)
+79     {
+80       int color = (colormap[i] ? G15_COLOR_BLACK : G15_COLOR_WHITE);
+81       int x = x1 + i % width;
+82       int y = y1 + i / width;
+83       g15r_setPixel (canvas, x, y, color);
+84     }
+85 }
+.fi
+.PP
+.SS "void g15r_pixelReverseFill (\fBg15canvas\fP * canvas, int x1, int y1, int x2, int y2, int fill, int color)"
+.PP
+Fills an area bounded by (x1, y1) and (x2, y2). 
+.PP
+The area with an upper left corner at (x1, y1) and lower right corner at (x2, y2) will be filled with color if fill>0 or the current contents of the area will be reversed if fill==0.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated on is found. 
+.br
+\fIx1\fP Defines leftmost bound of area to be filled. 
+.br
+\fIy1\fP Defines uppermost bound of area to be filled. 
+.br
+\fIx2\fP Defines rightmost bound of area to be filled. 
+.br
+\fIy2\fP Defines bottommost bound of area to be filled. 
+.br
+\fIfill\fP Area will be filled with color if fill != 0, else contents of area will have color values reversed. 
+.br
+\fIcolor\fP If fill != 0, then area will be filled if color == 1 and emptied if color == 0. 
+.RE
+.PP
+
+.PP
+Definition at line 44 of file pixel.c.
+.PP
+References g15r_getPixel(), and g15r_setPixel().
+.PP
+.nf
+46 {
+47   int x = 0;
+48   int y = 0;
+49 
+50   for (x = x1; x <= x2; ++x)
+51     {
+52       for (y = y1; y <= y2; ++y)
+53         {
+54           if (!fill)
+55             color = !g15r_getPixel (canvas, x, y);
+56           g15r_setPixel (canvas, x, y, color);
+57         }
+58     }
+59 }
+.fi
+.PP
+.SS "void g15r_renderCharacterLarge (\fBg15canvas\fP * canvas, int x, int y, unsigned char character, unsigned int sx, unsigned int sy)"
+.PP
+Renders a character in the large font at (x, y). 
+.PP
+Definition at line 22 of file text.c.
+.PP
+References fontdata_8x8, G15_COLOR_BLACK, G15_COLOR_WHITE, and g15r_setPixel().
+.PP
+Referenced by g15r_renderString().
+.PP
+.nf
+25 {
+26   int helper = character * 8;   /* for our font which is 8x8 */
+27 
+28   int top_left_pixel_x = sx + col * (8);        /* 1 pixel spacing */
+29   int top_left_pixel_y = sy + row * (8);        /* once again 1 pixel spacing */
+30 
+31   int x, y;
+32   for (y = 0; y < 8; ++y)
+33     {
+34       for (x = 0; x < 8; ++x)
+35         {
+36           char font_entry = fontdata_8x8[helper + y];
+37 
+38           if (font_entry & 1 << (7 - x))
+39             g15r_setPixel (canvas, top_left_pixel_x + x, top_left_pixel_y + y,
+40                            G15_COLOR_BLACK);
+41           else
+42             g15r_setPixel (canvas, top_left_pixel_x + x, top_left_pixel_y + y,
+43                            G15_COLOR_WHITE);
+44 
+45         }
+46     }
+47 }
+.fi
+.PP
+.SS "void g15r_renderCharacterMedium (\fBg15canvas\fP * canvas, int x, int y, unsigned char character, unsigned int sx, unsigned int sy)"
+.PP
+Renders a character in the meduim font at (x, y). 
+.PP
+Definition at line 50 of file text.c.
+.PP
+References fontdata_7x5, G15_COLOR_BLACK, G15_COLOR_WHITE, and g15r_setPixel().
+.PP
+Referenced by g15r_renderString().
+.PP
+.nf
+53 {
+54   int helper = character * 7 * 5;       /* for our font which is 6x4 */
+55 
+56   int top_left_pixel_x = sx + col * (5);        /* 1 pixel spacing */
+57   int top_left_pixel_y = sy + row * (7);        /* once again 1 pixel spacing */
+58 
+59   int x, y;
+60   for (y = 0; y < 7; ++y)
+61     {
+62       for (x = 0; x < 5; ++x)
+63         {
+64           char font_entry = fontdata_7x5[helper + y * 5 + x];
+65           if (font_entry)
+66             g15r_setPixel (canvas, top_left_pixel_x + x, top_left_pixel_y + y,
+67                            G15_COLOR_BLACK);
+68           else
+69             g15r_setPixel (canvas, top_left_pixel_x + x, top_left_pixel_y + y,
+70                            G15_COLOR_WHITE);
+71 
+72         }
+73     }
+74 }
+.fi
+.PP
+.SS "void g15r_renderCharacterSmall (\fBg15canvas\fP * canvas, int x, int y, unsigned char character, unsigned int sx, unsigned int sy)"
+.PP
+Renders a character in the small font at (x, y). 
+.PP
+Definition at line 77 of file text.c.
+.PP
+References fontdata_6x4, G15_COLOR_BLACK, G15_COLOR_WHITE, and g15r_setPixel().
+.PP
+Referenced by g15r_renderString().
+.PP
+.nf
+80 {
+81   int helper = character * 6 * 4;       /* for our font which is 6x4 */
+82 
+83   int top_left_pixel_x = sx + col * (4);        /* 1 pixel spacing */
+84   int top_left_pixel_y = sy + row * (6);        /* once again 1 pixel spacing */
+85 
+86   int x, y;
+87   for (y = 0; y < 6; ++y)
+88     {
+89       for (x = 0; x < 4; ++x)
+90         {
+91           char font_entry = fontdata_6x4[helper + y * 4 + x];
+92           if (font_entry)
+93             g15r_setPixel (canvas, top_left_pixel_x + x, top_left_pixel_y + y,
+94                            G15_COLOR_BLACK);
+95           else
+96             g15r_setPixel (canvas, top_left_pixel_x + x, top_left_pixel_y + y,
+97                            G15_COLOR_WHITE);
+98 
+99         }
+100     }
+101 }
+.fi
+.PP
+.SS "void g15r_renderString (\fBg15canvas\fP * canvas, unsigned char stringOut[], int row, int size, unsigned int sx, unsigned int sy)"
+.PP
+Renders a string with font size in row. 
+.PP
+Definition at line 104 of file text.c.
+.PP
+References G15_TEXT_LARGE, G15_TEXT_MED, G15_TEXT_SMALL, g15r_renderCharacterLarge(), g15r_renderCharacterMedium(), and g15r_renderCharacterSmall().
+.PP
+.nf
+106 {
+107 
+108   int i = 0;
+109   for (i; stringOut[i] != NULL; ++i)
+110     {
+111       switch (size)
+112         {
+113         case G15_TEXT_SMALL:
+114           {
+115             g15r_renderCharacterSmall (canvas, i, row, stringOut[i], sx, sy);
+116             break;
+117           }
+118         case G15_TEXT_MED:
+119           {
+120             g15r_renderCharacterMedium (canvas, i, row, stringOut[i], sx, sy);
+121             break;
+122           }
+123         case G15_TEXT_LARGE:
+124           {
+125             g15r_renderCharacterLarge (canvas, i, row, stringOut[i], sx, sy);
+126             break;
+127           }
+128         default:
+129           break;
+130         }
+131     }
+132 
+133 }
+.fi
+.PP
+.SS "void g15r_setPixel (\fBg15canvas\fP * canvas, unsigned int x, unsigned int y, int val)"
+.PP
+Sets the value of the pixel at (x, y). 
+.PP
+Sets the value of the pixel at (x, y)
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated on is found. 
+.br
+\fIx\fP X offset for pixel to be set. 
+.br
+\fIy\fP Y offset for pixel to be set. 
+.br
+\fIval\fP Value to which pixel should be set. 
+.RE
+.PP
+
+.PP
+Definition at line 50 of file screen.c.
+.PP
+References g15canvas::buffer, BYTE_SIZE, G15_LCD_HEIGHT, G15_LCD_WIDTH, g15r_getPixel(), g15canvas::mode_reverse, and g15canvas::mode_xor.
+.PP
+Referenced by draw_ttf_char(), g15r_drawCircle(), g15r_drawLine(), g15r_drawRoundBox(), g15r_pixelBox(), g15r_pixelOverlay(), g15r_pixelReverseFill(), g15r_renderCharacterLarge(), g15r_renderCharacterMedium(), and g15r_renderCharacterSmall().
+.PP
+.nf
+51 {
+52   if (x >= G15_LCD_WIDTH || y >= G15_LCD_HEIGHT)
+53     return;
+54 
+55   unsigned int pixel_offset = y * G15_LCD_WIDTH + x;
+56   unsigned int byte_offset = pixel_offset / BYTE_SIZE;
+57   unsigned int bit_offset = 7 - (pixel_offset % BYTE_SIZE);
+58 
+59   if (canvas->mode_xor)
+60     val ^= g15r_getPixel (canvas, x, y);
+61   if (canvas->mode_reverse)
+62     val = !val;
+63 
+64   if (val)
+65     canvas->buffer[byte_offset] =
+66       canvas->buffer[byte_offset] | 1 << bit_offset;
+67   else
+68     canvas->buffer[byte_offset] =
+69       canvas->buffer[byte_offset] & ~(1 << bit_offset);
+70 
+71 }
+.fi
+.PP
+.SS "void g15r_ttfLoad (\fBg15canvas\fP * canvas, char * fontname, int fontsize, int face_num)"
+.PP
+Loads a font through the FreeType2 library. 
+.PP
+Load a font for use with FreeType2 font support
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated on is found. 
+.br
+\fIfontname\fP Absolute pathname to font file to be loaded. 
+.br
+\fIfontsize\fP Size in points for font to be loaded. 
+.br
+\fIface_num\fP Slot into which font face will be loaded. 
+.RE
+.PP
+
+.PP
+Definition at line 145 of file text.c.
+.PP
+References g15canvas::ftLib, G15_MAX_FACE, g15canvas::ttf_face, and g15canvas::ttf_fontsize.
+.PP
+.nf
+146 {
+147   int errcode = 0;
+148 
+149   if (face_num < 0)
+150     face_num = 0;
+151   if (face_num > G15_MAX_FACE)
+152     face_num = G15_MAX_FACE;
+153 
+154   if (canvas->ttf_fontsize[face_num])
+155     FT_Done_Face (canvas->ttf_face[face_num][0]);       /* destroy the last face */
+156 
+157   if (!canvas->ttf_fontsize[face_num] && !fontsize)
+158     canvas->ttf_fontsize[face_num] = 10;
+159   else
+160     canvas->ttf_fontsize[face_num] = fontsize;
+161 
+162   errcode =
+163     FT_New_Face (canvas->ftLib, fontname, 0, &canvas->ttf_face[face_num][0]);
+164   if (errcode)
+165     {
+166       canvas->ttf_fontsize[face_num] = 0;
+167     }
+168   else
+169     {
+170       if (canvas->ttf_fontsize[face_num]
+171           && FT_IS_SCALABLE (canvas->ttf_face[face_num][0]))
+172         errcode =
+173           FT_Set_Char_Size (canvas->ttf_face[face_num][0], 0,
+174                             canvas->ttf_fontsize[face_num] * 64, 90, 0);
+175     }
+176 }
+.fi
+.PP
+.SS "void g15r_ttfPrint (\fBg15canvas\fP * canvas, int x, int y, int fontsize, int face_num, int color, int center, char * print_string)"
+.PP
+Prints a string in a given font. 
+.PP
+Render a string with a FreeType2 font
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated on is found. 
+.br
+\fIx\fP initial x position for string. 
+.br
+\fIy\fP initial y position for string. 
+.br
+\fIfontsize\fP Size of string in points. 
+.br
+\fIface_num\fP Font to be used is loaded in this slot. 
+.br
+\fIcolor\fP Text will be drawn this color. 
+.br
+\fIcenter\fP Text will be centered if center > 0. 
+.br
+\fIprint_string\fP Pointer to the string to be printed. 
+.RE
+.PP
+
+.PP
+Definition at line 271 of file text.c.
+.PP
+References calc_ttf_centering(), calc_ttf_true_ypos(), draw_ttf_str(), g15canvas::ttf_face, and g15canvas::ttf_fontsize.
+.PP
+.nf
+273 {
+274   int errcode = 0;
+275 
+276   if (canvas->ttf_fontsize[face_num])
+277     {
+278       if (fontsize > 0 && FT_IS_SCALABLE (canvas->ttf_face[face_num][0]))
+279         {
+280           canvas->ttf_fontsize[face_num] = fontsize;
+281           int errcode =
+282             FT_Set_Pixel_Sizes (canvas->ttf_face[face_num][0], 0,
+283                                 canvas->ttf_fontsize[face_num]);
+284           if (errcode)
+285             printf ('Trouble setting the Glyph size!\n');
+286         }
+287       y =
+288         calc_ttf_true_ypos (canvas->ttf_face[face_num][0], y,
+289                             canvas->ttf_fontsize[face_num]);
+290       if (center > 0)
+291         x = calc_ttf_centering (canvas->ttf_face[face_num][0], print_string);
+292       draw_ttf_str (canvas, print_string, x, y, color,
+293                     canvas->ttf_face[face_num][0]);
+294     }
+295 }
+.fi
+.PP
+.SH "Variable Documentation"
+.PP 
+.SS "unsigned char \fBfontdata_6x4\fP[]"
+.PP
+Font data for the small (6x4) font. 
+.PP
+Referenced by g15r_renderCharacterSmall().
+.SS "unsigned char \fBfontdata_7x5\fP[]"
+.PP
+Font data for the medium (7x5) font. 
+.PP
+Referenced by g15r_renderCharacterMedium().
+.SS "unsigned char \fBfontdata_8x8\fP[]"
+.PP
+Font data for the large (8x8) font. 
+.PP
+Referenced by g15r_renderCharacterLarge().
+.SH "Author"
+.PP
+Anthony J. Mirabella <mirabeaj@gmail.com>
+.PP 
+Generated automatically by Doxygen for libg15render from the source code.
