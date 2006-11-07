@@ -1,0 +1,151 @@
+.TH "G15Composer" "1" "3.0.1" "G15Tools - G15Composer" "G15Tools User Manual"
+.SH "NAME"
+g15composer \- Scriptable command interface to
+.BR libg15render (3)
+drawing functions
+.SH "DESCRIPTION"
+G15composer is a scriptable command interface to the libg15render drawing functions that outputs to a g15daemon screen. G15composer exposes all graphics primitives and text rendering functions of libg15render so that they may be used in a variety of situations, including from the command line or in virtually any scripting language.
+.SH "OPTIONS"
+G15composer understands the following options:
+.br
+.P
+.HP
+\-h	Show usage information.
+.P
+.HP
+\-b	Start without a display to listen for new screen commands.
+.SH "BASIC USAGE"
+nohup ./g15composer /path/to/pipe &
+
+1) echo 'TL "Hello" "World"' > /path/to/pipe
+
+2) cat instructions > /path/to/pipe
+
+3) ./some_script > /path/to/pipe
+   where some_script is a bash, Perl, etc. script or application which outputs
+   one or more of the commands listed below.
+.SH "COMMANDS"
+*** Text Commands:
+
+Ts "line 1" "line 2" ...
+   where s is the size of the font (S, M and L are supported).
+   To insert a double-quote, prefix it with a backslash
+
+TO X Y S F "line 1" "line 2" ...
+   Overlays text of the given size at (X,Y)
+   Text will be centered if F=1 and right justified if F=2
+
+*** Font Command: (NB., g15composer must be configured with --enable-ttf to use font commands)
+
+FL F S "/path/to/font"
+   Loads a font into Face Slot F with size S.
+
+FP F S X Y Co Ce "line 1" "line 2" ...
+   Prints text using the font is Slot F with size S at position (X,Y).
+   Text will be printed in color Co and will be centered if Ce=1.
+
+*** Pixel Commands:
+
+PO X Y W H "100101101..."
+   Overlays a pixel image of the given Width and Height at (X,Y)
+   The last argument must now be passed as a quoted string.  This is a change from previous behavior.
+
+PS X Y C
+   Sets the pixel at (X,Y) to color C (0 or 1)
+
+PC 0|1
+   Clears the screen and fills it with 0|1
+
+PF X1 Y1 X2 Y2 C
+   Fills the area from (X1,Y1) to (X2,Y2) with color C
+
+PR X1 Y1 X2 Y2
+   Reverses the pixels from (X1,Y1) to (X2,Y2)
+
+PB X1 Y1 X2 Y2 C T F
+   Draws a box from (X1,Y1) to (X2,Y2) using color C and thickness T, filling if F=1
+   T, and F are optional, but if specified must be specified in order, i.e., you must set T to set F
+   Defaults are T=1, and F=0
+
+*** Drawing Commands:
+
+DL X1 Y1 X2 Y2 C
+   Draws a line from (X1,Y1) to (X2,Y2) using color C
+
+DC X Y R C F
+   Draws a circle centered at (X,Y) with radius R using color C, filling if F=1
+   F is optional and defaults to F=0
+   Note that the syntax has changed, the position of C and F has been swapped
+
+DR X1 Y1 X2 Y2 C F
+   Draws a rounded box from (X1,Y1) to (X2,Y2) using color C, filling if F=1
+   F is optional and defaults to F=0
+   Note that the syntax has changed, the position of C and F has been swapped
+
+DB X1 Y1 X2 Y2 C N M T
+   Draws a percentage or progress bar from (X1,Y1) to (X2,Y2) using color C
+   The bar will be filled with N units out of M
+   T sets the type of the bar, valid values are 1, 2, or 3
+   T is optional and defaults to T=1
+
+*** Mode Commands:
+
+MC 0|1
+   Turns caching off or on, i.e. the changes are not immediately sent to the
+   LCD if caching is on (MC 1). Changes will be sent on the next MC 0.
+
+MX 0|1
+   Sets succeeding pixel colors to normal, or XORed with existing pixels.
+   Good for drawing sprites with MC:
+      MC 1, draw, MC 0
+      MC 1, redraw in original position and draw elsewhere, MC 0
+
+   Old   New   Current   Redraw
+    0     0     0^0 = 0   0^0 = 0
+    0     1     0^1 = 1   1^1 = 0
+    1     0     1^0 = 1   1^0 = 1
+    1     1     1^1 = 0   0^1 = 1
+
+MR 0|1
+   Set succeeding pixel colors to normal, or reversed
+
+MP 0|1|2
+   Set screen to foreground if 0 and background if 1
+   If 2, set screen to background if and only if user hasn't set it to foreground
+
+*** Screen Commands:
+
+SN "/path/to/pipe"
+   Create a new G15Comopser instance reading from /path/to/pipe
+
+SC
+   Close the current screen.  Closing the initial screen will close all other screens
+
+----------------------
+
+The following commands are relayed to g15daemon:
+
+*** LCD Commands:
+
+LB 0|1|2
+   Sets the LCD brightness level
+
+LC 0|1|2
+   Sets the LCD contrast level
+
+
+*** Keyboard/LED Commands:
+
+KL 0|1|2
+   Sets LED mode: 0=app-controlled 1=normal 2=sticky.
+   Not currently implemented.
+
+KM x 0|1
+   Sets the Mx-light off or on. x=0,1,2,3 where 0 is all M-lights (minus MR).
+   Only has an effect if KL is set to 0.
+.SH "AUTHOR"
+Anthony J. Mirabella <mirabeaj@gmail.com>
+.SH "SEE ALSO"
+.BR g15daemon (1),
+.BR libg15 (3),
+.BR libg15render (3)
