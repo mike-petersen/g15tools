@@ -1,10 +1,10 @@
-.TH "libg15render" 3 "6 Nov 2006" "libg15render" \" -*- nroff -*-
+.TH "libg15render" 3 "7 Nov 2006" "libg15render" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-libg15render \- Render text and graphics to a buffer usable by 
+libg15render \- Render text and graphics to a buffer usable by
 .BR libg15 (3)
-or 
+or
 .BR g15daemon (1).
 .SH SYNOPSIS
 .br
@@ -1044,41 +1044,43 @@ Render a string with a FreeType2 font
 .br
 \fIcolor\fP Text will be drawn this color. 
 .br
-\fIcenter\fP Text will be centered if center > 0. 
+\fIcenter\fP Text will be centered if center == 1 and right justified if center == 2. 
 .br
 \fIprint_string\fP Pointer to the string to be printed. 
 .RE
 .PP
 
 .PP
-Definition at line 271 of file text.c.
+Definition at line 283 of file text.c.
 .PP
-References calc_ttf_centering(), calc_ttf_true_ypos(), draw_ttf_str(), g15canvas::ttf_face, and g15canvas::ttf_fontsize.
+References calc_ttf_centering(), calc_ttf_right_justify(), calc_ttf_true_ypos(), draw_ttf_str(), g15canvas::ttf_face, and g15canvas::ttf_fontsize.
 .PP
 .nf
-273 {
-274   int errcode = 0;
-275 
-276   if (canvas->ttf_fontsize[face_num])
-277     {
-278       if (fontsize > 0 && FT_IS_SCALABLE (canvas->ttf_face[face_num][0]))
-279         {
-280           canvas->ttf_fontsize[face_num] = fontsize;
-281           int errcode =
-282             FT_Set_Pixel_Sizes (canvas->ttf_face[face_num][0], 0,
-283                                 canvas->ttf_fontsize[face_num]);
-284           if (errcode)
-285             printf ('Trouble setting the Glyph size!\n');
-286         }
-287       y =
-288         calc_ttf_true_ypos (canvas->ttf_face[face_num][0], y,
-289                             canvas->ttf_fontsize[face_num]);
-290       if (center > 0)
-291         x = calc_ttf_centering (canvas->ttf_face[face_num][0], print_string);
-292       draw_ttf_str (canvas, print_string, x, y, color,
-293                     canvas->ttf_face[face_num][0]);
-294     }
-295 }
+285 {
+286   int errcode = 0;
+287 
+288   if (canvas->ttf_fontsize[face_num])
+289     {
+290       if (fontsize > 0 && FT_IS_SCALABLE (canvas->ttf_face[face_num][0]))
+291         {
+292           canvas->ttf_fontsize[face_num] = fontsize;
+293           int errcode =
+294             FT_Set_Pixel_Sizes (canvas->ttf_face[face_num][0], 0,
+295                                 canvas->ttf_fontsize[face_num]);
+296           if (errcode)
+297             printf ('Trouble setting the Glyph size!\n');
+298         }
+299       y =
+300         calc_ttf_true_ypos (canvas->ttf_face[face_num][0], y,
+301                             canvas->ttf_fontsize[face_num]);
+302       if (center == 1)
+303         x = calc_ttf_centering (canvas->ttf_face[face_num][0], print_string);
+304       else if (center == 2)
+305         x = calc_ttf_right_justify (canvas->ttf_face[face_num][0], print_string);
+306       draw_ttf_str (canvas, print_string, x, y, color,
+307                     canvas->ttf_face[face_num][0]);
+308     }
+309 }
 .fi
 .PP
 .SH "Variable Documentation"

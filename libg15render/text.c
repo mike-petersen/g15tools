@@ -217,6 +217,18 @@ calc_ttf_centering (FT_Face face, char *str)
   return leftpos;
 }
 
+int
+calc_ttf_right_justify (FT_Face face, char *str)
+{
+  int leftpos;
+
+  leftpos = 160 - calc_ttf_totalstringwidth (face, str);
+  if (leftpos < 1)
+    leftpos = 1;
+
+  return leftpos;
+}
+
 void
 draw_ttf_char (g15canvas * canvas, FT_Bitmap charbitmap,
 	       unsigned char character, int x, int y, int color)
@@ -264,7 +276,7 @@ draw_ttf_str (g15canvas * canvas, char *str, int x, int y, int color,
  * \param fontsize Size of string in points.
  * \param face_num Font to be used is loaded in this slot.
  * \param color Text will be drawn this color.
- * \param center Text will be centered if center > 0.
+ * \param center Text will be centered if center == 1 and right justified if center == 2.
  * \param print_string Pointer to the string to be printed.
  */
 void
@@ -287,8 +299,10 @@ g15r_ttfPrint (g15canvas * canvas, int x, int y, int fontsize, int face_num,
       y =
 	calc_ttf_true_ypos (canvas->ttf_face[face_num][0], y,
 			    canvas->ttf_fontsize[face_num]);
-      if (center > 0)
+      if (center == 1)
 	x = calc_ttf_centering (canvas->ttf_face[face_num][0], print_string);
+      else if (center == 2)
+        x = calc_ttf_right_justify (canvas->ttf_face[face_num][0], print_string);
       draw_ttf_str (canvas, print_string, x, y, color,
 		    canvas->ttf_face[face_num][0]);
     }
