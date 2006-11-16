@@ -16,6 +16,7 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+#include <fcntl.h>
 #include "libg15render.h"
 
 void
@@ -373,3 +374,103 @@ g15r_drawBar (g15canvas * canvas, int x1, int y1, int x2, int y2, int color,
     }
   g15r_pixelBox (canvas, x1, y1, (int) ceil (x1 + length), y2, color, 1, 1);
 }
+
+/* basic wbmp splash screen loader - assumes image is 160x43 */
+int 
+g15r_loadWbmpSplash(g15canvas *canvas, char *filename)
+{
+    int retval;
+    int width=0, height=0;
+     
+    retval = g15r_loadWbmpToBuf(canvas->buffer,filename,
+                                &width,
+                                &height,
+                                G15_BUFFER_LEN);
+    return retval;
+}
+
+/* draw an icon at location my_x,my_y, from buf. width&height should be icons width/height */
+void 
+g15r_drawIcon(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int height)
+{
+    int y,x,val;
+    unsigned int pixel_offset = 0;
+    unsigned int byte_offset, bit_offset;
+
+    for (y=0; y < height - 1; y++)
+      for (x=0; x < width - 1; x++)
+        {
+		byte_offset = pixel_offset / BYTE_SIZE;
+		bit_offset = 7 - (pixel_offset % BYTE_SIZE);
+		pixel_offset++;
+
+		val = (buf[byte_offset] & (1 << bit_offset)) >> bit_offset;
+		g15r_setPixel (canvas, x + my_x, y + my_y, val);
+        }
+}
+
+/* basic wbmp loader - loads wbmp into pre-prepared buf.  sets img_height & img_width to image size */
+int 
+g15r_loadWbmpToBuf(char *buf, char *filename, int *img_width, int *img_height, int maxlen)
+{
+    int wbmp_fd;
+    int retval;
+    int x,y,val;
+    unsigned int buflen,header=4;
+    unsigned char headerbytes[5];
+    unsigned int pixel_offset = 0;
+    unsigned int byte_offset, bit_offset;
+    
+    if(maxlen<5 || buf == NULL)
+        return -1;
+    
+    wbmp_fd=open(filename,O_RDONLY);
+    if(!wbmp_fd){
+        return -1;
+    }
+    
+    retval=read(wbmp_fd,headerbytes,5);
+    
+    if(retval){
+        if (headerbytes[2] & 1) {
+            *img_width = ((unsigned char)headerbytes[2] ^ 1) | (unsigned char)headerbytes[3];
+            *img_height = headerbytes[4];
+            header = 5;
+        } else {
+            *img_width = headerbytes[2];
+            *img_height = headerbytes[3];
+            header = 4;
+            buf[0]=headerbytes[4];
+        }
+
+	int byte_width = *img_width / 8;
+	if (*img_width %8)
+	  byte_width++;
+
+        buflen = byte_width * (*img_height);
+        if(buflen<maxlen)
+            retval=read(wbmp_fd,buf+(5-header),buflen);
+        else
+            retval = -1;
+        close(wbmp_fd);
+    }
+
+    /* now invert the image */
+    for (y = 0; y < *img_height; y++)
+      for (x = 0; x < *img_width; x++)
+        {
+		pixel_offset = y * (*img_width) + x;
+		byte_offset = pixel_offset / BYTE_SIZE;
+		bit_offset = 7 - (pixel_offset % BYTE_SIZE);
+
+		val = (buf[byte_offset] & (1 << bit_offset)) >> bit_offset;
+
+		if (!val)
+	      	  buf[byte_offset] = buf[byte_offset] | 1 << bit_offset;
+		else
+		  buf[byte_offset] = buf[byte_offset] & ~(1 << bit_offset);
+	}
+
+    return retval;
+}
+
