@@ -414,9 +414,9 @@ g15r_drawIcon(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int h
     for (y=0; y < height - 1; y++)
       for (x=0; x < width - 1; x++)
         {
+		pixel_offset = y * width + x;
 		byte_offset = pixel_offset / BYTE_SIZE;
 		bit_offset = 7 - (pixel_offset % BYTE_SIZE);
-		pixel_offset++;
 
 		val = (buf[byte_offset] & (1 << bit_offset)) >> bit_offset;
 		g15r_setPixel (canvas, x + my_x, y + my_y, val);
