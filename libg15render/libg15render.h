@@ -80,6 +80,7 @@ extern "C"
 int g15r_loadWbmpSplash(g15canvas *canvas, char *filename);
 void g15r_drawIcon(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int height);
 int g15r_loadWbmpToBuf(char *buf, char *filename, int *img_width, int *img_height, int maxlen);
+void g15r_drawBigNum (g15canvas * canvas, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, int num);
 
 /** \brief Fills the screen with pixels of color*/
   void g15r_clearScreen (g15canvas * canvas, int color);
