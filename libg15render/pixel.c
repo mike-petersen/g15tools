@@ -409,6 +409,25 @@ g15r_drawIcon(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int h
         }
 }
 
+void 
+g15r_drawSprite(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int height, int start_x, int start_y, int total_width)
+{
+    int y,x,val;
+    unsigned int pixel_offset = 0;
+    unsigned int byte_offset, bit_offset;
+
+    for (y=0; y < height - 1; y++)
+      for (x=0; x < width - 1; x++)
+        {
+		pixel_offset = (y + start_y) * total_width + (x + start_x);
+		byte_offset = pixel_offset / BYTE_SIZE;
+		bit_offset = 7 - (pixel_offset % BYTE_SIZE);
+
+		val = (buf[byte_offset] & (1 << bit_offset)) >> bit_offset;
+		g15r_setPixel (canvas, x + my_x, y + my_y, val);
+        }
+}
+
 /* basic wbmp loader - loads wbmp into pre-prepared buf.  sets img_height & img_width to image size */
 int 
 g15r_loadWbmpToBuf(char *buf, char *filename, int *img_width, int *img_height, int maxlen)
