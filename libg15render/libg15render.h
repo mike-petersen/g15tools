@@ -71,18 +71,22 @@ extern "C"
 /** \brief Draws a completion bar*/
   void g15r_drawBar (g15canvas * canvas, int x1, int y1, int x2, int y2,
 		     int color, int num, int max, int type);
+/** \brief Draw a splash screen from 160x43 wbmp file*/
+int g15r_loadWbmpSplash(g15canvas *canvas, char *filename);
+/** \brief Draw an icon to the screen from a wbmp buffer*/
+void g15r_drawIcon(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int height);
+/** \brief Draw a sprite to the screen from a wbmp buffer*/
+void g15r_drawSprite(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int height, int start_x, int start_y, int total_width);
+/** \brief Load a wbmp file into a buffer*/
+int g15r_loadWbmpToBuf(char *buf, char *filename, int *img_width, int *img_height, int maxlen);
+/** \brief Draw a large number*/
+void g15r_drawBigNum (g15canvas * canvas, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, int num);
 
 /** \brief Gets the value of the pixel at (x, y)*/
   int g15r_getPixel (g15canvas * canvas, unsigned int x, unsigned int y);
 /** \brief Sets the value of the pixel at (x, y)*/
   void g15r_setPixel (g15canvas * canvas, unsigned int x, unsigned int y,
 		      int val);
-int g15r_loadWbmpSplash(g15canvas *canvas, char *filename);
-void g15r_drawIcon(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int height);
-void g15r_drawSprite(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int height, int start_x, int start_y, int total_width);
-int g15r_loadWbmpToBuf(char *buf, char *filename, int *img_width, int *img_height, int maxlen);
-void g15r_drawBigNum (g15canvas * canvas, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, int num);
-
 /** \brief Fills the screen with pixels of color*/
   void g15r_clearScreen (g15canvas * canvas, int color);
 /** \brief Clears the canvas and resets the mode switches*/

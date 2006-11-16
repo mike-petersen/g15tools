@@ -375,7 +375,12 @@ g15r_drawBar (g15canvas * canvas, int x1, int y1, int x2, int y2, int color,
   g15r_pixelBox (canvas, x1, y1, (int) ceil (x1 + length), y2, color, 1, 1);
 }
 
-/* basic wbmp splash screen loader - assumes image is 160x43 */
+/**
+ * wbmp splash screen loader - assumes image is 160x43
+ * 
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
+ * \param filename A string holding the path to the wbmp to be displayed.
+ */
 int 
 g15r_loadWbmpSplash(g15canvas *canvas, char *filename)
 {
@@ -389,7 +394,16 @@ g15r_loadWbmpSplash(g15canvas *canvas, char *filename)
     return retval;
 }
 
-/* draw an icon at location my_x,my_y, from buf. width&height should be icons width/height */
+/**
+ * Draw an icon to a canvas 
+ *
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated in is found.
+ * \param buf A pointer to the buffer holding the icon to be displayed.
+ * \param my_x Leftmost boundary of image.
+ * \param my_y Topmost boundary of image.
+ * \param width Width of the image in buf.
+ * \param height Height of the image in buf.
+ */
 void 
 g15r_drawIcon(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int height)
 {
@@ -409,6 +423,19 @@ g15r_drawIcon(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int h
         }
 }
 
+/**
+ * Draw a sprite to a canvas
+ *
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated in is found.
+ * \param buf A pointer to the buffer holding a set of sprites.
+ * \param my_x Leftmost boundary of image.
+ * \param my_y Topmost boundary of image.
+ * \param width Width of the sprite.
+ * \param height Height of the sprite.
+ * \param start_x X offset for reading sprite from buf.
+ * \param start_y Y offset for reading sprite from buf.
+ * \param total_width Width of the set of sprites held in buf.
+ */
 void 
 g15r_drawSprite(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int height, int start_x, int start_y, int total_width)
 {
@@ -428,7 +455,15 @@ g15r_drawSprite(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int
         }
 }
 
-/* basic wbmp loader - loads wbmp into pre-prepared buf.  sets img_height & img_width to image size */
+/**
+ * basic wbmp loader - loads wbmp into pre-prepared buf.
+ *
+ * \param buf A pointer to the buffer into which the wbmp will be loaded.
+ * \param filename A string holding the path to the wbmp to be loaded.
+ * \param img_width A pointer to an int that will hold the image width on return.
+ * \param img_height A pointer to an int that will hold the image height on return.
+ * \param maxlen The maximum number of bytes that should be read from filename.
+ */
 int 
 g15r_loadWbmpToBuf(char *buf, char *filename, int *img_width, int *img_height, int maxlen)
 {
@@ -493,6 +528,16 @@ g15r_loadWbmpToBuf(char *buf, char *filename, int *img_width, int *img_height, i
     return retval;
 }
 
+/**
+ * Draw a large number to a canvas
+ *
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
+ * \param x1 Defines leftmost bound of the number.
+ * \param y1 Defines uppermost bound of the number.
+ * \param x2 Defines rightmost bound of the number.
+ * \param y2 Defines bottommost bound of the number.
+ * \param num The number to be drawn.
+ */ 
 void 
 g15r_drawBigNum (g15canvas * canvas, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, int num)
 {
