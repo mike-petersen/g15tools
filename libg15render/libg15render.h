@@ -77,6 +77,10 @@ extern "C"
 /** \brief Sets the value of the pixel at (x, y)*/
   void g15r_setPixel (g15canvas * canvas, unsigned int x, unsigned int y,
 		      int val);
+int g15r_loadWbmpSplash(g15canvas *canvas, char *filename);
+void g15r_drawIcon(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int height);
+int g15r_loadWbmpToBuf(char *buf, char *filename, int *img_width, int *img_height, int maxlen);
+
 /** \brief Fills the screen with pixels of color*/
   void g15r_clearScreen (g15canvas * canvas, int color);
 /** \brief Clears the canvas and resets the mode switches*/
