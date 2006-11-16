@@ -128,7 +128,7 @@ main (int argc, char *argv[])
   g15r_drawRoundBox (canvas, 10, 21, 50, 40, 0, 1);
   g15r_drawRoundBox (canvas, 80, 15, 140, 30, 1, 1);
   updateScreen ();
-  sleep (4);
+  sleep (3);
 
   g15r_clearScreen (canvas, 0);
 
@@ -136,7 +136,7 @@ main (int argc, char *argv[])
   g15r_drawBar (canvas, 10, 22, 150, 32, 1, 75, 100, 2);
   g15r_drawBar (canvas, 10, 34, 150, 42, 1, 315, 900, 3);
   updateScreen ();
-  sleep (6);
+  sleep (3);
 
   g15r_clearScreen (canvas, 0);
 
@@ -146,10 +146,36 @@ main (int argc, char *argv[])
   g15r_pixelBox (canvas, 0, 22, 159, 42, 1, 1, 1);
   g15r_ttfPrint (canvas, 0, 25, 16, 1, 0, 1, "This   is a     test");
   updateScreen ();
-  sleep (6);
+  sleep (3);
+
+  g15r_clearScreen (canvas, 0);
+  g15r_loadWbmpSplash (canvas, "./splash.wbmp");
+  updateScreen ();
+  sleep (3);
+
+  g15r_clearScreen (canvas, 0);
+  char *buf = (char *)malloc (G15_BUFFER_LEN);
+  int width, height;
+  g15r_loadWbmpToBuf (buf, "./splash.wbmp", &width, &height, G15_BUFFER_LEN);
+  g15r_drawSprite (canvas, buf, 30, 10, 43, 20, 30, 10, width);
+  g15r_drawSprite (canvas, buf, 10, 20, 15, 20, 10, 20, width);
+  g15r_drawSprite (canvas, buf, 100, 20, 25, 20, 100, 20, width);
+  updateScreen ();
+  sleep (3);
 
   g15r_clearScreen (canvas, 0);
   g15r_pixelOverlay (canvas, 0, 0, 160, 43, logo_data);
+  updateScreen ();
+  sleep (3);
+
+  g15r_clearScreen (canvas, 0);
+  g15r_drawIcon (canvas, buf, 0, 0, width, height);
+  updateScreen ();
+  sleep (3);
+
+  g15r_clearScreen (canvas, 0);
+  g15r_drawBigNum (canvas, 0, 0, 12, 42, 3);
+  g15r_drawBigNum (canvas, 18, 0, 30, 42, 9);
   updateScreen ();
   sleep (3);
 
