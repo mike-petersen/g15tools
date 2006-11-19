@@ -543,6 +543,10 @@ g15r_drawBigNum (g15canvas * canvas, unsigned int x1, unsigned int y1, unsigned 
 {
     x1 += 2;
     x2 -= 2;
+    
+    int tmp_num = num + 48;
+    if ((tmp_num > 47) && (tmp_num < 58))
+      num = tmp_num;
 
     switch(num){
         case 45: 
