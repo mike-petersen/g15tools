@@ -174,8 +174,8 @@ main (int argc, char *argv[])
   sleep (3);
 
   g15r_clearScreen (canvas, 0);
-  g15r_drawBigNum (canvas, 0, 0, 20, 22, '3');
-  g15r_drawBigNum (canvas, 25, 0, 45, 42, '0');
+  g15r_drawBigNum (canvas, 0, 0, 20, 22, 3);
+  g15r_drawBigNum (canvas, 25, 0, 45, 42, 0);
   updateScreen ();
   sleep (3);
 
