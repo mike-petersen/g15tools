@@ -539,68 +539,68 @@ g15r_loadWbmpToBuf(char *buf, char *filename, int *img_width, int *img_height, i
  * \param num The number to be drawn.
  */ 
 void 
-g15r_drawBigNum (g15canvas * canvas, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, int num)
+g15r_drawBigNum (g15canvas * canvas, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, int color, int num)
 {
     x1 += 2;
     x2 -= 2;
     
     switch(num){
         case 0:
-            g15r_pixelBox (canvas, x1, y1, x2, y2 , G15_COLOR_BLACK, 1, 1);
-            g15r_pixelBox (canvas, x1 +5, y1 +5, x2 -5, y2 - 6, G15_COLOR_WHITE, 1, 1);
+            g15r_pixelBox (canvas, x1, y1, x2, y2 , color, 1, 1);
+            g15r_pixelBox (canvas, x1 +5, y1 +5, x2 -5, y2 - 6, 1 - color, 1, 1);
             break;
         case 1: 
-            g15r_pixelBox (canvas, x2-5, y1, x2, y2 , G15_COLOR_BLACK, 1, 1);
-            g15r_pixelBox (canvas, x1, y1, x2 -5, y2, G15_COLOR_WHITE, 1, 1);
+            g15r_pixelBox (canvas, x2-5, y1, x2, y2 , color, 1, 1);
+            g15r_pixelBox (canvas, x1, y1, x2 -5, y2, 1 - color, 1, 1);
             break;
         case 2:
-            g15r_pixelBox (canvas, x1, y1, x2, y2 , G15_COLOR_BLACK, 1, 1);
-            g15r_pixelBox (canvas, x1, y1+5, x2 -5, y1+((y2/2)-3), G15_COLOR_WHITE, 1, 1);
-            g15r_pixelBox (canvas, x1+5, y1+((y2/2)+3), x2 , y2-6, G15_COLOR_WHITE, 1, 1);
+            g15r_pixelBox (canvas, x1, y1, x2, y2 , color, 1, 1);
+            g15r_pixelBox (canvas, x1, y1+5, x2 -5, y1+((y2/2)-3), 1 - color, 1, 1);
+            g15r_pixelBox (canvas, x1+5, y1+((y2/2)+3), x2 , y2-6, 1 - color, 1, 1);
             break;
         case 3:
-            g15r_pixelBox (canvas, x1, y1, x2, y2 , G15_COLOR_BLACK, 1, 1);
-            g15r_pixelBox (canvas, x1, y1+5, x2 -5, y1+((y2/2)-3), G15_COLOR_WHITE, 1, 1);
-            g15r_pixelBox (canvas, x1, y1+((y2/2)+3), x2-5 , y2-6, G15_COLOR_WHITE, 1, 1);
+            g15r_pixelBox (canvas, x1, y1, x2, y2 , color, 1, 1);
+            g15r_pixelBox (canvas, x1, y1+5, x2 -5, y1+((y2/2)-3), 1 - color, 1, 1);
+            g15r_pixelBox (canvas, x1, y1+((y2/2)+3), x2-5 , y2-6, 1 - color, 1, 1);
             break;
         case 4:
-            g15r_pixelBox (canvas, x1, y1, x2, y2 , G15_COLOR_BLACK, 1, 1);
-            g15r_pixelBox (canvas, x1, y1+((y2/2)+3), x2 -5, y2, G15_COLOR_WHITE, 1, 1);
-            g15r_pixelBox (canvas, x1+5, y1, x2-5 , y1+((y2/2)-3), G15_COLOR_WHITE, 1, 1);
+            g15r_pixelBox (canvas, x1, y1, x2, y2 , color, 1, 1);
+            g15r_pixelBox (canvas, x1, y1+((y2/2)+3), x2 -5, y2, 1 - color, 1, 1);
+            g15r_pixelBox (canvas, x1+5, y1, x2-5 , y1+((y2/2)-3), 1 - color, 1, 1);
             break;
         case 5:
-            g15r_pixelBox (canvas, x1, y1, x2, y2 , G15_COLOR_BLACK, 1, 1);
-            g15r_pixelBox (canvas, x1+5, y1+5, x2 , y1+((y2/2)-3), G15_COLOR_WHITE, 1, 1);
-            g15r_pixelBox (canvas, x1, y1+((y2/2)+3), x2-5 , y2-6, G15_COLOR_WHITE, 1, 1);
+            g15r_pixelBox (canvas, x1, y1, x2, y2 , color, 1, 1);
+            g15r_pixelBox (canvas, x1+5, y1+5, x2 , y1+((y2/2)-3), 1 - color, 1, 1);
+            g15r_pixelBox (canvas, x1, y1+((y2/2)+3), x2-5 , y2-6, 1 - color, 1, 1);
             break;
         case 6:
-            g15r_pixelBox (canvas, x1, y1, x2, y2 , G15_COLOR_BLACK, 1, 1);
-            g15r_pixelBox (canvas, x1+5, y1+5, x2 , y1+((y2/2)-3), G15_COLOR_WHITE, 1, 1);
-            g15r_pixelBox (canvas, x1+5, y1+((y2/2)+3), x2-5 , y2-6, G15_COLOR_WHITE, 1, 1);
+            g15r_pixelBox (canvas, x1, y1, x2, y2 , color, 1, 1);
+            g15r_pixelBox (canvas, x1+5, y1+5, x2 , y1+((y2/2)-3), 1 - color, 1, 1);
+            g15r_pixelBox (canvas, x1+5, y1+((y2/2)+3), x2-5 , y2-6, 1 - color, 1, 1);
             break;
         case 7:
-            g15r_pixelBox (canvas, x1, y1, x2, y2 , G15_COLOR_BLACK, 1, 1);
-            g15r_pixelBox (canvas, x1, y1+5, x2 -5, y2, G15_COLOR_WHITE, 1, 1);
+            g15r_pixelBox (canvas, x1, y1, x2, y2 , color, 1, 1);
+            g15r_pixelBox (canvas, x1, y1+5, x2 -5, y2, 1 - color, 1, 1);
             break;
         case 8:
-            g15r_pixelBox (canvas, x1, y1, x2, y2 , G15_COLOR_BLACK, 1, 1);
-            g15r_pixelBox (canvas, x1+5, y1+5, x2-5 , y1+((y2/2)-3), G15_COLOR_WHITE, 1, 1);
-            g15r_pixelBox (canvas, x1+5, y1+((y2/2)+3), x2-5 , y2-6, G15_COLOR_WHITE, 1, 1);
+            g15r_pixelBox (canvas, x1, y1, x2, y2 , color, 1, 1);
+            g15r_pixelBox (canvas, x1+5, y1+5, x2-5 , y1+((y2/2)-3), 1 - color, 1, 1);
+            g15r_pixelBox (canvas, x1+5, y1+((y2/2)+3), x2-5 , y2-6, 1 - color, 1, 1);
             break;
         case 9:
-            g15r_pixelBox (canvas, x1, y1, x2, y2 , G15_COLOR_BLACK, 1, 1);
-            g15r_pixelBox (canvas, x1+5, y1+5, x2-5 , y1+((y2/2)-3), G15_COLOR_WHITE, 1, 1);
-            g15r_pixelBox (canvas, x1, y1+((y2/2)+3), x2-5 , y2, G15_COLOR_WHITE, 1, 1);
+            g15r_pixelBox (canvas, x1, y1, x2, y2 , color, 1, 1);
+            g15r_pixelBox (canvas, x1+5, y1+5, x2-5 , y1+((y2/2)-3), 1 - color, 1, 1);
+            g15r_pixelBox (canvas, x1, y1+((y2/2)+3), x2-5 , y2, 1 - color, 1, 1);
             break;
         case 10: 
-            g15r_pixelBox (canvas, x2-5, y1+5, x2, y1+10 , G15_COLOR_BLACK, 1, 1);
-            g15r_pixelBox (canvas, x2-5, y2-10, x2, y2-5 , G15_COLOR_BLACK, 1, 1);
+            g15r_pixelBox (canvas, x2-5, y1+5, x2, y1+10 , color, 1, 1);
+            g15r_pixelBox (canvas, x2-5, y2-10, x2, y2-5 , color, 1, 1);
             break;
         case 11: 
-            g15r_pixelBox (canvas, x1, y1+((y2/2)-2), x2, y1+((y2/2)+2), G15_COLOR_BLACK, 1, 1);
+            g15r_pixelBox (canvas, x1, y1+((y2/2)-2), x2, y1+((y2/2)+2), color, 1, 1);
             break;
         case 12:
-            g15r_pixelBox (canvas, x2-5, y2-5, x2, y2 , G15_COLOR_BLACK, 1, 1);
+            g15r_pixelBox (canvas, x2-5, y2-5, x2, y2 , color, 1, 1);
             break;
     }
 }

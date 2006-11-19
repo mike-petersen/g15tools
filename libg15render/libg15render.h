@@ -80,7 +80,7 @@ void g15r_drawSprite(g15canvas *canvas, char *buf, int my_x, int my_y, int width
 /** \brief Load a wbmp file into a buffer*/
 int g15r_loadWbmpToBuf(char *buf, char *filename, int *img_width, int *img_height, int maxlen);
 /** \brief Draw a large number*/
-void g15r_drawBigNum (g15canvas * canvas, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, int num);
+void g15r_drawBigNum (g15canvas * canvas, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, int color, int num);
 
 /** \brief Gets the value of the pixel at (x, y)*/
   int g15r_getPixel (g15canvas * canvas, unsigned int x, unsigned int y);
