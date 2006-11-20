@@ -363,7 +363,7 @@ int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
 {
   unsigned char buffer[9];
   
-  int ret = usb_bulk_read(keyboard_device, 0x81, (char*)buffer, 9, timeout);
+  int ret = usb_interrupt_read(keyboard_device, 0x81, (char*)buffer, 9, timeout);
   if (ret == 9)
   {
     if (buffer[0] == 1)
