@@ -18,11 +18,24 @@
 
 #include "libg15.h"
 #include <stdio.h>
+#include <stdarg.h>
 #include <usb.h>
 #include <string.h>
 
 static usb_dev_handle *keyboard_device = 0;
+/* #define DEBUG */
+/* debugging wrapper */
+int g15_log (FILE *fd, const char *fmt, ...) {
 
+#ifdef DEBUG
+   va_list argp;
+   va_start (argp, fmt);
+       vfprintf(fd,fmt,argp);
+   va_end (argp);
+#endif
+   return 0;
+}
+                                       
 static int initLibUsb()
 {
   usb_init();
@@ -56,14 +69,14 @@ static usb_dev_handle * findAndOpenG15()
         char name_buffer[65535];
         name_buffer[0] = 0;
         usb_dev_handle *devh = 0;
-        printf("Found g15, trying to open it\n");
+        g15_log(stderr,"Found g15, trying to open it\n");
         devh = usb_open(dev);
         
   
         if (!devh)
         {
-          fprintf(stderr, "Error, could not open the keyboard\n");
-          fprintf(stderr, "Perhaps you dont have enough permissions to access it\n");
+          g15_log(stderr, "Error, could not open the keyboard\n");
+          g15_log(stderr, "Perhaps you dont have enough permissions to access it\n");
           return 0;
         }
   
@@ -91,17 +104,17 @@ static usb_dev_handle * findAndOpenG15()
           }
           else
           {
-            fprintf(stderr,"Sorry, I could not detached the driver, giving up\n");
+            g15_log(stderr,"Sorry, I could not detached the driver, giving up\n");
             return 0;
           }
 
         }
-        printf("Debug: %s\n",name_buffer);
+        g15_log(stderr,"Debug: %s\n",name_buffer);
 #endif  
         ret = usb_set_configuration(devh, 1);
         if (ret)
         {
-          fprintf(stderr,"Error setting the configuration, this is fatal\n");
+          g15_log(stderr,"Error setting the configuration, this is fatal\n");
           return 0;
         }
   
@@ -111,16 +124,16 @@ static usb_dev_handle * findAndOpenG15()
         
         if (ret)
         {
-          fprintf(stderr,"Error claiming interface, good day cruel world\n");
+          g15_log(stderr,"Error claiming interface, good day cruel world\n");
           return 0;
         }
         usleep(25*1000);
-        printf("Done opening the keyboard\n");
+        g15_log(stderr,"Done opening the keyboard\n");
         return devh;
       }
     }  
   }
-  fprintf(stderr, "Error, keyboard not found, is it plugged in?\n");
+  g15_log(stderr, "Error, keyboard not found, is it plugged in?\n");
   return 0;
 }
 
@@ -195,7 +208,7 @@ int writePixmapToLCD(unsigned char const *data)
   ret = usb_interrupt_write(keyboard_device, 2, (char*)lcd_buffer, G15_BUFFER_LEN, 10000);
   if (ret != G15_BUFFER_LEN)
   {
-    fprintf(stderr, "Error writing pixmap to lcd, return value is %d instead of %d\n",ret,G15_BUFFER_LEN);
+    g15_log(stderr, "Error writing pixmap to lcd, return value is %d instead of %d\n",ret,G15_BUFFER_LEN);
     return G15_ERROR_WRITING_PIXMAP;
   }
   return 0;
