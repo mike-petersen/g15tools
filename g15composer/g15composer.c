@@ -63,6 +63,7 @@ void
 		fprintf (stderr, "Error: Could not create FIFO %s, aborting.\n", param->fifo_filename);
 		param->leaving = 1;
 		param->keepFifo = 1;
+		free (param);
 		pthread_exit (NULL);
 	  }
 	chmod (param->fifo_filename, mode);
@@ -113,13 +114,19 @@ void
 
 	if (!param->background)
 	  {
- 	  	g15_close_screen (param->g15screen_fd);
-		free (param->canvas);
+		if (param->g15screen_fd)
+ 	  	  g15_close_screen (param->g15screen_fd);
+		if (param->canvas != NULL)
+		  free (param->canvas);
 	  }
+
 	yylex_destroy (param->scanner);
+
 	if (param->keepFifo == 0)
 	  unlink (param->fifo_filename);
+
 	free (param);
+	
 	pthread_exit(NULL);
 }
 
