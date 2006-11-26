@@ -60,9 +60,10 @@ void
 	mode_t mode = S_IRUSR | S_IWUSR | S_IWGRP | S_IWOTH;
   	if (mkfifo (param->fifo_filename, mode))
   	  {
-		fprintf (stderr, "Error: Could not create FIFO %s, aborting", param->fifo_filename);
+		fprintf (stderr, "Error: Could not create FIFO %s, aborting.\n", param->fifo_filename);
 		param->leaving = 1;
 		param->keepFifo = 1;
+		pthread_exit (NULL);
 	  }
 	chmod (param->fifo_filename, mode);
 
