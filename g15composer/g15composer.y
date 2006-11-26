@@ -61,6 +61,11 @@ int yydebug = 0;
 %token T_DRAWCIRCLE
 %token T_DRAWRBOX
 %token T_DRAWBAR
+%token T_DRAWNUM
+%token T_DRAWICON
+%token T_DRAWSPRITE
+%token T_WBMPSPLASH
+%token T_WBMPLOAD
 %token T_MODECACHE
 %token T_MODEREV
 %token T_MODEXOR
@@ -102,6 +107,7 @@ nt_commands: /* empty */
 nt_command:
 	nt_pixel_command 
 	| nt_draw_command 
+	| nt_wbmp_command
 	| nt_mode_command 
 	| nt_font_command 
 	| nt_text_command
@@ -257,6 +263,15 @@ nt_draw_command:
 	}
 
 	|
+
+	T_DRAWNUM T_NUMBER T_NUMBER T_NUMBER T_NUMBER T_NUMBER T_NUMBER T_NEWLINE
+	{
+		if (((struct parserData *)param)->background == 1)
+		  return (0);
+		g15r_drawBigNum (((struct parserData *)param)->canvas, $2, $3, $4, $5, $6, $7);
+	}
+
+	|
 	nt_drawcircle
 	|
 	nt_drawrbox
@@ -315,6 +330,15 @@ nt_drawbar:
 		if (((struct parserData *)param)->background == 1)
 		  return (0);
 		g15r_drawBar (((struct parserData *)param)->canvas, $2, $3, $4, $5, $6, $7, $8, $9);
+	}
+	;
+
+nt_wbmp_command:
+	T_WBMPSPLASH nt_string T_NEWLINE
+	{
+		if (((struct parserData *)param)->background == 1)
+		  return (0);
+		g15r_loadWbmpSplash (((struct parserData *)param)->canvas, $2);
 	}
 	;
 

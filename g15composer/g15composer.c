@@ -119,7 +119,7 @@ void
 	if (param->keepFifo == 0)
 	  unlink (param->fifo_filename);
 	free (param);
-	pthread_exit(pthread_self());
+	pthread_exit(NULL);
 }
 
 int 

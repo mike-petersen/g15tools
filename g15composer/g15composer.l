@@ -43,6 +43,11 @@
 ^DC			return T_DRAWCIRCLE;
 ^DR			return T_DRAWRBOX;
 ^DB			return T_DRAWBAR;
+^DN 			return T_DRAWNUM;
+^DI 			return T_DRAWICON;
+^DS 			return T_DRAWSPRITE;
+^WS 			return T_WBMPSPLASH;
+^WL 			return T_WBMPLOAD;
 ^MC			return T_MODECACHE;
 ^MR			return T_MODEREV;
 ^MX			return T_MODEXOR;
