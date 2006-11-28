@@ -73,12 +73,20 @@ DR X1 Y1 X2 Y2 C F
    F is optional and defaults to F=0
    Note that the syntax has changed, the position of C and F has been swapped
    
-   
 DB X1 Y1 X2 Y2 C N M T
    Draws a percentage or progress bar from (X1,Y1) to (X2,Y2) using color C
    The bar will be filled with N units out of M
    T sets the type of the bar, valid values are 1, 2, or 3
    T is optional and defaults to T=1
+
+DN X1 Y1 X2 Y2 C N
+   Draws a big number N in the area bounded by (X1,Y2) and (X2,Y2) using color C
+
+*** WBMP Commands:
+
+WS "/path/to/image"
+   Loads a WBMP image from /path/to/image and displays it on the screen
+   Image must be 160x43 as it is loaded directly into the LCD buffer
    
 *** Mode Commands:
 

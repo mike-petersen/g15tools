@@ -88,6 +88,15 @@ DB X1 Y1 X2 Y2 C N M T
    T sets the type of the bar, valid values are 1, 2, or 3
    T is optional and defaults to T=1
 
+DN X1 Y1 X2 Y2 C N
+   Draws a big number N in the area bounded by (X1,Y2) and (X2,Y2) using color C
+
+*** WBMP Commands:
+
+WS "/path/to/image"
+   Loads a WBMP image from /path/to/image and displays it on the screen
+   Image must be 160x43 as it is loaded directly into the LCD buffer
+
 *** Mode Commands:
 
 MC 0|1
