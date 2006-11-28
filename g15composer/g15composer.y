@@ -272,6 +272,42 @@ nt_draw_command:
 	}
 
 	|
+
+	T_DRAWICON T_NUMBER T_NUMBER T_NUMBER T_NEWLINE
+	{
+		if (((struct parserData *)param)->background == 1)
+		  return (0);
+		
+		struct bufItem *buf = ((struct parserData *)param)->buflist->first_buf;
+
+		while ((buf->id != $2) && (buf != NULL))
+		  buf = buf->next;
+
+		if (buf == NULL)
+		  return (-1);
+
+		g15r_drawIcon (((struct parserData *)param)->canvas, buf->buffer, $3, $4, buf->width, buf->height);
+	}
+
+	|
+
+	T_DRAWSPRITE T_NUMBER T_NUMBER T_NUMBER T_NUMBER T_NUMBER T_NUMBER T_NUMBER T_NEWLINE
+	{
+		if (((struct parserData *)param)->background == 1)
+		  return (0);
+		
+		struct bufItem *buf = ((struct parserData *)param)->buflist->first_buf;
+
+		while ((buf->id != $2) && (buf != NULL))
+		  buf = buf->next;
+
+		if (buf == NULL)
+		  return (-1);
+
+		g15r_drawSprite (((struct parserData *)param)->canvas, buf->buffer, $3, $4, $5, $6, $7, $8, buf->width);
+	}
+
+	|
 	nt_drawcircle
 	|
 	nt_drawrbox
@@ -339,6 +375,21 @@ nt_wbmp_command:
 		if (((struct parserData *)param)->background == 1)
 		  return (0);
 		g15r_loadWbmpSplash (((struct parserData *)param)->canvas, $2);
+		free ($2);
+	}
+
+	|
+
+	T_WBMPLOAD T_NUMBER nt_string T_NEWLINE
+	{
+		if (((struct parserData *)param)->background == 1)
+		  return (0);
+		int width = 0;
+		int height = 0;
+
+		char *buffer = g15r_loadWbmpToBuf ($3, &width, &height);
+		int ret = add_buf (((struct parserData *)param)->buflist, $2, buffer, width, height);
+		free ($3);
 	}
 	;
 

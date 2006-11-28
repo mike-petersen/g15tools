@@ -82,12 +82,22 @@ DB X1 Y1 X2 Y2 C N M T
 DN X1 Y1 X2 Y2 C N
    Draws a big number N in the area bounded by (X1,Y2) and (X2,Y2) using color C
 
+DI B X Y
+   Draws a WBMP icon from buffer B at (X,Y)
+
+DS B X Y W H OX OY
+   Draws a WBMP sprite from buffer B at (X,Y) with size WxH
+   Sprite is drawn from buffer offset by (OX,OY)
+
 *** WBMP Commands:
 
 WS "/path/to/image"
    Loads a WBMP image from /path/to/image and displays it on the screen
    Image must be 160x43 as it is loaded directly into the LCD buffer
    
+WL B "/path/to/image"
+   Loads a WBMP image from /path/to/image into buffer number B
+
 *** Mode Commands:
 
 MC 0|1

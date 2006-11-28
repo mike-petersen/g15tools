@@ -85,6 +85,7 @@ void
 		param->canvas->mode_reverse = 0;
 		updateScreen (param->canvas, param->g15screen_fd, 1);
 		g15r_clearScreen (param->canvas, G15_COLOR_WHITE);
+		param->buflist = new_bufList ();
 	  }
 
 	if ((yyset_in (fopen(param->fifo_filename, "r"), param->scanner)) == 0)
@@ -167,6 +168,8 @@ new_strList ()
 {
 	struct strList *new;
 	new = (struct strList *) malloc (sizeof (struct strList));
+	if (new == NULL)
+	  return NULL;
 	new->first_string = 0;
 	new->last_string = 0;
 
@@ -178,6 +181,8 @@ add_string (struct strList *list, char *string)
 {
 	struct strItem *new;
 	new = (struct strItem *) malloc (sizeof (struct strItem));
+	if (new == NULL)
+	  return;
 	new->string = strdup(string);
 	new->next_string = NULL;
 
@@ -187,6 +192,53 @@ add_string (struct strList *list, char *string)
 	  list->last_string->next_string = new;
 	list->last_string = new;
 	free (string);
+}
+
+struct bufList *
+new_bufList ()
+{
+	struct bufList *new;
+	new = (struct bufList *) malloc (sizeof (struct bufList));
+	if (new == NULL)
+	  return NULL;
+	new->first_buf = 0;
+	new->last_buf = 0;
+
+	return new;
+}
+
+int
+add_buf (struct bufList *bufList, int id, char *buffer, int width, int height)
+{
+	struct bufItem *new;
+	struct bufItem *tmp;
+	
+	tmp = bufList->first_buf;
+
+	while (tmp != 0)
+	  {
+	  	if (tmp->id == id)
+		  return 1;
+		tmp = tmp->next;
+	  }
+
+	new = (struct bufItem *) malloc (sizeof (struct bufItem));
+	if (new == NULL)
+	  return -1;
+	new->buffer = buffer;
+	new->id = id;
+	new->width = width;
+	new->height = height;
+	new->next = NULL;
+
+	if (bufList->first_buf == 0)
+	  bufList->first_buf = new;
+	else
+	  bufList->last_buf->next = new;
+
+	bufList->last_buf = new;
+
+	return 0;
 }
 
 void

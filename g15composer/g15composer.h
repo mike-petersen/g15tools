@@ -34,6 +34,24 @@ struct strItem
 	struct strItem *next_string;
 };
 
+struct bufList;
+struct bufItem;
+
+struct bufList
+{
+	struct bufItem *first_buf;
+	struct bufItem *last_buf;
+};
+
+struct bufItem
+{
+	char *buffer;
+	int id;
+	int width;
+	int height;
+	struct bufItem *next;
+};
+
 struct parserData
 {
 	int background;
@@ -47,6 +65,8 @@ struct parserData
 	int keepFifo;
 	void *scanner;
 	pthread_t thread;
+	struct bufList *buflist;
+	struct bufItem *bufitem;
 };
 
 typedef struct strList *List;
@@ -57,6 +77,8 @@ void printUsage ();
 void *threadEntry (void *arg);
 struct strList * new_strList ();
 void add_string (struct strList *strList, char *string);
+struct bufList * new_bufList ();
+int add_buf (struct bufList *bufList, int id, char *buffer, int width, int height);
 void updateScreen (g15canvas *canvas, int g15screen_fd, int force);
 int getDispCol (int len, int size, int type);
 
