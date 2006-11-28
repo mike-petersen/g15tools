@@ -78,7 +78,7 @@ void g15r_drawIcon(g15canvas *canvas, char *buf, int my_x, int my_y, int width, 
 /** \brief Draw a sprite to the screen from a wbmp buffer*/
 void g15r_drawSprite(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int height, int start_x, int start_y, int total_width);
 /** \brief Load a wbmp file into a buffer*/
-int g15r_loadWbmpToBuf(char *buf, char *filename, int *img_width, int *img_height, int maxlen);
+char *g15r_loadWbmpToBuf(char *filename, int *img_width, int *img_height);
 /** \brief Draw a large number*/
 void g15r_drawBigNum (g15canvas * canvas, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, int color, int num);
 

@@ -154,9 +154,8 @@ main (int argc, char *argv[])
   sleep (3);
 
   g15r_clearScreen (canvas, 0);
-  char *buf = (char *)malloc (G15_BUFFER_LEN);
   int width, height;
-  g15r_loadWbmpToBuf (buf, "./splash.wbmp", &width, &height, G15_BUFFER_LEN);
+  char *buf = g15r_loadWbmpToBuf ("./splash.wbmp", &width, &height);
   g15r_drawSprite (canvas, buf, 30, 10, 43, 20, 30, 10, width);
   g15r_drawSprite (canvas, buf, 10, 20, 15, 20, 10, 20, width);
   g15r_drawSprite (canvas, buf, 100, 20, 25, 20, 100, 20, width);

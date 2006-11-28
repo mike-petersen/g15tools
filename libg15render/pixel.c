@@ -384,14 +384,15 @@ g15r_drawBar (g15canvas * canvas, int x1, int y1, int x2, int y2, int color,
 int 
 g15r_loadWbmpSplash(g15canvas *canvas, char *filename)
 {
-    int retval;
     int width=0, height=0;
+    char *buf;
      
-    retval = g15r_loadWbmpToBuf(canvas->buffer,filename,
-                                &width,
-                                &height,
-                                G15_BUFFER_LEN);
-    return retval;
+    buf = g15r_loadWbmpToBuf(filename,
+                             &width,
+                             &height);
+
+    memcpy (canvas->buffer, buf, G15_BUFFER_LEN);
+    return 0;
 }
 
 /**
@@ -456,31 +457,27 @@ g15r_drawSprite(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int
 }
 
 /**
- * basic wbmp loader - loads wbmp into pre-prepared buf.
+ * basic wbmp loader - loads a wbmp image into a buffer.
  *
- * \param buf A pointer to the buffer into which the wbmp will be loaded.
  * \param filename A string holding the path to the wbmp to be loaded.
  * \param img_width A pointer to an int that will hold the image width on return.
  * \param img_height A pointer to an int that will hold the image height on return.
- * \param maxlen The maximum number of bytes that should be read from filename.
  */
-int 
-g15r_loadWbmpToBuf(char *buf, char *filename, int *img_width, int *img_height, int maxlen)
+char * 
+g15r_loadWbmpToBuf(char *filename, int *img_width, int *img_height)
 {
     int wbmp_fd;
     int retval;
     int x,y,val;
+    char *buf;
     unsigned int buflen,header=4;
     unsigned char headerbytes[5];
     unsigned int pixel_offset = 0;
     unsigned int byte_offset, bit_offset;
     
-    if(maxlen<5 || buf == NULL)
-        return -1;
-    
     wbmp_fd=open(filename,O_RDONLY);
     if(!wbmp_fd){
-        return -1;
+        return NULL;
     }
     
     retval=read(wbmp_fd,headerbytes,5);
@@ -493,8 +490,6 @@ g15r_loadWbmpToBuf(char *buf, char *filename, int *img_width, int *img_height, i
         } else {
             *img_width = headerbytes[2];
             *img_height = headerbytes[3];
-            header = 4;
-            buf[0]=headerbytes[4];
         }
 
 	int byte_width = *img_width / 8;
@@ -502,10 +497,16 @@ g15r_loadWbmpToBuf(char *buf, char *filename, int *img_width, int *img_height, i
 	  byte_width++;
 
         buflen = byte_width * (*img_height);
-        if(buflen<maxlen)
-            retval=read(wbmp_fd,buf+(5-header),buflen);
-        else
-            retval = -1;
+
+	buf = (char *)malloc (buflen);
+	if (buf == NULL)
+	  return NULL;
+
+	if (header == 4)
+          buf[0]=headerbytes[4];
+
+        retval=read(wbmp_fd,buf+(5-header),buflen);
+
         close(wbmp_fd);
     }
 
@@ -525,7 +526,7 @@ g15r_loadWbmpToBuf(char *buf, char *filename, int *img_width, int *img_height, i
 		  buf[byte_offset] = buf[byte_offset] & ~(1 << bit_offset);
 	}
 
-    return retval;
+    return buf;
 }
 
 /**
