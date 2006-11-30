@@ -1,3 +1,8 @@
+3.1
+* Add support for new WBMP and bignum routines in libg15render-1.2
+* Improve FIFO handling to recover dangling FIFOs
+* Add -u/--user command line option to change effective UID/GID
+
 3.0
 * Reimplement g15composer using flex and bison
 * Text may now be right justified with the TO command
