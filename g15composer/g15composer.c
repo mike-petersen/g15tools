@@ -195,11 +195,10 @@ main (int argc, char *argv[])
 		dirc = strdup (param->fifo_filename);
 		dname = dirname (dirc);
 
-		if (!strcmp (dname, "."))
+		if (strncmp (dname, "/", 1))
 		  {
-			char *basec, *bname, cwd[256];
-			basec = strdup (param->fifo_filename);
-			bname = basename (basec);
+			char *bname, cwd[256];
+			bname = strdup (param->fifo_filename);
 			getcwd (cwd, 256);
 			sprintf (param->fifo_filename, "%s/%s", cwd, bname);
 		  }
