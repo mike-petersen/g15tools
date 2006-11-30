@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <pwd.h>
 #include <fcntl.h>
+#include <libgen.h>
 #include <libg15.h>
 #include <libg15render.h>
 #include <g15daemon_client.h>
@@ -190,6 +191,29 @@ main (int argc, char *argv[])
 	
 	if (param->fifo_filename != NULL)
 	  {
+		char *dirc, *dname;
+		dirc = strdup (param->fifo_filename);
+		dname = dirname (dirc);
+
+		if (!strcmp (dname, "."))
+		  {
+			char *basec, *bname, cwd[256];
+			basec = strdup (param->fifo_filename);
+			bname = basename (basec);
+			getcwd (cwd, 256);
+			sprintf (param->fifo_filename, "%s/%s", cwd, bname);
+		  }
+
+		int tmpfd = open ("/var/run/g15composer", O_WRONLY | O_NDELAY);
+		if (tmpfd > 0)
+		  {
+			FILE *control = fdopen (tmpfd, "w");
+			fprintf (control, "SN \"%s\"\n", param->fifo_filename);
+			fclose (control);
+			close (tmpfd);
+			return 0;
+		  }
+
 		struct passwd *nobody;
 
 		if (strlen ((char *)user) == 0)
