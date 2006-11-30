@@ -22,6 +22,9 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <pthread.h>
+#include <errno.h>
+#include <pwd.h>
+#include <fcntl.h>
 #include <libg15.h>
 #include <libg15render.h>
 #include <g15daemon_client.h>
@@ -53,20 +56,39 @@ void
 {
 	struct parserData *param = (struct parserData *)arg;
 	extern short g15c_logo_data[6880];
+	int tmpfd, errno;
 
 	param->leaving = 0;
-	param->keepFifo = 0;
 
-	mode_t mode = S_IRUSR | S_IWUSR | S_IWGRP | S_IWOTH;
-  	if (mkfifo (param->fifo_filename, mode))
-  	  {
-		fprintf (stderr, "Error: Could not create FIFO %s, aborting.\n", param->fifo_filename);
-		param->leaving = 1;
-		param->keepFifo = 1;
+	mode_t mode = S_IRUSR | S_IWUSR | S_IWGRP;
+	tmpfd = open (param->fifo_filename, O_WRONLY | O_NDELAY);
+	if (tmpfd == -1 && errno == ENOENT)
+	  {
+  		if (mkfifo (param->fifo_filename, mode))
+  		  {
+			fprintf (stderr, "Error: Could not create FIFO %s, aborting.\n", param->fifo_filename);
+			free (param);
+			close (tmpfd);
+			pthread_exit (NULL);
+		  }
+		chmod (param->fifo_filename, mode);
+	  }
+	else if (tmpfd == -1 && errno != ENXIO)
+	  {
+	  	fprintf (stderr, "Error: Unable to access %s, aborting.\n", param->fifo_filename);
 		free (param);
+		close (tmpfd);
 		pthread_exit (NULL);
 	  }
-	chmod (param->fifo_filename, mode);
+	else if (tmpfd > 0)
+	  {
+		fprintf (stderr, "Error: No usable FIFO %s, aborting.\n", param->fifo_filename);
+		free (param);
+		close (tmpfd);
+		pthread_exit (NULL);
+	  }
+
+	close (tmpfd);
 
 	yylex_init (&param->scanner);
 
@@ -123,7 +145,7 @@ void
 
 	yylex_destroy (param->scanner);
 
-	if (param->keepFifo == 0)
+	if (strncmp(param->fifo_filename, "/var/run/", 9))
 	  unlink (param->fifo_filename);
 
 	free (param);
@@ -138,6 +160,8 @@ main (int argc, char *argv[])
 	param->background = 0;
 	param->fifo_filename = NULL;
 
+	unsigned char user[256];
+
 	int i = 1;
 	for (i = 1; (i < argc && param->fifo_filename == NULL); ++i)
 	  {
@@ -150,6 +174,14 @@ main (int argc, char *argv[])
 	      {
 	        param->background = 1;
 	      }
+	    else if (!strcmp(argv[i], "-u") || !strcmp(argv[i], "--user")) 
+	      {
+    		if(argv[i+1]!=NULL)
+		  {
+            		strncpy((char*)user,argv[i+1],128);
+	            	i++;
+		  }
+	      }
 	    else
 	      {
 	        param->fifo_filename = argv[i];
@@ -158,9 +190,32 @@ main (int argc, char *argv[])
 	
 	if (param->fifo_filename != NULL)
 	  {
+		struct passwd *nobody;
+
+		if (strlen ((char *)user) == 0)
+		  nobody = getpwnam("nobody");
+		else
+		  nobody = getpwnam((char *)user);
+
+		if (nobody == NULL)
+		  nobody = getpwuid(geteuid());
+
+		if(nobody!=NULL) 
+		  {
+		        setegid(nobody->pw_gid);
+		  	seteuid(nobody->pw_uid);
+		  }
+
 	  	pthread_create (&param->thread, NULL, threadEntry, (void *) param);
 		pthread_join (param->thread, NULL);
 	  }
+	else
+	  {
+	  	fprintf (stderr, "Please provide a FIFO filename to read from.\n");
+		return -1;
+	  }
+	
+	return 0;
 }
 
 struct strList * 

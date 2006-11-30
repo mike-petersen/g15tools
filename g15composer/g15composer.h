@@ -62,7 +62,6 @@ struct parserData
 	char *fifo_filename;
 	int mkey_state;
 	int leaving;
-	int keepFifo;
 	void *scanner;
 	pthread_t thread;
 	struct bufList *buflist;
