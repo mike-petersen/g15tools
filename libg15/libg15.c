@@ -63,7 +63,8 @@ static usb_dev_handle * findAndOpenG15()
     for (dev = bus->devices; dev; dev = dev->next)
     {
 
-      if (dev->descriptor.idVendor == 0x046d && dev->descriptor.idProduct == 0x0c222)
+      if ((dev->descriptor.idVendor == 0x046d && dev->descriptor.idProduct == 0x0c222)  //G15 
+        ||(dev->descriptor.idVendor == 0x046d && dev->descriptor.idProduct == 0x0c225)) //G11 keyboard
       {
         int ret=0;
         char name_buffer[65535];
