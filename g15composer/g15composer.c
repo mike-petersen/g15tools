@@ -37,11 +37,11 @@
 #include "config.h"
 #endif
 
-int 
-yyerror (char *err) 
+int
+yyerror (char *err)
 {
-	fprintf (stderr, "Error: %s\n",err);
-	return (0);
+  fprintf (stderr, "Error: %s\n", err);
+  return (0);
 }
 
 void
@@ -52,321 +52,339 @@ printUsage ()
   fprintf (stdout, "Display composer for the Logitech G15 LCD\n");
 }
 
-void
-*threadEntry (void *arg)
+void *
+threadEntry (void *arg)
 {
-	struct parserData *param = (struct parserData *)arg;
-	extern short g15c_logo_data[6880];
-	int tmpfd, errno;
+  struct parserData *param = (struct parserData *) arg;
+  extern short g15c_logo_data[6880];
+  int tmpfd, errno;
 
-	param->leaving = 0;
+  param->leaving = 0;
 
-	mode_t mode = S_IRUSR | S_IWUSR | S_IWGRP;
-	tmpfd = open (param->fifo_filename, O_WRONLY | O_NDELAY);
-	if (tmpfd == -1 && errno == ENOENT)
-	  {
-  		if (mkfifo (param->fifo_filename, mode))
-  		  {
-			fprintf (stderr, "Error: Could not create FIFO %s, aborting.\n", param->fifo_filename);
-			free (param);
-			close (tmpfd);
-			pthread_exit (NULL);
-		  }
-		chmod (param->fifo_filename, mode);
-	  }
-	else if (tmpfd == -1 && errno != ENXIO)
-	  {
-	  	fprintf (stderr, "Error: Unable to access %s, aborting.\n", param->fifo_filename);
-		free (param);
-		close (tmpfd);
-		pthread_exit (NULL);
-	  }
-	else if (tmpfd > 0)
-	  {
-		fprintf (stderr, "Error: No usable FIFO %s, aborting.\n", param->fifo_filename);
-		free (param);
-		close (tmpfd);
-		pthread_exit (NULL);
-	  }
+  mode_t mode = S_IRUSR | S_IWUSR | S_IWGRP;
+  tmpfd = open (param->fifo_filename, O_WRONLY | O_NDELAY);
+  /* Create fifo if it does not exist */
+  if (tmpfd == -1 && errno == ENOENT)
+    {
+      if (mkfifo (param->fifo_filename, mode))
+	{
+	  fprintf (stderr, "Error: Could not create FIFO %s, aborting.\n",
+		   param->fifo_filename);
+	  free (param);
+	  close (tmpfd);
+	  pthread_exit (NULL);
+	}
+      chmod (param->fifo_filename, mode);
+    }
+  /* Exit if unable to access fifo */
+  else if (tmpfd == -1 && errno != ENXIO)
+    {
+      fprintf (stderr, "Error: Unable to access %s, aborting.\n",
+	       param->fifo_filename);
+      free (param);
+      close (tmpfd);
+      pthread_exit (NULL);
+    }
+  /* Exit if fifo is regular file or fifo being read */
+  else if (tmpfd > 0)
+    {
+      fprintf (stderr, "Error: No usable FIFO %s, aborting.\n",
+	       param->fifo_filename);
+      free (param);
+      close (tmpfd);
+      pthread_exit (NULL);
+    }
 
-	close (tmpfd);
+  close (tmpfd);
 
-	yylex_init (&param->scanner);
+  yylex_init (&param->scanner);
 
-	if (!param->background)
-  	  {
-		param->canvas = (g15canvas *) malloc (sizeof (g15canvas));
-		param->g15screen_fd = 0;
-	  	if ((param->g15screen_fd = new_g15_screen (G15_G15RBUF)) < 0)
-	    	  {
-	  		fprintf (stderr, "Sorry, can't connect to g15daemon\n");
-			param->leaving = 1;
-	    	  }
-		g15r_initCanvas (param->canvas);
-		param->canvas->mode_reverse = 1;
-		g15r_pixelOverlay (param->canvas, 0, 0, 160, 43, g15c_logo_data);
-		param->canvas->mode_reverse = 0;
-		updateScreen (param->canvas, param->g15screen_fd, 1);
-		g15r_clearScreen (param->canvas, G15_COLOR_WHITE);
-		param->buflist = new_bufList ();
-	  }
+  if (!param->background)
+    {
+      param->canvas = (g15canvas *) malloc (sizeof (g15canvas));
+      param->g15screen_fd = 0;
+      if ((param->g15screen_fd = new_g15_screen (G15_G15RBUF)) < 0)
+	{
+	  fprintf (stderr, "Sorry, can't connect to g15daemon\n");
+	  param->leaving = 1;
+	}
+      g15r_initCanvas (param->canvas);
+      param->canvas->mode_reverse = 1;
+      g15r_pixelOverlay (param->canvas, 0, 0, 160, 43, g15c_logo_data);
+      param->canvas->mode_reverse = 0;
+      updateScreen (param->canvas, param->g15screen_fd, 1);
+      g15r_clearScreen (param->canvas, G15_COLOR_WHITE);
+      param->buflist = new_bufList ();
+    }
 
-	if ((yyset_in (fopen(param->fifo_filename, "r"), param->scanner)) == 0)
-	  {
-	  	perror (param->fifo_filename);
-		param->leaving = 1;
-	  }
+  if ((yyset_in (fopen (param->fifo_filename, "r"), param->scanner)) == 0)
+    {
+      perror (param->fifo_filename);
+      param->leaving = 1;
+    }
 
-	int result = 0;
-	while (param->leaving == 0)
-	  {
-		result = yyparse(param);
-		fclose (yyget_in(param->scanner));
-		if (param->leaving == 0)
-		  {
-			if ((yyset_in(fopen (param->fifo_filename,"r"), param->scanner)) == 0)
-			  {
-			  	perror (param->fifo_filename);
-				param->leaving = 1;
-			  }
-			if (param->background == 1)
-			  continue;
-			if (!param->canvas->mode_cache)
-			  g15r_clearScreen (param->canvas, G15_COLOR_WHITE);
-		  }
-	  }
+  int result = 0;
+  while (param->leaving == 0)
+    {
+      result = yyparse (param);
+      fclose (yyget_in (param->scanner));
+      if (param->leaving == 0)
+	{
+	  if ((yyset_in (fopen (param->fifo_filename, "r"), param->scanner))
+	      == 0)
+	    {
+	      perror (param->fifo_filename);
+	      param->leaving = 1;
+	    }
+	  if (param->background == 1)
+	    continue;
+	  if (!param->canvas->mode_cache)
+	    g15r_clearScreen (param->canvas, G15_COLOR_WHITE);
+	}
+    }
 
-	if (!param->background)
-	  {
-		if (param->g15screen_fd)
- 	  	  g15_close_screen (param->g15screen_fd);
-		if (param->canvas != NULL)
-		  free (param->canvas);
-	  }
+  if (!param->background)
+    {
+      if (param->g15screen_fd)
+	g15_close_screen (param->g15screen_fd);
+      if (param->canvas != NULL)
+	free (param->canvas);
+    }
 
-	yylex_destroy (param->scanner);
+  yylex_destroy (param->scanner);
 
-	if (strncmp(param->fifo_filename, "/var/run/", 9))
-	  unlink (param->fifo_filename);
+  if (strncmp (param->fifo_filename, "/var/run/", 9))
+    unlink (param->fifo_filename);
 
-	free (param);
-	
-	pthread_exit(NULL);
+  free (param);
+
+  pthread_exit (NULL);
 }
 
-int 
+int
 main (int argc, char *argv[])
 {
-	struct parserData *param = (struct parserData *) malloc (sizeof (struct parserData));
-	param->background = 0;
-	param->fifo_filename = NULL;
+  struct parserData *param =
+    (struct parserData *) malloc (sizeof (struct parserData));
+  param->background = 0;
+  param->fifo_filename = NULL;
 
-	unsigned char user[256];
+  unsigned char user[256];
 
-	int i = 1;
-	for (i = 1; (i < argc && param->fifo_filename == NULL); ++i)
-	  {
-	    if (!strcmp (argv[i],"-h") || !strcmp (argv[i],"--help"))
-	      {
-	        printUsage ();
-	        return 0;
-	      }
-	    else if (!strcmp (argv[i],"-b"))
-	      {
-	        param->background = 1;
-	      }
-	    else if (!strcmp(argv[i], "-u") || !strcmp(argv[i], "--user")) 
-	      {
-    		if(argv[i+1]!=NULL)
-		  {
-            		strncpy((char*)user,argv[i+1],128);
-	            	i++;
-		  }
-	      }
-	    else
-	      {
-	        param->fifo_filename = argv[i];
-	      }
-	  }
-	
-	if (param->fifo_filename != NULL)
-	  {
-		char *dirc, *dname;
-		dirc = strdup (param->fifo_filename);
-		dname = dirname (dirc);
+  int i = 1;
+  for (i = 1; (i < argc && param->fifo_filename == NULL); ++i)
+    {
+      if (!strcmp (argv[i], "-h") || !strcmp (argv[i], "--help"))
+	{
+	  printUsage ();
+	  return 0;
+	}
+      else if (!strcmp (argv[i], "-b"))
+	{
+	  param->background = 1;
+	}
+      else if (!strcmp (argv[i], "-u") || !strcmp (argv[i], "--user"))
+	{
+	  if (argv[i + 1] != NULL)
+	    {
+	      strncpy ((char *) user, argv[i + 1], 128);
+	      i++;
+	    }
+	}
+      else
+	{
+	  param->fifo_filename = argv[i];
+	}
+    }
 
-		if (strncmp (dname, "/", 1))
-		  {
-			char *bname, cwd[256];
-			bname = strdup (param->fifo_filename);
-			getcwd (cwd, 256);
-			sprintf (param->fifo_filename, "%s/%s", cwd, bname);
-		  }
+  if (param->fifo_filename != NULL)
+    {
+      char *dirc, *dname;
+      dirc = strdup (param->fifo_filename);
+      dname = dirname (dirc);
 
-		int tmpfd = open ("/var/run/g15composer", O_WRONLY | O_NDELAY);
-		if (tmpfd > 0)
-		  {
-			FILE *control = fdopen (tmpfd, "w");
-			fprintf (control, "SN \"%s\"\n", param->fifo_filename);
-			fclose (control);
-			close (tmpfd);
-			return 0;
-		  }
+      if (strncmp (dname, "/", 1))
+	{
+	  char *bname, cwd[256];
+	  bname = strdup (param->fifo_filename);
+	  getcwd (cwd, 256);
+	  sprintf (param->fifo_filename, "%s/%s", cwd, bname);
+	}
 
-		struct passwd *nobody;
+      int tmpfd = open ("/var/run/g15composer", O_WRONLY | O_NDELAY);
+      if (tmpfd > 0)
+	{
+	  FILE *control = fdopen (tmpfd, "w");
+	  fprintf (control, "SN \"%s\"\n", param->fifo_filename);
+	  fclose (control);
+	  close (tmpfd);
+	  return 0;
+	}
 
-		if (strlen ((char *)user) == 0)
-		  nobody = getpwnam("nobody");
-		else
-		  nobody = getpwnam((char *)user);
+      struct passwd *nobody;
 
-		if (nobody == NULL)
-		  nobody = getpwuid(geteuid());
+      if (strlen ((char *) user) == 0)
+	nobody = getpwnam ("nobody");
+      else
+	nobody = getpwnam ((char *) user);
 
-		if(nobody!=NULL) 
-		  {
-		        setegid(nobody->pw_gid);
-		  	seteuid(nobody->pw_uid);
-		  }
+      if (nobody == NULL)
+	nobody = getpwuid (geteuid ());
 
-	  	pthread_create (&param->thread, NULL, threadEntry, (void *) param);
-		pthread_join (param->thread, NULL);
-	  }
-	else
-	  {
-	  	fprintf (stderr, "Please provide a FIFO filename to read from.\n");
-		return -1;
-	  }
-	
-	return 0;
+      if (nobody != NULL)
+	{
+	  setegid (nobody->pw_gid);
+	  seteuid (nobody->pw_uid);
+	}
+
+      pthread_create (&param->thread, NULL, threadEntry, (void *) param);
+      pthread_join (param->thread, NULL);
+    }
+  else
+    {
+      fprintf (stderr, "Please provide a FIFO filename to read from.\n");
+      return -1;
+    }
+
+  return 0;
 }
 
-struct strList * 
+struct strList *
 new_strList ()
 {
-	struct strList *new;
-	new = (struct strList *) malloc (sizeof (struct strList));
-	if (new == NULL)
-	  return NULL;
-	new->first_string = 0;
-	new->last_string = 0;
+  struct strList *new;
+  new = (struct strList *) malloc (sizeof (struct strList));
+  if (new == NULL)
+    return NULL;
+  new->first_string = NULL;
+  new->last_string = NULL;
 
-	return new;
+  return new;
 }
 
-void 
+void
 add_string (struct strList *list, char *string)
 {
-	struct strItem *new;
-	new = (struct strItem *) malloc (sizeof (struct strItem));
-	if (new == NULL)
-	  return;
-	new->string = strdup(string);
-	new->next_string = NULL;
+  struct strItem *new;
+  new = (struct strItem *) malloc (sizeof (struct strItem));
+  if (new == NULL)
+    return;
+  new->string = strdup (string);
+  new->next_string = NULL;
 
-	if (list->first_string == 0)
-	  list->first_string = new;
-	else
-	  list->last_string->next_string = new;
-	list->last_string = new;
-	free (string);
+  if (list->first_string == NULL)
+    list->first_string = new;
+  else
+    list->last_string->next_string = new;
+  list->last_string = new;
+  free (string);
 }
 
 struct bufList *
 new_bufList ()
 {
-	struct bufList *new;
-	new = (struct bufList *) malloc (sizeof (struct bufList));
-	if (new == NULL)
-	  return NULL;
-	new->first_buf = 0;
-	new->last_buf = 0;
+  struct bufList *new;
+  new = (struct bufList *) malloc (sizeof (struct bufList));
+  if (new == NULL)
+    return NULL;
+  new->first_buf = NULL;
+  new->last_buf = NULL;
 
-	return new;
+  return new;
 }
 
 int
 add_buf (struct bufList *bufList, int id, char *buffer, int width, int height)
 {
-	struct bufItem *new;
-	struct bufItem *tmp;
-	
-	tmp = bufList->first_buf;
+  struct bufItem *new = NULL;
+  struct bufItem *tmp;
 
-	while (tmp != 0)
-	  {
-	  	if (tmp->id == id)
-		  return 1;
-		tmp = tmp->next;
-	  }
+  tmp = bufList->first_buf;
 
-	new = (struct bufItem *) malloc (sizeof (struct bufItem));
-	if (new == NULL)
-	  return -1;
-	new->buffer = buffer;
-	new->id = id;
-	new->width = width;
-	new->height = height;
-	new->next = NULL;
+  while (tmp != NULL)
+    {
+      if (tmp->id == id)
+	{
+	  new = tmp;
+	  free (new->buffer);
+	}
+      tmp = tmp->next;
+    }
 
-	if (bufList->first_buf == 0)
-	  bufList->first_buf = new;
-	else
-	  bufList->last_buf->next = new;
+  /* Allocate new if we didn't match by id */
+  if (new == NULL)
+    new = (struct bufItem *) malloc (sizeof (struct bufItem));
 
-	bufList->last_buf = new;
+  /* Exit if new still == NULL */
+  if (new == NULL)
+    return -1;
 
-	return 0;
+  new->buffer = buffer;
+  new->id = id;
+  new->width = width;
+  new->height = height;
+  new->next = NULL;
+
+  if (bufList->first_buf == NULL)
+    bufList->first_buf = new;
+  else
+    bufList->last_buf->next = new;
+
+  bufList->last_buf = new;
+
+  return 0;
 }
 
 void
-updateScreen (g15canvas *canvas, int g15screen_fd, int force)
+updateScreen (g15canvas * canvas, int g15screen_fd, int force)
 {
-	if (force || !canvas->mode_cache)
-	  g15_send (g15screen_fd, (char *) canvas->buffer, 1048);
+  if (force || !canvas->mode_cache)
+    g15_send (g15screen_fd, (char *) canvas->buffer, G15_BUFFER_LEN);
 }
 
 int
 getDispCol (int len, int size, int type)
 {
-	int dispcol = 0;
+  #define TEXT_CENTER 1
+  #define TEXT_RIGHT  2
+  #define WIDTH_SMALL 4
+  #define WIDTH_MED   5
+  #define WIDTH_LARGE 8
 
-	switch (size)
-	  {
-	  	case 0:
-		  {
-			if (type == 1)
- 	  		  dispcol = (80 - ((len * 4) / 2));
-			else if (type == 2)
-			  dispcol = (160 - (len * 4));
-			break;
-		  }
-		case 1:
-		  {
-			if (type == 1)
- 	  		  dispcol = (80 - ((len * 5) / 2));
-			else if (type == 2)
-			  dispcol = (160 - (len * 5));
-			break;
-		  }
-		case 2:
-		  {
-			if (type == 1)
- 	  		  dispcol = (80 - ((len * 8) / 2));
-			else if (type == 2)
-			  dispcol = (160 - (len * 8));
-			break;
-		  }
-		default:
-		  {
-		  	dispcol = 0;
-			break;
-		  }
-	  }
-	
-	if (dispcol < 0)
-	  dispcol = 0;
+  int dispcol = 0;
 
-	return dispcol;
+  switch (size)
+    {
+    case G15_TEXT_SMALL:
+      {
+	if (type == TEXT_CENTER)
+	  dispcol = ((G15_LCD_WIDTH / 2) - ((len * WIDTH_SMALL) / 2));
+	else if (type == TEXT_RIGHT)
+	  dispcol = (G15_LCD_WIDTH - (len * WIDTH_SMALL));
+	break;
+      }
+    case G15_TEXT_MED:
+      {
+	if (type == TEXT_CENTER)
+	  dispcol = ((G15_LCD_WIDTH / 2) - ((len * WIDTH_MED) / 2));
+	else if (type == TEXT_RIGHT)
+	  dispcol = (G15_LCD_WIDTH - (len * WIDTH_MED));
+	break;
+      }
+    case G15_TEXT_LARGE:
+      {
+	if (type == TEXT_CENTER)
+	  dispcol = ((G15_LCD_WIDTH / 2) - ((len * WIDTH_LARGE) / 2));
+	else if (type == TEXT_RIGHT)
+	  dispcol = (G15_LCD_WIDTH - (len * WIDTH_LARGE));
+	break;
+      }
+    default:
+      break;
+    }
+
+  if (dispcol < 0)
+    dispcol = 0;
+
+  return dispcol;
 }
-
