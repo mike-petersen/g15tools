@@ -47,7 +47,7 @@ yyerror (char *err)
 void
 printUsage ()
 {
-  fprintf (stdout, "Usage: g15composer [-b] /path/to/fifo\n");
+  fprintf (stdout, "Usage: g15composer [-b] [-u username] /path/to/fifo\n");
   fprintf (stdout, "       cat instructions > /path/to/fifo\n\n");
   fprintf (stdout, "Display composer for the Logitech G15 LCD\n");
 }
