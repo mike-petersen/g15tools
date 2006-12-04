@@ -156,6 +156,8 @@ threadEntry (void *arg)
   if (strncmp (param->fifo_filename, "/var/run/", 9))
     unlink (param->fifo_filename);
 
+  del_thread (param);
+
   free (param);
 
   pthread_exit (NULL);
@@ -249,12 +251,11 @@ main (int argc, char *argv[])
       struct threadItem *next_thread;
       while (tmp_thread != NULL)
         {
+	  next_thread = tmp_thread->next;
 	  FILE *to_close = fopen (tmp_thread->data->fifo_filename, "w");
 	  fprintf (to_close, "SC\n");
 	  pthread_join (tmp_thread->thread, NULL);
-	  next_thread = tmp_thread->next;
 	  fclose (to_close);
-	  free (tmp_thread);
 	  tmp_thread = next_thread;
 	}
     }
@@ -387,6 +388,32 @@ add_thread (struct parserData *data)
   else
     data->threads->last_thread->next = new;
   data->threads->last_thread = new;
+
+  pthread_mutex_unlock (&data->threads->mutex);
+}
+
+void
+del_thread (struct parserData *data)
+{
+  pthread_mutex_lock (&data->threads->mutex);
+
+  struct threadItem *old = data->threads->first_thread->next;
+  struct threadItem *prev = data->threads->first_thread;
+
+  while (old != NULL)
+  {
+    if (old->thread == data->thread)
+      {
+        prev->next = old->next;
+	old->data = NULL;
+	old->next = NULL;
+	free (old);
+	break;
+      }
+
+    prev = old;
+    old = old->next;
+  }
 
   pthread_mutex_unlock (&data->threads->mutex);
 }

@@ -96,6 +96,7 @@ struct bufList * new_bufList ();
 int add_buf (struct bufList *bufList, int id, char *buffer, int width, int height);
 struct threadList * new_threadList ();
 void add_thread (struct parserData *data);
+void del_thread (struct parserData *data);
 void updateScreen (g15canvas *canvas, int g15screen_fd, int force);
 int getDispCol (int len, int size, int type);
 
