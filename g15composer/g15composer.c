@@ -124,11 +124,11 @@ threadEntry (void *arg)
     }
 
   int result = 0;
-  while (param->leaving == 0)
+  while ((param->leaving == 0) && (param->threads->leaving == 0))
     {
       result = yyparse (param);
       fclose (yyget_in (param->scanner));
-      if (param->leaving == 0)
+      if ((param->leaving == 0) && (param->threads->leaving == 0))
 	{
 	  if ((yyset_in (fopen (param->fifo_filename, "r"), param->scanner))
 	      == 0)
@@ -237,8 +237,26 @@ main (int argc, char *argv[])
 	  seteuid (nobody->pw_uid);
 	}
 
+      struct threadList *thread_list = new_threadList ();
+      param->threads = thread_list;
       pthread_create (&param->thread, NULL, threadEntry, (void *) param);
+      add_thread (param);
       pthread_join (param->thread, NULL);
+
+      thread_list->leaving = 1;
+
+      struct threadItem *tmp_thread = thread_list->first_thread->next;
+      struct threadItem *next_thread;
+      while (tmp_thread != NULL)
+        {
+	  FILE *to_close = fopen (tmp_thread->data->fifo_filename, "w");
+	  fprintf (to_close, "SC\n");
+	  pthread_join (tmp_thread->thread, NULL);
+	  next_thread = tmp_thread->next;
+	  fclose (to_close);
+	  free (tmp_thread);
+	  tmp_thread = next_thread;
+	}
     }
   else
     {
@@ -333,6 +351,44 @@ add_buf (struct bufList *bufList, int id, char *buffer, int width, int height)
   bufList->last_buf = new;
 
   return 0;
+}
+
+struct threadList * 
+new_threadList ()
+{
+  struct threadList *new;
+  new = (struct threadList *) malloc (sizeof (struct threadList));
+  if (new == NULL)
+    return NULL;
+
+  new->first_thread = NULL;
+  new->last_thread = NULL;
+  new->leaving = 0;
+  pthread_mutex_init (&new->mutex, NULL);
+
+  return new;
+}
+
+void 
+add_thread (struct parserData *data)
+{
+  pthread_mutex_lock (&data->threads->mutex);
+
+  struct threadItem *new;
+  new = (struct threadItem *) malloc (sizeof (struct threadItem));
+  if (new == NULL)
+    return;
+  new->thread = data->thread;
+  new->data = data;
+  new->next = NULL;
+
+  if (data->threads->first_thread == NULL)
+    data->threads->first_thread = new;
+  else
+    data->threads->last_thread->next = new;
+  data->threads->last_thread = new;
+
+  pthread_mutex_unlock (&data->threads->mutex);
 }
 
 void

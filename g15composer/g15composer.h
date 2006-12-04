@@ -52,6 +52,24 @@ struct bufItem
 	struct bufItem *next;
 };
 
+struct threadList;
+struct threadItem;
+
+struct threadList
+{
+	struct threadItem *first_thread;
+	struct threadItem *last_thread;
+	pthread_mutex_t mutex;
+	int leaving;
+};
+
+struct threadItem
+{
+	pthread_t thread;
+	struct parserData *data;
+	struct threadItem *next;
+};
+
 struct parserData
 {
 	int background;
@@ -64,12 +82,10 @@ struct parserData
 	int leaving;
 	void *scanner;
 	pthread_t thread;
+	struct threadList *threads;
 	struct bufList *buflist;
 	struct bufItem *bufitem;
 };
-
-typedef struct strList *List;
-typedef struct strItem *String;
 
 int yyerror (char *err);
 void printUsage ();
@@ -78,6 +94,8 @@ struct strList * new_strList ();
 void add_string (struct strList *strList, char *string);
 struct bufList * new_bufList ();
 int add_buf (struct bufList *bufList, int id, char *buffer, int width, int height);
+struct threadList * new_threadList ();
+void add_thread (struct parserData *data);
 void updateScreen (g15canvas *canvas, int g15screen_fd, int force);
 int getDispCol (int len, int size, int type);
 

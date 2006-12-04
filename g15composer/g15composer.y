@@ -655,10 +655,11 @@ nt_screen_command:
 	{
 		struct parserData *newParam = (struct parserData *) malloc (sizeof (struct parserData));
 		newParam->background = 0;
+		newParam->threads = ((struct parserData *)param)->threads;
 		newParam->fifo_filename = strdup ($2);
 
 	  	pthread_create (&newParam->thread, NULL, threadEntry, (void *) newParam);
-		pthread_detach (newParam->thread);
+		add_thread (newParam);
 		free ($2);
 	}
 
