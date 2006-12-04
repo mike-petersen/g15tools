@@ -247,7 +247,7 @@ main (int argc, char *argv[])
 
       thread_list->leaving = 1;
 
-      struct threadItem *tmp_thread = thread_list->first_thread->next;
+      struct threadItem *tmp_thread = thread_list->first_thread;
       struct threadItem *next_thread;
       while (tmp_thread != NULL)
         {
@@ -397,14 +397,18 @@ del_thread (struct parserData *data)
 {
   pthread_mutex_lock (&data->threads->mutex);
 
-  struct threadItem *old = data->threads->first_thread->next;
+  struct threadItem *old = data->threads->first_thread;
   struct threadItem *prev = data->threads->first_thread;
 
   while (old != NULL)
   {
     if (old->thread == data->thread)
       {
-        prev->next = old->next;
+	if (prev != data->threads->first_thread)
+          prev->next = old->next;
+	else
+	  data->threads->first_thread = old->next;
+	
 	old->data = NULL;
 	old->next = NULL;
 	free (old);
