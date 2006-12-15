@@ -6,7 +6,7 @@ problems for some people
 1.1.0
 * Add header define to allow for api version changes
 * Add exitLibG15() to reset the device back to factory defaults on library exit.
-SVN
+1.1.1
 * Add basic support for the G11 keyboard
 * revert all bulk transfers - bulk transfers are illegal for low-speed
 devices, and cause -22 (EINVAL) warnings on new kernels.

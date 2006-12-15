@@ -1,3 +1,12 @@
+libg15 (1.1.1-1) edgy; urgency=low
+
+  * Add basic support for the G11 keyboard
+  * revert all bulk transfers - bulk transfers are illegal for low-speed
+    devices, and cause -22 (EINVAL) warnings on new kernels.
+  * pass most errors to the client app.
+
+ -- Anthony J. Mirabella <mirabeaj@gmail.com>  Fri, 15 Dec 2006 05:17:49 -0500
+
 libg15 (1.0-1) breezy; urgency=low
 
   * Initial release 

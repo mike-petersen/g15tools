@@ -3,11 +3,11 @@
 %define prefix	/usr
 Summary: library to control logitech G15 keyboards
 Name: libg15
-Version: 1.0
+Version: 1.1.1
 Release: 1
 Copyright: GPL
 Group: Applications/System
-Source: http://prdownloads.sourceforge.net/g15tools/libg15-1.0.tar.bz2
+Source: http://prdownloads.sourceforge.net/g15tools/libg15-1.1.1.tar.bz2
 URL: http://sourceforge.net/projects/g15tools
 Distribution: Linux
 Vendor: NONE
