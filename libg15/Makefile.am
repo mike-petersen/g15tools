@@ -7,3 +7,4 @@ EXTRA_DIST = debian rpm
 
 dist-hook:
 	rm -rf `find $(distdir)/debian -name .svn`
+	rm -rf `find $(distdir)/rpm -name .svn`

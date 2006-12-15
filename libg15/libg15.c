@@ -21,9 +21,9 @@
 #include <stdarg.h>
 #include <usb.h>
 #include <string.h>
-
+#include <errno.h>
 static usb_dev_handle *keyboard_device = 0;
-/* #define DEBUG */
+//#define DEBUG 
 /* debugging wrapper */
 int g15_log (FILE *fd, const char *fmt, ...) {
 
@@ -195,6 +195,29 @@ static void dumpPixmapIntoLCDFormat(unsigned char *lcd_buffer, unsigned char con
     }
   }
 }
+int handle_usb_errors(const char *prefix, int ret) {
+  switch (ret){
+    case -ETIMEDOUT:
+     return G15_ERROR_READING_USB_DEVICE;  /* backward-compatibility */
+     break;
+    case -ENOSPC: /* the we dont have enough bandwidth, apparently.. something has to give here.. */
+    case -ENODEV: /* the device went away - we probably should attempt to reattach */
+    case -ENXIO: /* host controller bug */
+    case -EINVAL: /* invalid request */
+    case -EAGAIN: /* try again */
+    case -EFBIG: /* too many frames to handle */
+    case -EMSGSIZE: /* msgsize is invalid */
+     g15_log(stderr,"libg15 error: %s (%i)\n",prefix,ret);     
+     break;
+    case -EPIPE: /* endpoint is stalled */
+     g15_log(stderr,"libg15 error: %s EPIPE! clearing...\n",prefix);     
+     usb_clear_halt(keyboard_device, 0x81);
+     break;
+  default: /* timed out */
+     g15_log(stderr,"Unknown error: %s !! (err is %i)\n",prefix,ret);     
+  }
+  return ret;
+}
 
 int writePixmapToLCD(unsigned char const *data)
 {
@@ -205,13 +228,14 @@ int writePixmapToLCD(unsigned char const *data)
   
   /* the keyboard needs this magic byte */
   lcd_buffer[0] = 0x03;
-  
+
   ret = usb_interrupt_write(keyboard_device, 2, (char*)lcd_buffer, G15_BUFFER_LEN, 10000);
   if (ret != G15_BUFFER_LEN)
   {
-    g15_log(stderr, "Error writing pixmap to lcd, return value is %d instead of %d\n",ret,G15_BUFFER_LEN);
+    handle_usb_errors ("LCDPixmap Write",ret);
     return G15_ERROR_WRITING_PIXMAP;
   }
+  
   return 0;
 }
 
@@ -363,7 +387,6 @@ static void processKeyEvent(unsigned int *pressed_keys, unsigned char *buffer)
 int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
 {
   unsigned char buffer[9];
-  
   int ret = usb_interrupt_read(keyboard_device, 0x81, (char*)buffer, 9, timeout);
   if (ret == 9)
   {
@@ -374,11 +397,5 @@ int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
     
     return G15_NO_ERROR;
   }
-  else 
-  {
-    //printf("Return val is %d\n",ret);
-  }
-  
-  return G15_ERROR_READING_USB_DEVICE;
-  
+ return handle_usb_errors("Keyboard Read", ret); /* allow the app to deal with errors */
 }
