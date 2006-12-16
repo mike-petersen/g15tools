@@ -46,7 +46,7 @@ static int g15_log (FILE *fd, const char *fmt, ...) {
   }
    return 0;
 }
-                                       
+
 static int initLibUsb()
 {
   usb_init();
@@ -58,10 +58,10 @@ static int initLibUsb()
      
   if (!usb_find_busses())
     return G15_ERROR_OPENING_USB_DEVICE;
-  
+
   if (!usb_find_devices())
     return G15_ERROR_OPENING_USB_DEVICE;
-  
+
   return G15_NO_ERROR;
 }
 
@@ -156,6 +156,26 @@ static usb_dev_handle * findAndOpenG15()
   return 0;
 }
 
+int re_initLibG15()
+{
+
+  usb_init();
+
+  /**
+   *  usb_find_busses and usb_find_devices both report the number of devices
+   *  / busses added / removed since the last call. since this is the first
+   *  call we have to return values != 0 or else we didnt find anything */
+     
+  if (!usb_find_devices())
+    return G15_ERROR_OPENING_USB_DEVICE;
+  
+  keyboard_device = findAndOpenG15();
+  if (!keyboard_device)
+    return G15_ERROR_OPENING_USB_DEVICE;
+ 
+  return G15_NO_ERROR;
+}
+
 int initLibG15()
 {
   int retval = G15_NO_ERROR;
@@ -179,6 +199,8 @@ int exitLibG15()
     usleep(50*1000);
     retval = usb_reset(keyboard_device);
     usleep(50*1000);
+    usb_close(keyboard_device);
+    keyboard_device=0;
     return retval;
   }
   return -1;

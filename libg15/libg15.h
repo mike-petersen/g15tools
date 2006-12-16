@@ -111,6 +111,9 @@ extern "C"
   /* this one return G15_NO_ERROR on success, something
    * else otherwise (for instance G15_ERROR_OPENING_USB_DEVICE */
   int initLibG15();
+  /* re-initialise a previously unplugged keyboard ie ENODEV was returned at some point */
+  int re_initLibG15();
+
   int exitLibG15();
   /* enable or disable debugging */
   void libg15Debug(int option);
