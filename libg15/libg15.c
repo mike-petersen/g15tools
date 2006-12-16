@@ -31,7 +31,7 @@ static int enospc_slowdown = 0;
 void libg15Debug(int option ) {
 
   libg15_debugging_enabled = option;
-
+  usb_set_debug(option);
 }
 
 /* debugging wrapper */
