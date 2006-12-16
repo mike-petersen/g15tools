@@ -25,7 +25,7 @@ extern "C"
 #endif
 
   /* allow for api changes */
-#define LIBG15_VERSION 1100
+#define LIBG15_VERSION 1200
 	
   enum
   {
@@ -112,7 +112,9 @@ extern "C"
    * else otherwise (for instance G15_ERROR_OPENING_USB_DEVICE */
   int initLibG15();
   int exitLibG15();
-    
+  /* enable or disable debugging */
+  void libg15Debug(int option);
+  
   int writePixmapToLCD(unsigned char const *data);
   int setLCDContrast(unsigned int level);
   int setLEDs(unsigned int leds);

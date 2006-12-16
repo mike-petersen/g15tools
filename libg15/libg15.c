@@ -22,17 +22,27 @@
 #include <usb.h>
 #include <string.h>
 #include <errno.h>
-static usb_dev_handle *keyboard_device = 0;
-//#define DEBUG 
-/* debugging wrapper */
-int g15_log (FILE *fd, const char *fmt, ...) {
 
-#ifdef DEBUG
-   va_list argp;
-   va_start (argp, fmt);
+static usb_dev_handle *keyboard_device = 0;
+static int libg15_debugging_enabled = 0;
+
+/* enable or disable debugging */
+void libg15Debug(int option ) {
+
+  libg15_debugging_enabled = option;
+
+}
+
+/* debugging wrapper */
+static int g15_log (FILE *fd, const char *fmt, ...) {
+
+  if (libg15_debugging_enabled){
+     fprintf(fd,"libg15: ");
+     va_list argp;
+     va_start (argp, fmt);
        vfprintf(fd,fmt,argp);
-   va_end (argp);
-#endif
+     va_end (argp);
+  }
    return 0;
 }
                                        
@@ -58,6 +68,7 @@ static usb_dev_handle * findAndOpenG15()
 {
   struct usb_bus *bus = 0;
   struct usb_device *dev = 0;
+  int retries=0;
   for (bus = usb_busses; bus; bus = bus->next) 
   {
     for (dev = bus->devices; dev; dev = dev->next)
@@ -70,17 +81,15 @@ static usb_dev_handle * findAndOpenG15()
         char name_buffer[65535];
         name_buffer[0] = 0;
         usb_dev_handle *devh = 0;
-        g15_log(stderr,"Found g15, trying to open it\n");
+        g15_log(stderr,"Found %s, trying to open it\n",dev->descriptor.idProduct == 0x0c222?"G15":"G11");
+
         devh = usb_open(dev);
-        
-  
         if (!devh)
         {
           g15_log(stderr, "Error, could not open the keyboard\n");
           g15_log(stderr, "Perhaps you dont have enough permissions to access it\n");
           return 0;
         }
-  
   
         usleep(25*1000);
 
@@ -96,12 +105,12 @@ static usb_dev_handle * findAndOpenG15()
             thanks to RobEngle for pointing this out */
         if (!ret && name_buffer[0])
         {
-          printf("Trying to detach drive currentl attached: \"%s\"\n",name_buffer);
+          g15_log(stderr,"Trying to detach driver currently attached: \"%s\"\n",name_buffer);
 
           ret = usb_detach_kernel_driver_np(devh, 0);
           if (!ret)
           {
-            printf("Success, detached the driver\n");
+            g15_log(stderr,"Success, detached the driver\n");
           }
           else
           {
@@ -110,7 +119,7 @@ static usb_dev_handle * findAndOpenG15()
           }
 
         }
-        g15_log(stderr,"Debug: %s\n",name_buffer);
+        g15_log(stderr,"Previously attached driver was: %s\n",name_buffer);
 #endif  
         ret = usb_set_configuration(devh, 1);
         if (ret)
@@ -121,7 +130,11 @@ static usb_dev_handle * findAndOpenG15()
   
         usleep(25*1000);
   
-        ret = usb_claim_interface(devh,0);
+        while((ret = usb_claim_interface(devh,0)) && retries <10) {
+          usleep(25*1000);
+          retries++;
+          g15_log(stderr,"Trying to claim interface\n");
+        }
         
         if (ret)
         {
@@ -195,6 +208,7 @@ static void dumpPixmapIntoLCDFormat(unsigned char *lcd_buffer, unsigned char con
     }
   }
 }
+
 int handle_usb_errors(const char *prefix, int ret) {
   switch (ret){
     case -ETIMEDOUT:
@@ -271,8 +285,12 @@ int setLCDBrightness(unsigned int level)
 
   switch(level) 
   {
-    case 1 : usb_data[2] = 0x10; break;
-    case 2 : usb_data[2] = 0x20; break;
+    case 1 : 
+      usb_data[2] = 0x10; 
+      break;
+    case 2 : 
+      usb_data[2] = 0x20; 
+      break;
     default:
       usb_data[2] = 0x00;
   }

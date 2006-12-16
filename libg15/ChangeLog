@@ -11,4 +11,8 @@ problems for some people
 * revert all bulk transfers - bulk transfers are illegal for low-speed
 devices, and cause -22 (EINVAL) warnings on new kernels.
 * pass most errors to the client app.
-
+SVN
+* Add debugging function to enable/disable extra output
+* All debugging output is now prefixed with libg15 to aid localising
+problems.
+* Try to claim usb interface up to 10 times before failing
