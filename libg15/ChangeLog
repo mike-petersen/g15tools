@@ -2,17 +2,21 @@
 * Initial Release
 1.0.1
 * Change transfer type from interrupt to bulk for keypresses, which resolves
-problems for some people
+  problems for some people
 1.1.0
 * Add header define to allow for api version changes
 * Add exitLibG15() to reset the device back to factory defaults on library exit.
 1.1.1
 * Add basic support for the G11 keyboard
 * revert all bulk transfers - bulk transfers are illegal for low-speed
-devices, and cause -22 (EINVAL) warnings on new kernels.
+  devices, and cause -22 (EINVAL) warnings on new kernels.
 * pass most errors to the client app.
 SVN
 * Add debugging function to enable/disable extra output
 * All debugging output is now prefixed with libg15 to aid localising
-problems.
+  problems.
 * Try to claim usb interface up to 10 times before failing
+* Slow down initialisation, to allow keyboard to come out of usb
+  auto-suspend on newer kernels.
+* Attempt to combat ENOSPC by slowing down writes to the lcd if ENOSPC is received.  
+  Unless that error occurs at least once, transfers are sent as normal.

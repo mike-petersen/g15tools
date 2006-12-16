@@ -25,6 +25,7 @@
 
 static usb_dev_handle *keyboard_device = 0;
 static int libg15_debugging_enabled = 0;
+static int enospc_slowdown = 0;
 
 /* enable or disable debugging */
 void libg15Debug(int option ) {
@@ -64,6 +65,7 @@ static int initLibUsb()
   return G15_NO_ERROR;
 }
 
+
 static usb_dev_handle * findAndOpenG15()
 {
   struct usb_bus *bus = 0;
@@ -90,7 +92,7 @@ static usb_dev_handle * findAndOpenG15()
           g15_log(stderr, "Perhaps you dont have enough permissions to access it\n");
           return 0;
         }
-  
+
         usleep(50*1000);
 
         /* libusb functions ending in _np are not portable between OS's 
@@ -145,6 +147,7 @@ static usb_dev_handle * findAndOpenG15()
         }
         usleep(1000*1000); // FIXME.  I should find a way of polling the status to ensure the endpoint has woken up, rather than just waiting for a second
         g15_log(stderr,"Done opening the keyboard\n");
+
         return devh;
       }
     }  
@@ -219,6 +222,9 @@ int handle_usb_errors(const char *prefix, int ret) {
      return G15_ERROR_READING_USB_DEVICE;  /* backward-compatibility */
      break;
     case -ENOSPC: /* the we dont have enough bandwidth, apparently.. something has to give here.. */
+      g15_log(stderr,"usb error: ENOSPC.. reducing speed\n");
+      enospc_slowdown = 1;
+      break;
     case -ENODEV: /* the device went away - we probably should attempt to reattach */
     case -ENXIO: /* host controller bug */
     case -EINVAL: /* invalid request */
@@ -240,20 +246,39 @@ int handle_usb_errors(const char *prefix, int ret) {
 int writePixmapToLCD(unsigned char const *data)
 {
   int ret = 0;
+  int transfercount=0;
   unsigned char lcd_buffer[G15_BUFFER_LEN];
   memset(lcd_buffer,0,G15_BUFFER_LEN);
   dumpPixmapIntoLCDFormat(lcd_buffer, data);
   
   /* the keyboard needs this magic byte */
   lcd_buffer[0] = 0x03;
+  /* in an attempt to reduce peak bus utilisation, we break the transfer into 32 byte chunks and sleep a bit in between.
+     It shouldnt make much difference, but then again, the g15 shouldnt be flooding the bus enough to cause ENOSPC, yet 
+     apparently does on some machines...
+     I'm not sure how successful this will be in combatting ENOSPC, but we'll give it try in the real-world. */
 
-  ret = usb_interrupt_write(keyboard_device, 2, (char*)lcd_buffer, G15_BUFFER_LEN, 10000);
-  if (ret != G15_BUFFER_LEN)
-  {
-    handle_usb_errors ("LCDPixmap Write",ret);
-    return G15_ERROR_WRITING_PIXMAP;
+  if(enospc_slowdown != 0){
+    for(transfercount = 0;transfercount<=31;transfercount++){
+      ret = usb_interrupt_write(keyboard_device, 2, (char*)lcd_buffer+(32*transfercount), 32, 1000);
+      if (ret != 32)
+      {
+        handle_usb_errors ("LCDPixmap Slow Write",ret);
+        return G15_ERROR_WRITING_PIXMAP;
+      }
+      usleep(100);
+    }
+  }else{
+      /* transfer entire buffer in one hit */
+      ret = usb_interrupt_write(keyboard_device, 2, (char*)lcd_buffer, G15_BUFFER_LEN, 1000);
+      if (ret != G15_BUFFER_LEN)
+      {
+        handle_usb_errors ("LCDPixmap Write",ret);
+        return G15_ERROR_WRITING_PIXMAP;
+      }
+      usleep(100);
   }
-  
+
   return 0;
 }
 
