@@ -91,7 +91,7 @@ static usb_dev_handle * findAndOpenG15()
           return 0;
         }
   
-        usleep(25*1000);
+        usleep(50*1000);
 
         /* libusb functions ending in _np are not portable between OS's 
          * Non-linux users will need some way to detach the HID driver from
@@ -119,8 +119,10 @@ static usb_dev_handle * findAndOpenG15()
           }
 
         }
-        g15_log(stderr,"Previously attached driver was: %s\n",name_buffer);
+
 #endif  
+        usleep(50*1000);
+
         ret = usb_set_configuration(devh, 1);
         if (ret)
         {
@@ -128,20 +130,20 @@ static usb_dev_handle * findAndOpenG15()
           return 0;
         }
   
-        usleep(25*1000);
+        usleep(50*1000);
   
         while((ret = usb_claim_interface(devh,0)) && retries <10) {
-          usleep(25*1000);
+          usleep(50*1000);
           retries++;
           g15_log(stderr,"Trying to claim interface\n");
         }
-        
+  
         if (ret)
         {
           g15_log(stderr,"Error claiming interface, good day cruel world\n");
           return 0;
         }
-        usleep(25*1000);
+        usleep(1000*1000); // FIXME.  I should find a way of polling the status to ensure the endpoint has woken up, rather than just waiting for a second
         g15_log(stderr,"Done opening the keyboard\n");
         return devh;
       }
@@ -171,7 +173,9 @@ int exitLibG15()
   int retval = G15_NO_ERROR;
   if (keyboard_device){
     retval = usb_release_interface (keyboard_device, 0);
+    usleep(50*1000);
     retval = usb_reset(keyboard_device);
+    usleep(50*1000);
     return retval;
   }
   return -1;
@@ -221,14 +225,14 @@ int handle_usb_errors(const char *prefix, int ret) {
     case -EAGAIN: /* try again */
     case -EFBIG: /* too many frames to handle */
     case -EMSGSIZE: /* msgsize is invalid */
-     g15_log(stderr,"libg15 error: %s (%i)\n",prefix,ret);     
+     g15_log(stderr,"usb error: %s (%i)\n",prefix,ret);     
      break;
     case -EPIPE: /* endpoint is stalled */
-     g15_log(stderr,"libg15 error: %s EPIPE! clearing...\n",prefix);     
+     g15_log(stderr,"usb error: %s EPIPE! clearing...\n",prefix);     
      usb_clear_halt(keyboard_device, 0x81);
      break;
   default: /* timed out */
-     g15_log(stderr,"Unknown error: %s !! (err is %i)\n",prefix,ret);     
+     g15_log(stderr,"Unknown usb error: %s !! (err is %i)\n",prefix,ret);     
   }
   return ret;
 }
