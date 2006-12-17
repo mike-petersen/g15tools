@@ -16,6 +16,7 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+#include <pthread.h>
 #include "libg15.h"
 #include <stdio.h>
 #include <stdarg.h>
@@ -26,6 +27,9 @@
 static usb_dev_handle *keyboard_device = 0;
 static int libg15_debugging_enabled = 0;
 static int enospc_slowdown = 0;
+
+static pthread_mutex_t libusb_mutex;
+
 
 /* enable or disable debugging */
 void libg15Debug(int option ) {
@@ -186,8 +190,10 @@ int initLibG15()
   keyboard_device = findAndOpenG15();
   if (!keyboard_device)
     return G15_ERROR_OPENING_USB_DEVICE;
- 
-	return retval;
+
+  pthread_mutex_init(&libusb_mutex, NULL); 
+  
+  return retval;
 }
 
 /* reset the keyboard, returning it to a known state */
@@ -201,6 +207,7 @@ int exitLibG15()
     usleep(50*1000);
     usb_close(keyboard_device);
     keyboard_device=0;
+    pthread_mutex_destroy(&libusb_mutex);
     return retval;
   }
   return -1;
@@ -257,7 +264,9 @@ int handle_usb_errors(const char *prefix, int ret) {
      break;
     case -EPIPE: /* endpoint is stalled */
      g15_log(stderr,"usb error: %s EPIPE! clearing...\n",prefix);     
+     pthread_mutex_lock(&libusb_mutex);
      usb_clear_halt(keyboard_device, 0x81);
+     pthread_mutex_unlock(&libusb_mutex);
      break;
   default: /* timed out */
      g15_log(stderr,"Unknown usb error: %s !! (err is %i)\n",prefix,ret);     
@@ -281,6 +290,7 @@ int writePixmapToLCD(unsigned char const *data)
      I'm not sure how successful this will be in combatting ENOSPC, but we'll give it try in the real-world. */
 
   if(enospc_slowdown != 0){
+    pthread_mutex_lock(&libusb_mutex);  
     for(transfercount = 0;transfercount<=31;transfercount++){
       ret = usb_interrupt_write(keyboard_device, 2, (char*)lcd_buffer+(32*transfercount), 32, 1000);
       if (ret != 32)
@@ -290,9 +300,12 @@ int writePixmapToLCD(unsigned char const *data)
       }
       usleep(100);
     }
+    pthread_mutex_unlock(&libusb_mutex);
   }else{
       /* transfer entire buffer in one hit */
+      pthread_mutex_lock(&libusb_mutex);
       ret = usb_interrupt_write(keyboard_device, 2, (char*)lcd_buffer, G15_BUFFER_LEN, 1000);
+      pthread_mutex_unlock(&libusb_mutex);
       if (ret != G15_BUFFER_LEN)
       {
         handle_usb_errors ("LCDPixmap Write",ret);
@@ -306,6 +319,7 @@ int writePixmapToLCD(unsigned char const *data)
 
 int setLCDContrast(unsigned int level)
 {
+  int retval = 0;
   unsigned char usb_data[] = { 2, 32, 129, 0 };
 
   switch(level) 
@@ -319,19 +333,26 @@ int setLCDContrast(unsigned int level)
     default:
       usb_data[3] = 18;
   }  
-  
-  return usb_control_msg(keyboard_device, USB_TYPE_CLASS + USB_RECIP_INTERFACE, 9, 0x302, 0, (char*)usb_data, 4, 10000); 
+  pthread_mutex_lock(&libusb_mutex);
+  retval = usb_control_msg(keyboard_device, USB_TYPE_CLASS + USB_RECIP_INTERFACE, 9, 0x302, 0, (char*)usb_data, 4, 10000);
+  pthread_mutex_unlock(&libusb_mutex);
+  return retval;
 }
 
 int setLEDs(unsigned int leds)
 {
+  int retval = 0;
   unsigned char m_led_buf[4] = { 2, 4, 0, 0 };
   m_led_buf[2] = ~(unsigned char)leds;
-  return usb_control_msg(keyboard_device, USB_TYPE_CLASS + USB_RECIP_INTERFACE, 9, 0x302, 0, (char*)m_led_buf, 4, 10000); 
+  pthread_mutex_lock(&libusb_mutex);
+  retval = usb_control_msg(keyboard_device, USB_TYPE_CLASS + USB_RECIP_INTERFACE, 9, 0x302, 0, (char*)m_led_buf, 4, 10000); 
+  pthread_mutex_unlock(&libusb_mutex);
+  return retval;
 }
 
 int setLCDBrightness(unsigned int level)
 {
+  int retval = 0;
   unsigned char usb_data[] = { 2, 2, 0, 0 };
 
   switch(level) 
@@ -345,13 +366,16 @@ int setLCDBrightness(unsigned int level)
     default:
       usb_data[2] = 0x00;
   }
-
-  return usb_control_msg(keyboard_device, USB_TYPE_CLASS + USB_RECIP_INTERFACE, 9, 0x302, 0, (char*)usb_data, 4, 10000); 
+  pthread_mutex_lock(&libusb_mutex);
+  retval = usb_control_msg(keyboard_device, USB_TYPE_CLASS + USB_RECIP_INTERFACE, 9, 0x302, 0, (char*)usb_data, 4, 10000); 
+  pthread_mutex_unlock(&libusb_mutex);
+  return retval;
 }
 
 /* set the keyboard backlight. doesnt affect lcd backlight. 0==off,1==medium,2==high */
 int setKBBrightness(unsigned int level)
 {
+  int retval = 0;
   unsigned char usb_data[] = { 2, 1, 0, 0 };
 
   switch(level) 
@@ -365,8 +389,10 @@ int setKBBrightness(unsigned int level)
     default:
       usb_data[2] = 0x0;
   }
-
-  return usb_control_msg(keyboard_device, USB_TYPE_CLASS + USB_RECIP_INTERFACE, 9, 0x302, 0, (char*)usb_data, 4, 10000); 
+  pthread_mutex_lock(&libusb_mutex);
+  retval = usb_control_msg(keyboard_device, USB_TYPE_CLASS + USB_RECIP_INTERFACE, 9, 0x302, 0, (char*)usb_data, 4, 10000); 
+  pthread_mutex_unlock(&libusb_mutex);
+  return retval;
 }
 
 static unsigned char g15KeyToLogitechKeyCode(int key)
@@ -476,7 +502,11 @@ static void processKeyEvent(unsigned int *pressed_keys, unsigned char *buffer)
 int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
 {
   unsigned char buffer[9];
-  int ret = usb_interrupt_read(keyboard_device, 0x81, (char*)buffer, 9, timeout);
+  int ret = 0;
+  pthread_mutex_lock(&libusb_mutex);
+    ret = usb_interrupt_read(keyboard_device, 0x81, (char*)buffer, 9, timeout);
+  pthread_mutex_unlock(&libusb_mutex);
+   
   if (ret == 9)
   {
     if (buffer[0] == 1)
