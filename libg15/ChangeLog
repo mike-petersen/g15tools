@@ -20,3 +20,4 @@ SVN
   auto-suspend on newer kernels.
 * Attempt to combat ENOSPC by slowing down writes to the lcd if ENOSPC is received.  
   Unless that error occurs at least once, transfers are sent as normal.
+* Add function to change keyboard backlight (independant of lcd backlight).

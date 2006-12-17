@@ -349,6 +349,26 @@ int setLCDBrightness(unsigned int level)
   return usb_control_msg(keyboard_device, USB_TYPE_CLASS + USB_RECIP_INTERFACE, 9, 0x302, 0, (char*)usb_data, 4, 10000); 
 }
 
+/* set the keyboard backlight. doesnt affect lcd backlight. 0==off,1==medium,2==high */
+int setKBBrightness(unsigned int level)
+{
+  unsigned char usb_data[] = { 2, 1, 0, 0 };
+
+  switch(level) 
+  {
+    case 1 : 
+      usb_data[2] = 0x1; 
+      break;
+    case 2 : 
+      usb_data[2] = 0x2; 
+      break;
+    default:
+      usb_data[2] = 0x0;
+  }
+
+  return usb_control_msg(keyboard_device, USB_TYPE_CLASS + USB_RECIP_INTERFACE, 9, 0x302, 0, (char*)usb_data, 4, 10000); 
+}
+
 static unsigned char g15KeyToLogitechKeyCode(int key)
 {
    // first 12 G keys produce F1 - F12, thats 0x3a + key

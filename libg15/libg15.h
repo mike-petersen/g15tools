@@ -122,7 +122,8 @@ extern "C"
   int setLCDContrast(unsigned int level);
   int setLEDs(unsigned int leds);
   int setLCDBrightness(unsigned int level);
-  
+  int setKBBrightness(unsigned int level);  
+
   /* Please be warned
    * the g15 sends two different usb msgs for each key press
    * but only one of these two is used here. Since we do not want to wait
