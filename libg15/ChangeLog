@@ -11,7 +11,7 @@
 * revert all bulk transfers - bulk transfers are illegal for low-speed
   devices, and cause -22 (EINVAL) warnings on new kernels.
 * pass most errors to the client app.
-SVN
+1.2.0
 * Add debugging function to enable/disable extra output
 * All debugging output is now prefixed with libg15 to aid localising
   problems.
