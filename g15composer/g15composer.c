@@ -58,6 +58,7 @@ threadEntry (void *arg)
   struct parserData *param = (struct parserData *) arg;
   extern short g15c_logo_data[6880];
   int tmpfd, errno;
+  FILE *fifo;
 
   param->leaving = 0;
 
@@ -117,11 +118,14 @@ threadEntry (void *arg)
       param->buflist = new_bufList ();
     }
 
-  if ((yyset_in (fopen (param->fifo_filename, "r"), param->scanner)) == 0)
+  fifo = fopen (param->fifo_filename, "r");
+  if (fifo == NULL)
     {
       perror (param->fifo_filename);
       param->leaving = 1;
     }
+  else
+    yyset_in (fifo, param->scanner);
 
   int result = 0;
   while ((param->leaving == 0) && (param->threads->leaving == 0))
@@ -130,12 +134,15 @@ threadEntry (void *arg)
       fclose (yyget_in (param->scanner));
       if ((param->leaving == 0) && (param->threads->leaving == 0))
 	{
-	  if ((yyset_in (fopen (param->fifo_filename, "r"), param->scanner))
-	      == 0)
+	  fifo = fopen (param->fifo_filename, "r");
+	  if (fifo == NULL)
 	    {
 	      perror (param->fifo_filename);
 	      param->leaving = 1;
 	    }
+	  else
+	    yyset_in (fifo, param->scanner);
+
 	  if (param->background == 1)
 	    continue;
 	  if (!param->canvas->mode_cache)
