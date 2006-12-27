@@ -185,7 +185,6 @@ static usb_dev_handle * findAndOpenDevice(libg15_devices_t handled_device)
           g15_log(stderr,G15_LOG_INFO,"Error claiming interface, good day cruel world\n");
           return 0;
         }
-        usleep(1000*1000); // FIXME.  I should find a way of polling the status to ensure the endpoint has woken up, rather than just waiting for a second
         g15_log(stderr,G15_LOG_INFO,"Done opening the keyboard\n");
 
         return devh;
@@ -244,6 +243,8 @@ int initLibG15()
   if (!keyboard_device)
     return G15_ERROR_OPENING_USB_DEVICE;
 
+  setLEDs(0);
+  usleep(1000*1000); // FIXME.  I should find a way of polling the status to ensure the endpoint has woken up, rather than just waiting for a second
   pthread_mutex_init(&libusb_mutex, NULL); 
   
   return retval;
