@@ -44,7 +44,7 @@ struct libg15_devices_t {
 }
 
   /* allow for api changes */
-#define LIBG15_VERSION 1210
+#define LIBG15_VERSION 1201
 
   enum 
   {
