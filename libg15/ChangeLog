@@ -11,7 +11,7 @@
 * revert all bulk transfers - bulk transfers are illegal for low-speed
   devices, and cause -22 (EINVAL) warnings on new kernels.
 * pass most errors to the client app.
-1.2.0
+1.2.1
 * Add debugging function to enable/disable extra output
 * All debugging output is now prefixed with libg15 to aid localising
   problems.
@@ -27,3 +27,4 @@
 * libg15 now uses pthread mutexes to force sequential access to the bus via libusb. 
   Control message URBs are no longer being lost if sent by a different
   thread in the middle of a screen transfer etc.
+* Reset the keyboard before init to ensure correct initialisation on kernels > 2.6.19
