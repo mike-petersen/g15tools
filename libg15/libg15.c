@@ -28,11 +28,27 @@ static usb_dev_handle *keyboard_device = 0;
 static int libg15_debugging_enabled = 0;
 static int enospc_slowdown = 0;
 
+static int found_devicetype = -1;
+
 static pthread_mutex_t libusb_mutex;
 
+/* to add a new device, simply create a new DEVICE() in this list */
+/* Fields are: "Name",VendorID,ProductID,Capabilities */
+const libg15_devices_t g15_devices[] = {
+  DEVICE("Logitech G15",0x46d,0xc222,G15_LCD|G15_KEYS),
+  DEVICE("Logitech G11",0x46d,0xc225,G15_KEYS),
+  DEVICE(NULL,0,0,0)
+};
+
+int g15DeviceCapabilities() {
+    if(found_devicetype>-1)
+      return g15_devices[found_devicetype].caps;
+    else
+      return -1;
+}
 
 /* enable or disable debugging */
-void libg15Debug(int option ) {
+void libg15Debug(int option) {
 
   libg15_debugging_enabled = option;
   usb_set_debug(option);
@@ -69,8 +85,7 @@ static int initLibUsb()
   return G15_NO_ERROR;
 }
 
-
-static usb_dev_handle * findAndOpenG15()
+static usb_dev_handle * findAndOpenDevice(libg15_devices_t handled_device)
 {
   struct usb_bus *bus = 0;
   struct usb_device *dev = 0;
@@ -79,15 +94,13 @@ static usb_dev_handle * findAndOpenG15()
   {
     for (dev = bus->devices; dev; dev = dev->next)
     {
-
-      if ((dev->descriptor.idVendor == 0x046d && dev->descriptor.idProduct == 0x0c222)  //G15 
-        ||(dev->descriptor.idVendor == 0x046d && dev->descriptor.idProduct == 0x0c225)) //G11 keyboard
+      if ((dev->descriptor.idVendor == handled_device.vendorid && dev->descriptor.idProduct == handled_device.productid)) 
       {
         int ret=0;
         char name_buffer[65535];
         name_buffer[0] = 0;
         usb_dev_handle *devh = 0;
-        g15_log(stderr,"Found %s, trying to open it\n",dev->descriptor.idProduct == 0x0c222?"G15":"G11");
+        g15_log(stderr,"Found %s, trying to open it\n",handled_device.name);
 
         devh = usb_open(dev);
         if (!devh)
@@ -125,7 +138,6 @@ static usb_dev_handle * findAndOpenG15()
           }
 
         }
-
 #endif  
         usleep(50*1000);
 
@@ -156,9 +168,24 @@ static usb_dev_handle * findAndOpenG15()
       }
     }  
   }
-  g15_log(stderr, "Error, keyboard not found, is it plugged in?\n");
   return 0;
 }
+
+
+static usb_dev_handle * findAndOpenG15() {
+  int i;
+  for (i=0; g15_devices[i].name !=NULL  ;i++){
+    g15_log(stderr,"Trying to find %s\n",g15_devices[i].name);
+    if(keyboard_device = findAndOpenDevice(g15_devices[i])){
+        found_devicetype = i;
+        break;
+    }
+    else
+      g15_log(stderr,"%s not found\n",g15_devices[i].name);
+  }
+  return keyboard_device;
+}
+
 
 int re_initLibG15()
 {
@@ -281,6 +308,9 @@ int writePixmapToLCD(unsigned char const *data)
   unsigned char lcd_buffer[G15_BUFFER_LEN];
   memset(lcd_buffer,0,G15_BUFFER_LEN);
   dumpPixmapIntoLCDFormat(lcd_buffer, data);
+
+  if(!(g15_devices[found_devicetype].caps & G15_LCD))
+    return 0;
   
   /* the keyboard needs this magic byte */
   lcd_buffer[0] = 0x03;

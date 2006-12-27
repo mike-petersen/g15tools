@@ -24,6 +24,25 @@ extern "C"
 {
 #endif
 
+#define G15_LCD 1
+#define G15_KEYS 2
+
+typedef struct libg15_devices_t libg15_devices_t;
+
+struct libg15_devices_t {
+  const char *name;	// name - can be anything, only used for informational purposes
+  unsigned int vendorid;
+  unsigned int productid;
+  unsigned int caps; // capability bitfield - G15_LCD|G15_KEYS;
+};
+
+#define DEVICE(name, vendorid, productid, caps) { \
+    name, \
+    vendorid, \
+    productid, \
+    caps \
+}
+
   /* allow for api changes */
 #define LIBG15_VERSION 1200
 	
