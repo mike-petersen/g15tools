@@ -32,6 +32,7 @@ static int found_devicetype = -1;
 
 static pthread_mutex_t libusb_mutex;
 
+
 /* to add a new device, simply create a new DEVICE() in this list */
 /* Fields are: "Name",VendorID,ProductID,Capabilities */
 const libg15_devices_t g15_devices[] = {
@@ -40,12 +41,14 @@ const libg15_devices_t g15_devices[] = {
   DEVICE(NULL,0,0,0)
 };
 
+/* return device capabilities */
 int g15DeviceCapabilities() {
     if(found_devicetype>-1)
       return g15_devices[found_devicetype].caps;
     else
       return -1;
 }
+
 
 /* enable or disable debugging */
 void libg15Debug(int option) {
@@ -55,16 +58,37 @@ void libg15Debug(int option) {
 }
 
 /* debugging wrapper */
-static int g15_log (FILE *fd, const char *fmt, ...) {
+static int g15_log (FILE *fd, unsigned int level, const char *fmt, ...) {
 
-  if (libg15_debugging_enabled){
+   if (libg15_debugging_enabled && libg15_debugging_enabled>=level) {
      fprintf(fd,"libg15: ");
      va_list argp;
      va_start (argp, fmt);
        vfprintf(fd,fmt,argp);
      va_end (argp);
-  }
+   }
+
    return 0;
+}
+
+/* return number of connected and supported devices */
+int g15NumberOfConnectedDevices() {
+  struct usb_bus *bus = 0;
+  struct usb_device *dev = 0;
+  int i=0;
+  unsigned int found = 0;
+
+  for (i=0; g15_devices[i].name !=NULL;i++)
+    for (bus = usb_busses; bus; bus = bus->next) 
+    {
+      for (dev = bus->devices; dev; dev = dev->next)
+      {
+        if ((dev->descriptor.idVendor == g15_devices[i].vendorid && dev->descriptor.idProduct == g15_devices[i].productid)) 
+          found++;
+      }
+    }
+    g15_log(stderr,G15_LOG_INFO,"Found %i supported devices\n",found);
+    return found;
 }
 
 static int initLibUsb()
@@ -100,13 +124,13 @@ static usb_dev_handle * findAndOpenDevice(libg15_devices_t handled_device)
         char name_buffer[65535];
         name_buffer[0] = 0;
         usb_dev_handle *devh = 0;
-        g15_log(stderr,"Found %s, trying to open it\n",handled_device.name);
+        g15_log(stderr,G15_LOG_INFO,"Found %s, trying to open it\n",handled_device.name);
 
         devh = usb_open(dev);
         if (!devh)
         {
-          g15_log(stderr, "Error, could not open the keyboard\n");
-          g15_log(stderr, "Perhaps you dont have enough permissions to access it\n");
+          g15_log(stderr,G15_LOG_INFO, "Error, could not open the keyboard\n");
+          g15_log(stderr,G15_LOG_INFO, "Perhaps you dont have enough permissions to access it\n");
           return 0;
         }
 
@@ -124,16 +148,16 @@ static usb_dev_handle * findAndOpenDevice(libg15_devices_t handled_device)
             thanks to RobEngle for pointing this out */
         if (!ret && name_buffer[0])
         {
-          g15_log(stderr,"Trying to detach driver currently attached: \"%s\"\n",name_buffer);
+          g15_log(stderr,G15_LOG_INFO,"Trying to detach driver currently attached: \"%s\"\n",name_buffer);
 
           ret = usb_detach_kernel_driver_np(devh, 0);
           if (!ret)
           {
-            g15_log(stderr,"Success, detached the driver\n");
+            g15_log(stderr,G15_LOG_INFO,"Success, detached the driver\n");
           }
           else
           {
-            g15_log(stderr,"Sorry, I could not detached the driver, giving up\n");
+            g15_log(stderr,G15_LOG_INFO,"Sorry, I could not detached the driver, giving up\n");
             return 0;
           }
 
@@ -144,7 +168,7 @@ static usb_dev_handle * findAndOpenDevice(libg15_devices_t handled_device)
         ret = usb_set_configuration(devh, 1);
         if (ret)
         {
-          g15_log(stderr,"Error setting the configuration, this is fatal\n");
+          g15_log(stderr,G15_LOG_INFO,"Error setting the configuration, this is fatal\n");
           return 0;
         }
   
@@ -153,16 +177,16 @@ static usb_dev_handle * findAndOpenDevice(libg15_devices_t handled_device)
         while((ret = usb_claim_interface(devh,0)) && retries <10) {
           usleep(50*1000);
           retries++;
-          g15_log(stderr,"Trying to claim interface\n");
+          g15_log(stderr,G15_LOG_INFO,"Trying to claim interface\n");
         }
   
         if (ret)
         {
-          g15_log(stderr,"Error claiming interface, good day cruel world\n");
+          g15_log(stderr,G15_LOG_INFO,"Error claiming interface, good day cruel world\n");
           return 0;
         }
         usleep(1000*1000); // FIXME.  I should find a way of polling the status to ensure the endpoint has woken up, rather than just waiting for a second
-        g15_log(stderr,"Done opening the keyboard\n");
+        g15_log(stderr,G15_LOG_INFO,"Done opening the keyboard\n");
 
         return devh;
       }
@@ -175,13 +199,13 @@ static usb_dev_handle * findAndOpenDevice(libg15_devices_t handled_device)
 static usb_dev_handle * findAndOpenG15() {
   int i;
   for (i=0; g15_devices[i].name !=NULL  ;i++){
-    g15_log(stderr,"Trying to find %s\n",g15_devices[i].name);
+    g15_log(stderr,G15_LOG_INFO,"Trying to find %s\n",g15_devices[i].name);
     if(keyboard_device = findAndOpenDevice(g15_devices[i])){
         found_devicetype = i;
         break;
     }
     else
-      g15_log(stderr,"%s not found\n",g15_devices[i].name);
+      g15_log(stderr,G15_LOG_INFO,"%s not found\n",g15_devices[i].name);
   }
   return keyboard_device;
 }
@@ -213,6 +237,8 @@ int initLibG15()
   retval = initLibUsb();
   if (retval)
     return retval;
+  
+  g15NumberOfConnectedDevices();
   
   keyboard_device = findAndOpenG15();
   if (!keyboard_device)
@@ -278,7 +304,7 @@ int handle_usb_errors(const char *prefix, int ret) {
      return G15_ERROR_READING_USB_DEVICE;  /* backward-compatibility */
      break;
     case -ENOSPC: /* the we dont have enough bandwidth, apparently.. something has to give here.. */
-      g15_log(stderr,"usb error: ENOSPC.. reducing speed\n");
+      g15_log(stderr,G15_LOG_INFO,"usb error: ENOSPC.. reducing speed\n");
       enospc_slowdown = 1;
       break;
     case -ENODEV: /* the device went away - we probably should attempt to reattach */
@@ -287,16 +313,16 @@ int handle_usb_errors(const char *prefix, int ret) {
     case -EAGAIN: /* try again */
     case -EFBIG: /* too many frames to handle */
     case -EMSGSIZE: /* msgsize is invalid */
-     g15_log(stderr,"usb error: %s (%i)\n",prefix,ret);     
+     g15_log(stderr,G15_LOG_INFO,"usb error: %s (%i)\n",prefix,ret);     
      break;
     case -EPIPE: /* endpoint is stalled */
-     g15_log(stderr,"usb error: %s EPIPE! clearing...\n",prefix);     
+     g15_log(stderr,G15_LOG_INFO,"usb error: %s EPIPE! clearing...\n",prefix);     
      pthread_mutex_lock(&libusb_mutex);
      usb_clear_halt(keyboard_device, 0x81);
      pthread_mutex_unlock(&libusb_mutex);
      break;
   default: /* timed out */
-     g15_log(stderr,"Unknown usb error: %s !! (err is %i)\n",prefix,ret);     
+     g15_log(stderr,G15_LOG_INFO,"Unknown usb error: %s !! (err is %i)\n",prefix,ret);     
   }
   return ret;
 }
@@ -444,8 +470,9 @@ static void processKeyEvent(unsigned int *pressed_keys, unsigned char *buffer)
   int i;
   
   *pressed_keys = 0;
-  /*printf("Buffer: %x, %x, %x, %x, %x, %x, %x, %x, %x\n",buffer[0],buffer[1],buffer[2],buffer[3],buffer[4],buffer[5],buffer[6],buffer[7],buffer[8]);
-  */
+  
+  g15_log(stderr,G15_LOG_WARN,"Keyboard: %x, %x, %x, %x, %x, %x, %x, %x, %x\n",buffer[0],buffer[1],buffer[2],buffer[3],buffer[4],buffer[5],buffer[6],buffer[7],buffer[8]);
+  
   if (buffer[0] == 0x02)
   {
     if (buffer[1]&0x01)

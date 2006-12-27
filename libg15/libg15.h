@@ -45,7 +45,13 @@ struct libg15_devices_t {
 
   /* allow for api changes */
 #define LIBG15_VERSION 1200
-	
+
+  enum 
+  {
+    G15_LOG_INFO = 1,
+    G15_LOG_WARN
+  };
+  
   enum
   {
     G15_NO_ERROR = 0,
