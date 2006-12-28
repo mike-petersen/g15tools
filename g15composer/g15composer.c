@@ -179,6 +179,8 @@ main (int argc, char *argv[])
   param->fifo_filename = NULL;
 
   unsigned char user[256];
+  unsigned char group[256];
+  int reuse_fifo = 0;
 
   int i = 1;
   for (i = 1; (i < argc && param->fifo_filename == NULL); ++i)
@@ -192,11 +194,23 @@ main (int argc, char *argv[])
 	{
 	  param->background = 1;
 	}
+      else if (!strcmp (argv[i], "-r"))
+        {
+	  reuse_fifo = 1;
+	}
       else if (!strcmp (argv[i], "-u") || !strcmp (argv[i], "--user"))
 	{
 	  if (argv[i + 1] != NULL)
 	    {
 	      strncpy ((char *) user, argv[i + 1], 128);
+	      i++;
+	    }
+	}
+      else if (!strcmp (argv[i], "-g") || !strcmp (argv[i], "--group"))
+        {
+	  if (argv[i + 1] != NULL)
+	    {
+	      strncpy ((char *) group, argv[i + 1], 128);
 	      i++;
 	    }
 	}
@@ -220,30 +234,39 @@ main (int argc, char *argv[])
 	  sprintf (param->fifo_filename, "%s/%s", cwd, bname);
 	}
 
-      int tmpfd = open ("/var/run/g15composer", O_WRONLY | O_NDELAY);
-      if (tmpfd > 0)
-	{
-	  FILE *control = fdopen (tmpfd, "w");
-	  fprintf (control, "SN \"%s\"\n", param->fifo_filename);
-	  fclose (control);
-	  close (tmpfd);
-	  return 0;
+      if (reuse_fifo)
+        {
+      	  int tmpfd = open ("/var/run/g15composer", O_WRONLY | O_NDELAY);
+      	  if (tmpfd > 0)
+	    {
+	      FILE *control = fdopen (tmpfd, "w");
+	      fprintf (control, "SN \"%s\"\n", param->fifo_filename);
+	      fclose (control);
+	      close (tmpfd);
+	      return 0;
+	    }
 	}
 
-      struct passwd *nobody;
+      struct passwd *euser;
 
       if (strlen ((char *) user) == 0)
-	nobody = getpwnam ("nobody");
+	euser = getpwnam ("nobody");
       else
-	nobody = getpwnam ((char *) user);
+	euser = getpwnam ((char *) user);
 
-      if (nobody == NULL)
-	nobody = getpwuid (geteuid ());
+      if (euser == NULL)
+	euser = getpwuid (geteuid ());
 
-      if (nobody != NULL)
+      if (strlen ((char *) group))
 	{
-	  setegid (nobody->pw_gid);
-	  seteuid (nobody->pw_uid);
+	  setegid (atoi(group));
+	}
+
+      if (euser != NULL)
+	{
+	  if (group == NULL)
+	    setegid (euser->pw_gid);
+	  seteuid (euser->pw_uid);
 	}
 
       struct threadList *thread_list = new_threadList ();
