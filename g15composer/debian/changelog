@@ -1,10 +1,19 @@
+g15composer (3.1-1) edgy; urgency=low
+
+  * Add support for new WBMP and bignum routines in libg15render-1.2
+  * Improve FIFO handling to recover dangling FIFOs
+  * Add -u/--user -g/--group command line options to change effective UID/GID
+  * Add -r command line option to reuse running g15composer instance
+
+ -- Anthony J. Mirabella <mirabeaj@gmail.com>  Mon, 01 Jan 2007 17:16:35 -0500
+
 g15composer (3.0-1) edgy; urgency=low
 
   * Reimplement g15composer using flex and bison
   * Text may now be right justified with the TO command
   * Some command syntax has changed.  See README for details.
 
- -- Anthony J. Mirabella <mirabeaj@gmail.com> Thu, 26 Oct 2006 17:06:13 -0400
+ -- Anthony J. Mirabella <mirabeaj@gmail.com>  Thu, 26 Oct 2006 17:06:13 -0400
 
 g15composer (2.1-1) dapper; urgency=low
 

@@ -2,7 +2,7 @@ Source: g15composer
 Section: utils
 Priority: optional
 Maintainer: Anthony J. Mirabella <mirabeaj@gmail.com>
-Build-Depends: debhelper (>= 4.0.0), autotools-dev, libg15-dev, libg15daemon-client-dev, libg15render-dev, libfreetype6-dev
+Build-Depends: debhelper (>= 4.0.0), autotools-dev, libg15-dev, libg15daemon-client-dev, libg15render-dev (>= 1.2), libfreetype6-dev
 Standards-Version: 3.6.2
 
 Package: g15composer
