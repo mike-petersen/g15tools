@@ -1,3 +1,9 @@
+1.2
+* Add WBMP loading and drawing routines
+* Add drawBigNum routine
+* Add man page
+* Enable right justified TTF printing
+
 1.1
 * Lower buffer size from 7k to 1k (recompile programs linked against v1.0)
 * Add drawCircle, drawRoundBox, and drawBar routines

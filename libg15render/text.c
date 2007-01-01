@@ -182,7 +182,7 @@ calc_ttf_true_ypos (FT_Face face, int y, int ttf_fontsize)
   if (!FT_IS_SCALABLE (face))
     ttf_fontsize = face->available_sizes->height;
 
-  y += ttf_fontsize - (ttf_fontsize * .25);
+  y += ttf_fontsize * .75;
 
   return y;
 }
