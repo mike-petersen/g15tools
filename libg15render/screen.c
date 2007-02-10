@@ -94,8 +94,23 @@ g15r_initCanvas (g15canvas * canvas)
   canvas->mode_cache = 0;
   canvas->mode_reverse = 0;
   canvas->mode_xor = 0;
+}
+
+void
+g15r_initTTFCanvas (g15canvas * canvas)
+{
+  memset (canvas->buffer, 0, G15_BUFFER_LEN);
+  canvas->mode_cache = 0;
+  canvas->mode_reverse = 0;
+  canvas->mode_xor = 0;
+  canvas->ttf_canvas = (g15_ttf_canvas *) calloc (1, sizeof (g15_ttf_canvas));
+  if (canvas->ttf_canvas == NULL)
+    {
+        printf ("Error allocating ttf_canvas\n");
+        return;
+    }
 #ifdef TTF_SUPPORT
-  if (FT_Init_FreeType (&canvas->ftLib))
+  if (FT_Init_FreeType (&canvas->ttf_canvas->ftLib))
     printf ("Freetype couldnt initialise\n");
 #endif
 }
