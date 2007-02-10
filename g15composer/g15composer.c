@@ -109,7 +109,11 @@ threadEntry (void *arg)
 	  fprintf (stderr, "Sorry, can't connect to g15daemon\n");
 	  param->leaving = 1;
 	}
+#ifdef TTF_SUPPORT
+      g15r_initTTFCanvas (param->canvas);
+#else
       g15r_initCanvas (param->canvas);
+#endif
       param->canvas->mode_reverse = 1;
       g15r_pixelOverlay (param->canvas, 0, 0, 160, 43, g15c_logo_data);
       param->canvas->mode_reverse = 0;
@@ -154,6 +158,8 @@ threadEntry (void *arg)
     {
       if (param->g15screen_fd)
 	g15_close_screen (param->g15screen_fd);
+      if (param->canvas->ttf_canvas != NULL)
+	free (param->canvas->ttf_canvas);
       if (param->canvas != NULL)
 	free (param->canvas);
     }
