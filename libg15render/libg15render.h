@@ -32,15 +32,6 @@ extern "C"
 #define G15_PIXEL_FILL  	1
 #define G15_MAX_FACE		5
 
-  typedef struct g15_ttf_canvas
-  {
-#ifdef TTF_SUPPORT
-    FT_Library ftLib;
-    FT_Face ttf_face[G15_MAX_FACE][sizeof (FT_Face)];
-    int ttf_fontsize[G15_MAX_FACE];
-#endif
-  } g15_ttf_canvas;
-
 /** \brief This structure holds the data need to render objects to the LCD screen.*/
   typedef struct g15canvas
   {
@@ -52,8 +43,11 @@ extern "C"
     int mode_cache;
 /** g15canvas::mode_reverse determines whether color values passed to g15r_setPixel are reversed.*/
     int mode_reverse;
-/** g15canvas::ttf_canvas is a pointer to a g15_ttf_canvas struct containing data for ttf operations.*/
-    g15_ttf_canvas *ttf_canvas;
+#ifdef TTF_SUPPORT
+    FT_Library ftLib;
+    FT_Face ttf_face[G15_MAX_FACE][sizeof (FT_Face)];
+    int ttf_fontsize[G15_MAX_FACE];
+#endif
   } g15canvas;
 
 /** \brief Fills an area bounded by (x1, y1) and (x2, y2)*/
@@ -97,8 +91,6 @@ void g15r_drawBigNum (g15canvas * canvas, unsigned int x1, unsigned int y1, unsi
   void g15r_clearScreen (g15canvas * canvas, int color);
 /** \brief Clears the canvas and resets the mode switches*/
   void g15r_initCanvas (g15canvas * canvas);
-/** \brief Clears the canvas, resets the mode switches, and initializes ttf support*/
-  void g15r_initTTFCanvas (g15canvas * canvas);
 
 /** \brief Font data for the large (8x8) font*/
   extern unsigned char fontdata_8x8[];
