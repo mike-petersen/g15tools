@@ -1,4 +1,4 @@
-libg15 (1.2.0) edgy; urgency=low
+libg15 (1.2.1) edgy; urgency=low
   * Add debugging function to enable/disable extra output
   * All debugging output is now prefixed with libg15 to aid localising
     problems.
@@ -14,6 +14,8 @@ libg15 (1.2.0) edgy; urgency=low
   * libg15 now uses pthread mutexes to force sequential access to the bus via
     libusb.  Control message URBs are no longer being lost if sent by a different
     thread in the middle of a screen transfer etc.
+  * Reset the keyboard before init to ensure correct initialisation on
+    kernels > 2.6.19
 
 libg15 (1.1.1-1) edgy; urgency=low
 

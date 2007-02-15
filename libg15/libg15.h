@@ -26,6 +26,7 @@ extern "C"
 
 #define G15_LCD 1
 #define G15_KEYS 2
+#define G15_DEVICE_IS_SHARED 4
 
 typedef struct libg15_devices_t libg15_devices_t;
 
@@ -60,7 +61,8 @@ struct libg15_devices_t {
     G15_ERROR_TIMEOUT,
     G15_ERROR_READING_USB_DEVICE,
     G15_ERROR_TRY_AGAIN,
-    G15_ERROR_WRITING_BUFFER
+    G15_ERROR_WRITING_BUFFER,
+    G15_ERROR_UNSUPPORTED
   };
   
   enum
