@@ -30,8 +30,8 @@ static int enospc_slowdown = 0;
 
 static int found_devicetype = -1;
 static int shared_device = 0;
-static int g15_keys_endpoint;
-static int g15_lcd_endpoint;
+static int g15_keys_endpoint = 0;
+static int g15_lcd_endpoint = 0;
 static pthread_mutex_t libusb_mutex;
 
 
@@ -39,9 +39,9 @@ static pthread_mutex_t libusb_mutex;
 /* Fields are: "Name",VendorID,ProductID,Capabilities */
 const libg15_devices_t g15_devices[] = {
     DEVICE("Logitech G15",0x46d,0xc222,G15_LCD|G15_KEYS),
-           DEVICE("Logitech G11",0x46d,0xc225,G15_KEYS),
-                  DEVICE("Logitech Z-10",0x46d,0x0a07,G15_LCD|G15_KEYS|G15_DEVICE_IS_SHARED),
-                         DEVICE(NULL,0,0,0)
+    DEVICE("Logitech G11",0x46d,0xc225,G15_KEYS),
+    DEVICE("Logitech Z-10",0x46d,0x0a07,G15_LCD|G15_KEYS|G15_DEVICE_IS_SHARED),
+    DEVICE(NULL,0,0,0)
 };
 
 /* return device capabilities */
@@ -149,11 +149,18 @@ static usb_dev_handle * findAndOpenDevice(libg15_devices_t handled_device)
 
                 g15_log(stderr, G15_LOG_INFO, "Device has %i possible configurations\n",dev->descriptor.bNumConfigurations);
 
+                /* if device is shared with another driver, such as the Z-10 speakers sharing with alsa, we have to disable some calls */
+                if(g15DeviceCapabilities() & G15_DEVICE_IS_SHARED)
+                  shared_device = 1;
+
                 for (j = 0; j<dev->descriptor.bNumConfigurations;j++){
                     struct usb_config_descriptor *cfg = &dev->config[j];
 
                     for (i=0;i<cfg->bNumInterfaces; i++){
                         struct usb_interface *ifp = &cfg->interface[i];
+                        /* if endpoints are already known, finish up */
+                        if(g15_keys_endpoint && g15_lcd_endpoint)
+                          break;
                         g15_log(stderr, G15_LOG_INFO, "Device has %i Alternate Settings\n", ifp->num_altsetting);
 
                         for(k=0;k<ifp->num_altsetting;k++){
@@ -189,14 +196,15 @@ static usb_dev_handle * findAndOpenDevice(libg15_devices_t handled_device)
 
                                 }
 #endif  
-
-                                ret = usb_set_configuration(devh, 1);
-                                if (ret)
-                                {
+                                /* don't set configuration if device is shared */
+                                if(0 == shared_device) {
+                                  ret = usb_set_configuration(devh, 1);
+                                  if (ret)
+                                  {
                                     g15_log(stderr,G15_LOG_INFO,"Error setting the configuration, this is fatal\n");
                                     return 0;
+                                  }
                                 }
-
                                 usleep(50*1000);
                                 while((ret = usb_claim_interface(devh,i)) && retries <10) {
                                     usleep(50*1000);
@@ -236,11 +244,6 @@ static usb_dev_handle * findAndOpenDevice(libg15_devices_t handled_device)
                     }
                 }
 
-
-
-
-                /* if device is shared with another driver, such as the Z-10 speakers sharing with alsa, we have to disable some calls */
-                shared_device = g15DeviceCapabilities();
 
                 g15_log(stderr,G15_LOG_INFO,"Done opening the keyboard\n");
                 usleep(500*1000); // sleep a bit for good measure 
