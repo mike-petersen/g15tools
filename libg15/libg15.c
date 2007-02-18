@@ -112,7 +112,7 @@ static int initLibUsb()
     return G15_NO_ERROR;
 }
 
-static usb_dev_handle * findAndOpenDevice(libg15_devices_t handled_device)
+static usb_dev_handle * findAndOpenDevice(libg15_devices_t handled_device, int device_index)
 {
     struct usb_bus *bus = 0;
     struct usb_device *dev = 0;
@@ -130,6 +130,7 @@ static usb_dev_handle * findAndOpenDevice(libg15_devices_t handled_device)
                 char name_buffer[65535];
                 name_buffer[0] = 0;
                 usb_dev_handle *devh = 0;
+                found_devicetype = device_index;
                 g15_log(stderr,G15_LOG_INFO,"Found %s, trying to open it\n",handled_device.name);
 #if 0
                 devh = usb_open(dev);
@@ -173,7 +174,7 @@ static usb_dev_handle * findAndOpenDevice(libg15_devices_t handled_device)
                                 * Non-linux users will need some way to detach the HID driver from
                                 * the G15 until we work out how to do this for other OS's automatically. 
                                 * For the moment, we just skip this code..
-        */
+                                */
 #ifdef LIBUSB_HAS_GET_DRIVER_NP
                                 ret = usb_get_driver_np(devh, i, name_buffer, 65535);
         			/* some kernel versions say that a driver is attached even though there is none
@@ -259,8 +260,7 @@ static usb_dev_handle * findAndOpenG15() {
     int i;
     for (i=0; g15_devices[i].name !=NULL  ;i++){
         g15_log(stderr,G15_LOG_INFO,"Trying to find %s\n",g15_devices[i].name);
-        if(keyboard_device = findAndOpenDevice(g15_devices[i])){
-            found_devicetype = i;
+        if(keyboard_device = findAndOpenDevice(g15_devices[i],i)){
             break;
         }
         else
@@ -466,7 +466,7 @@ int setLEDs(unsigned int leds)
   
     if(shared_device>0)
         return G15_ERROR_UNSUPPORTED;
-  
+
     pthread_mutex_lock(&libusb_mutex);
     retval = usb_control_msg(keyboard_device, USB_TYPE_CLASS + USB_RECIP_INTERFACE, 9, 0x302, 0, (char*)m_led_buf, 4, 10000); 
     pthread_mutex_unlock(&libusb_mutex);
