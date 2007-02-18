@@ -28,3 +28,6 @@
   Control message URBs are no longer being lost if sent by a different
   thread in the middle of a screen transfer etc.
 * Reset the keyboard before init to ensure correct initialisation on kernels > 2.6.19
+1.2.1 -> svn
+* Add support for the logitech Z-10 speakers - many thanks to Dwayne Fontenot for
+  detailed information and debugging.
