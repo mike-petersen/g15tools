@@ -1,0 +1,38 @@
+g15cat ver.0.3 - GNU Software - (c) 2007 Antonio Bartolini
+
+How to install:
+
+ make
+
+and (as root):
+
+ make install
+
+How to uninstall (as root):
+
+ make uninstall
+
+
+
+Usage:
+
+  g15cat [-p pipe] [-f FORMAT] [-d]
+
+  Where possibile options are:
+  -f FORMAT = TS, TM or TL [default TS]
+  -p PIPE = Path of the G15 pipe [default /var/run/g15]
+  -t = Display data in Top-Down mode
+  -d = Debug mode
+
+ Report bugs to robynhub@gmail.com
+
+ g15cat is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ g15cat is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
