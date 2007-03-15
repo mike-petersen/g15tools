@@ -17,6 +17,7 @@
 */
 
 #include <fcntl.h>
+#include <math.h>
 #include "libg15render.h"
 
 void
@@ -339,7 +340,7 @@ g15r_drawBar (g15canvas * canvas, int x1, int y1, int x2, int y2, int color,
 {
   float len, length;
   int x;
-  if (max == 0)
+  if (max <= 0 || num <= 0)
     return;
   if (num > max)
     num = max;
