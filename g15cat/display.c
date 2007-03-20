@@ -22,6 +22,9 @@
 #include <stdio.h>
 #include <string.h>
 
+
+/* Add data to the end of linked list and free the first one */
+
 int display_add(display *disp, char *val, int linelen){
   linea *l, *u;
   
@@ -32,10 +35,10 @@ int display_add(display *disp, char *val, int linelen){
   disp->first->prev = NULL;
   /* free frist linea */
   free(u);
-
+  
   /* add the last */
   l = (linea *) malloc(sizeof(linea));
-  l->data = (char *) malloc(sizeof(char) * linelen + 2);
+  l->data = (char *) calloc(linelen + 2, sizeof(char));
   strcpy(l->data,val);
   disp->last->next = (struct linea *) l; 
   l->prev = (struct linea *) disp->last;
@@ -44,49 +47,57 @@ int display_add(display *disp, char *val, int linelen){
   return 0;
 }
 
-display * display_create(display *disp, int linelen, int maxlines, char *format){
+
+/* create a new linked list of lines */
+display * display_create(display *disp, int linelen, int numlines, char *format){
   int i;
   linea *prec;
   linea *latest;
   
   disp = (display *) malloc(sizeof(display));
   disp->first = (linea *) malloc(sizeof(linea));
-  disp->first->data = (char *) malloc(sizeof(char) * linelen + 2);
+  disp->first->data = (char *) calloc(linelen + 2, sizeof(char));
   
   /* initialing data */
-  strcpy(disp->first->data," ");
   disp->first->prev = NULL;
   latest = disp->first;
-
-  for(i=0;i<maxlines;i++){
+  
+  for(i=0;i<numlines;i++){
     /* moving pointer */
     prec = latest;
-    /* latest = (linea *) latest->next; */
-
-    /* fill data */
+    /* fill pointers data */
     latest = malloc(sizeof(linea));
     latest->prev = (struct linea *) prec;
     prec->next =  (struct linea *) latest; 
-    /* initialing data */   
-    latest->data = malloc(sizeof(char) * linelen + 2);
-    strcpy(latest->data," ");
+    /* fill with empty data */   
+    latest->data = calloc(linelen + 2, sizeof(char));
   }
   /* last one */
   disp->last = latest;
   disp->last->next = NULL;
-  
+
+   /* maybe for future use */
+  disp->numlines = numlines; 
   return disp;
 }
 
+
+/* free world with free memory */
 int free_display(display *disp){
   linea *pointer;
   
+  /* check for correct args */
+  if (disp == NULL)
+    return -1;
+  
   /* free data */
   pointer = disp->first;
+  /* clean each data until ends */
   while (pointer->next != NULL){
     free(pointer->data);
-     pointer = (linea *)pointer->next;
+    pointer = (linea *)pointer->next;
   }
+  /* cleaning the last one */
   free(pointer->data);
   
   /* free lines */

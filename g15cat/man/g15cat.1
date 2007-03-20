@@ -1,0 +1,64 @@
+.\" Process this file with
+.\" groff -man -Tascii foo.1
+.\"
+.TH G15cat 1
+.SH NAME
+g15cat \- send a stream of data to a g15 LCD Display
+.SH SYNOPSIS
+.B g15cat [-F 
+.I FILENAME
+.B ] [-s 
+.I SECONDS
+.B ] [-f
+.I FORMAT
+.B ] [ -c
+.I NUMCHARS
+.B ] [-t] [-d 
+.I SECONDS
+.B ]
+.B...
+.SH DESCRIPTION
+.B g15cat
+read data from standard input and put it on a display by the 
+.BR g15daemon 
+running. 
+g15cat by default it wait 5 seconds until exit if unspecified by args.
+.SH OPTIONS
+.IP "-F FILENAME"
+Read 
+.I FILENAME 
+instead stdin.
+.IP "-s SECONDS"
+Wait n. 
+.I SECONDS 
+until exit.
+.IP "-f FORMAT"
+Display data in the specified 
+.I FORMAT 
+allowed values of 
+.I FORMAT
+are:
+.I S 
+for small size text, 
+.BR 
+.I M 
+for medium size text and 
+.BR
+.I L 
+for large size text. Default: 
+.I S
+.IP "-c NUMCHARS"
+Cut away the first 
+.I NUMCHARS 
+from input lines.
+.IP -t
+Draw data from top to down
+.IP "-s SECONDS"
+Enable the slow mode and wait n. 
+.I SECONDS 
+before draw each line.
+.SH AUTHOR
+Antonio Bartolini <robynhub at gmail.com>
+.SH "SEE ALSO"
+.BR g15daemon (1),
+.BR g15daemon_client (1)

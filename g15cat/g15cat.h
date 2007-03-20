@@ -18,6 +18,10 @@
     
 */
 
+#ifndef G15CAT_H_
+#define G15CAT_H_
+
+#include "display.h"
 
 #define TM_CHARS 32
 #define TS_CHARS 40
@@ -26,12 +30,15 @@
 #define TS_LINES 6
 #define TL_LINES 4
 
+#define TRUE 1
+#define FALSE 0
 
-/* in caso di fallimento stampa errore e abort pulito */
+
+/* if error clean exit */
 #define IFERROR(s,m) if((s)==-1) {perror(m); client_exit(errno);}
-/* in caso di fallimento stampa errore e comando variabile */
+/* if error print a message and execute variable */
 #define IFERROR3(s,m,c) if((s)==-1) {perror(m); c;} 
-/* in caso di fallimento abort pulito senza stampa di errore */              
+/* if error clean abort without messages */              
 #define IFERRORQ(s) if((s)==-1) {client_exit(status);}
 /* debug routine */
 #define DEBUG(m) if(debug) {printf("%s",m);}
@@ -41,5 +48,6 @@ void client_exit(int);
 void siginit(void);
 void main_usage(void);
 void main_loop(void);
+int refresh(display *);
 
-
+#endif /* G15CAT_H_ */

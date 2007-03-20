@@ -32,21 +32,23 @@
 #include <libg15.h>
 #include <libg15render.h>
 
-#include "display.h"
+//#include "display.h"
 #include "g15cat.h"
 
-char *version="1.0";
-char *format="S";
-char *buffer;
-display *disp;
-int debug=0;
-int topdown=0;
-int g15fd;
-int seconds=5;
-int dim =  G15_TEXT_SMALL;
-
-int refresh(display *);
-
+/* config variables */
+char *version = "VERSION";           /* version of this program */
+char *format = "S";                  /* default format of text  */
+char *buffer;                        /* buffer to render        */
+display *disp;                       /* linked list for storage data */
+g15canvas *canvas;		     /* g15canvas struct for screen data */
+int slow_mode = 0;                   /* slowdown mode also for debug */
+int topdown = 0;                     /* direction of the text   */
+int g15fd;                           /* file descriptor of the g15 display */
+int seconds = 5;                     /* seconds to wait until exit */
+int slow;                            /* If >0 wait. Else go wild  */
+int cut = 0;                         /* number of chars that need to be cutted */
+int dim =  G15_TEXT_SMALL;           /* size of the text */
+FILE * fd;                           /* file descriptor of input */
 
 
 struct sigaction action; /* struct to handle signals */
@@ -54,78 +56,69 @@ struct sigaction action; /* struct to handle signals */
 /* init routine to handle signals */
 void siginit(void){
   
-  /* assegnamento gestione segnale SIGINT a client_exit() */
+  /* signal assignment: SIGINT to client_exit() */
   IFERROR3(sigaction(SIGINT,NULL,&action),"sigaction",exit(errno));
   action.sa_handler=client_exit;
   IFERROR3(sigaction(SIGINT,&action,NULL),"sigaction",exit(errno));
-  /* assegnamento gestione segnale SIGQUIT a client_exit() */
+  /* signal assignment: SIGQUIT to client_exit() */
   IFERROR3(sigaction(SIGQUIT,NULL,&action),"sigaction",exit(errno));
   action.sa_handler=client_exit;
   IFERROR3(sigaction(SIGQUIT,&action,NULL),"sigaction",exit(errno));
-  /* assegnamento gestione segnale SIGTERM a client_exit() */
+  /* signal assignment: SIGTERM to client_exit() */
   IFERROR3(sigaction(SIGTERM,NULL,&action),"sigaction",exit(errno));
   action.sa_handler=client_exit;
   IFERROR3(sigaction(SIGTERM,&action,NULL),"sigaction",exit(errno));
 }
 
+/* clean exit on signals */
 void client_exit(int st){
   free_display(disp);
-  /* DEBUG("bye. \n");*/
   exit(st);
 }
 
 
 /* print the main usage */
 void main_usage(void){
-  /* print help */
-  
-  printf("g15cat ver.%s - GNU Software - (c) 2007 Antonio Bartolini\n\nUsage:\n", version);
-  printf("  g15cat [-s SECONDS] [-f FORMAT] [-d]\n\n  Where possibile options are:\n");
-  printf("  -f FORMAT = S, M or L [default S]\n");
-  printf("  -t = Display data in Top-Down mode\n");
-  printf("  -s SECONDS = Wait n. SECONDS until exit [default 5]\n");
-  printf("  -d = Debug mode\n\n");
-  printf("  Report bugs to robynhub@gmail.com\n");
-  /* exit */
-  exit(0); 
+  printf("g15cat ver. %s - GNU Software - (c) 2007 Antonio Bartolini\n\nUsage:\n", version);
+  printf("  g15cat [-F FILENAME] [-s SECONDS] [-f FORMAT] [-c NUMCHARS] [-t] [-d SECONDS]\n\n  Where possibile options are:\n");
+  printf("  -F FILENAME = Read Filename as Input. [default STDIN]\n");
+  printf("  -s SECONDS = Wait n. SECONDS until exit. [default 5]\n");
+  printf("  -f FORMAT = S, M or L. [default S]\n");
+  printf("  -c NUMCHARS = Cut first NUMCHARS characters from the begin of each line.\n");
+  printf("  -t = Display data in Top-Down mode.\n");
+  printf("  -d SECONDS = Wait n. SECONDS before printing each line (Slow mode).\n");
+  printf("  -h = Display this help.\n\n");
+  printf("Report bugs to robynhub@gmail.com\n");
+  /* exit 1 anyway */
+  exit(1); 
 }
 
 
 /* refresh routine */
-
 int refresh(display *buf){
-  char *buffer;
   linea *pointer;
-  g15canvas *canvas;
   int lineno=0;
   
-  /* empty buffer */
-  strcpy(buffer," ");
-  canvas = (g15canvas *) malloc (sizeof (g15canvas));
-  if (canvas != NULL) {
-    memset(canvas->buffer, 0, G15_BUFFER_LEN);
-    canvas->mode_cache = 0;
-    canvas->mode_reverse = 0;
-    canvas->mode_xor = 0;
-  }
-  
+  /* Clear the buffer in the g15canvas struct */
+  g15r_clearScreen (canvas, 0);
+
   if (topdown)
     pointer = buf->last;
   else
     pointer = buf->first;
   do{  
+    /* rendering data */
     g15r_renderString (canvas, (unsigned char *)pointer->data, lineno, dim, 0, 0);
     lineno++;
     if (topdown)
       pointer = (linea *) pointer->prev;
     else
       pointer = (linea *) pointer->next;
-  } while (pointer!= NULL);
+  } while (pointer!= NULL); /* until the buffer end */
   
-  /* send data */
+  /* send data to the display*/
   g15_send(g15fd,(char *)canvas->buffer,G15_BUFFER_LEN);
-  free(canvas);
-  return 0;
+  return TRUE;
 }
 
 /* main loop */
@@ -136,6 +129,7 @@ void main_loop(void){
   int counter;
   char c;
   
+  /* parse dimension of the text and take the values */
   if(*format == 'S'){
     num_chars = TS_CHARS;
     num_lines = TS_LINES;
@@ -152,69 +146,107 @@ void main_loop(void){
     main_usage();
   }
   
-  buffer = malloc((num_chars + 2) * sizeof(char)); 
+  /* security check */
+  if (cut < 0)
+    cut = 0;
   
+  buffer = calloc(num_chars + 2, sizeof(char)); 
+  
+  /* create new canvas */
+  canvas = (g15canvas *) calloc (1, sizeof (g15canvas));
+  /* create display*/
   disp = display_create(disp, num_chars,num_lines,format);
+  /* catch the screen */
   g15fd = new_g15_screen(G15_G15RBUF);
   
   if(g15fd < 0){
     printf("Can't connect to daemon!\n");
     client_exit(255);
   }
-  
-  while ((c = getchar()) && !feof(stdin) ){
-    if (c == '\n' || counter == num_chars){
+  /* fetch character while a new charater exist or EOF reached */
+  while ((c = fgetc(fd)) && !feof(fd) ){
+    /* if it's at the end of the line or max number of charatcter reached */
+    if (c == '\n' || (counter - cut) == num_chars){
       /* add the line */
       display_add(disp,buffer,num_chars);
       /* refresh display */
       refresh(disp);
+      /* slow mode */
+      if(slow_mode)
+        sleep(slow);
       /* empty buffer */
       strcpy(buffer,"");
       
       /* ignore rest of line */
-      if (counter == num_chars)
-	do { c = getchar(); } while (c != '\n' || feof(stdin) );
+      if ((counter - cut) == num_chars)
+	do { c = fgetc(fd); } while (c != '\n' || feof(fd) );
       counter = 0;
       
     } else {
-      strncat(buffer, &c, 1);
+      /* If there is some cutted characters skip it */
+      if (counter >= cut){
+	strncat(buffer, &c, 1);
+      }
       counter++;
     }
   }
+  /* wait until exit */
   sleep(seconds);
+  /* free memory */
   free(buffer);
+  free(canvas);
+  /* close input fd */
+  fclose(fd);
+  /* clean exit */
   client_exit(0);
   
 }
 
 
 int main(int argc,char **argv){
-  
   int option;
   
-  siginit();
-  while ((option = getopt(argc,argv,"tdhf:s:")) != -1){
-    
+  /* catch the signals */
+  siginit(); 
+  /* default fd */
+  fd = stdin;
+  
+  while ((option = getopt(argc,argv,"td:hf:s:c:F:")) != -1){    
     switch(option){
+    case 'F':
+      fd = fopen(optarg, "r");
+      if (fd == NULL){
+	/* something goes wrong */
+	printf("ERROR: Can't open file: %s\n",optarg);
+	main_usage();
+      }
+      break;
     case 's':
-      seconds=atoi(optarg);
+      seconds = atoi(optarg);
       break;       
     case 'f':
-      format=optarg;
+      format = optarg;
       break;      
     case 'd':
-      debug = 1;
+      slow = atoi(optarg);
+      slow_mode = TRUE;
       break;
     case 't':
-      topdown = 1;
+      topdown = TRUE;
+      break;
+    case 'c':
+      cut = atoi(optarg);
       break;
     case 'h':
+      main_usage();
+    default:
+      /* if something goes wrong */
       main_usage();
     }
   }
   
   main_loop(); 
-  return 0;  /* never reached */
+  return TRUE;  /* never reached */
 }
 
 

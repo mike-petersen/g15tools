@@ -1,8 +1,8 @@
-g15cat ver.0.3 - GNU Software - (c) 2007 Antonio Bartolini
+g15cat ver. 1.1 - GNU Software - (c) 2007 Antonio Bartolini
 
 How to install:
 
- make
+ ./configure && make
 
 and (as root):
 
@@ -12,19 +12,19 @@ How to uninstall (as root):
 
  make uninstall
 
-
-
 Usage:
-
-  g15cat [-p pipe] [-f FORMAT] [-d]
+  g15cat [-F FILENAME] [-s SECONDS] [-f FORMAT] [-c NUMCHARS] [-t] [-d SECONDS]
 
   Where possibile options are:
-  -f FORMAT = TS, TM or TL [default TS]
-  -p PIPE = Path of the G15 pipe [default /var/run/g15]
-  -t = Display data in Top-Down mode
-  -d = Debug mode
+  -F FILENAME = Read Filename as Input. [default STDIN]
+  -s SECONDS = Wait n. SECONDS until exit. [default 5]
+  -f FORMAT = S, M or L. [default S]
+  -c NUMCHARS = Cut first NUMCHARS characters from the begin of each line.
+  -t = Display data in Top-Down mode.
+  -d SECONDS = Wait n. SECONDS before printing each line (Slow mode).
+  -h = Display this help.
 
- Report bugs to robynhub@gmail.com
+Report bugs to robynhub@gmail.com
 
  g15cat is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
