@@ -3,6 +3,7 @@
 
 AC_PREREQ(2.61)
 AC_INIT(g15cat, 1.1, robynhub@gmail.com)
+AC_CONFIG_AUX_DIR(config)
 AM_INIT_AUTOMAKE()
 AC_CONFIG_SRCDIR([g15cat.c])
 AC_CONFIG_HEADER([config.h])
