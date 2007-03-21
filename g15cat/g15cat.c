@@ -79,7 +79,8 @@ void client_exit(int st){
 
 /* print the main usage */
 void main_usage(void){
-  printf("g15cat ver. %s - GNU Software - (c) 2007 Antonio Bartolini\n\nUsage:\n", version);
+  printf("g15cat ver. %s - GNU Software - (c) 2007 Antonio Bartolini\n", version);
+  printf("part of G15tools - http://g15tools.sourceforge.net/\n\nUsage:\n");
   printf("  g15cat [-F FILENAME] [-s SECONDS] [-f FORMAT] [-c NUMCHARS] [-t] [-d SECONDS]\n\n  Where possibile options are:\n");
   printf("  -F FILENAME = Read Filename as Input. [default STDIN]\n");
   printf("  -s SECONDS = Wait n. SECONDS until exit. [default 5]\n");
