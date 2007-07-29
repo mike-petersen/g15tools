@@ -106,7 +106,7 @@ g15r_renderString (g15canvas * canvas, unsigned char stringOut[], int row,
 {
 
   int i = 0;
-  for (i; stringOut[i] != NULL; ++i)
+  for (i; stringOut[i] != 0; ++i)
     {
       switch (size)
 	{
