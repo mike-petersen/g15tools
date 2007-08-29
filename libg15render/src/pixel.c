@@ -16,6 +16,8 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+#include <stdlib.h>
+#include <unistd.h>
 #include <fcntl.h>
 #include <math.h>
 #include "libg15render.h"
