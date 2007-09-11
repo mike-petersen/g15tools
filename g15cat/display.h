@@ -43,5 +43,9 @@ typedef struct {
 int display_add(display *disp, char *val, int linelen);
 display * display_create(display *disp, int linelen, int maxlines, char *format);
 int free_display(display *disp);
-
+int display_add_char(display *disp, char c);
+int display_len(display *disp);
+int display_rem_char(display *disp, int linelen);
+int display_newline(display *disp, int linelen);
+int display_remline(display *disp, int linelen);
 #endif /* DISPLAY_H_ */

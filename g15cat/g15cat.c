@@ -36,7 +36,7 @@
 #include "g15cat.h"
 
 /* config variables */
-char *version = "VERSION";           /* version of this program */
+char *version = G15CAT_VERSION;      /* version of this program */
 char *format = "S";                  /* default format of text  */
 char *buffer;                        /* buffer to render        */
 display *disp;                       /* linked list for storage data */
@@ -44,11 +44,13 @@ g15canvas *canvas;		     /* g15canvas struct for screen data */
 int slow_mode = 0;                   /* slowdown mode also for debug */
 int topdown = 0;                     /* direction of the text   */
 int g15fd;                           /* file descriptor of the g15 display */
-int seconds = 5;                     /* seconds to wait until exit */
+int seconds = 2;                     /* seconds to wait until exit */
 int slow;                            /* If >0 wait. Else go wild  */
+int shell_mode = 0;                  /* if 1 don't cut final chars but \n and continue */
 int cut = 0;                         /* number of chars that need to be cutted */
 int dim =  G15_TEXT_SMALL;           /* size of the text */
 FILE * fd;                           /* file descriptor of input */
+pid_t pid;
 
 
 struct sigaction action; /* struct to handle signals */
@@ -81,9 +83,10 @@ void client_exit(int st){
 void main_usage(void){
   printf("g15cat ver. %s - GNU Software - (c) 2007 Antonio Bartolini\n", version);
   printf("part of G15tools - http://g15tools.sourceforge.net/\n\nUsage:\n");
-  printf("  g15cat [-F FILENAME] [-s SECONDS] [-f FORMAT] [-c NUMCHARS] [-t] [-d SECONDS]\n\n  Where possibile options are:\n");
+  printf("  g15cat [-F FILENAME] [-s SECONDS] [-f FORMAT] [-c NUMCHARS] [-t] [-S] [-d SECONDS]\n\n  Where possibile options are:\n");
   printf("  -F FILENAME = Read Filename as Input. [default STDIN]\n");
   printf("  -s SECONDS = Wait n. SECONDS until exit. [default 5]\n");
+  printf("  -S  = Shell mode (see man). \n");
   printf("  -f FORMAT = S, M or L. [default S]\n");
   printf("  -c NUMCHARS = Cut first NUMCHARS characters from the begin of each line.\n");
   printf("  -t = Display data in Top-Down mode.\n");
@@ -102,7 +105,7 @@ int refresh(display *buf){
   
   /* Clear the buffer in the g15canvas struct */
   g15r_clearScreen (canvas, 0);
-
+  
   if (topdown)
     pointer = buf->last;
   else
@@ -151,7 +154,6 @@ void main_loop(void){
   if (cut < 0)
     cut = 0;
   
-  buffer = calloc(num_chars + 2, sizeof(char)); 
   
   /* create new canvas */
   canvas = (g15canvas *) calloc (1, sizeof (g15canvas));
@@ -165,36 +167,56 @@ void main_loop(void){
     client_exit(255);
   }
   /* fetch character while a new charater exist or EOF reached */
-  while ((c = fgetc(fd)) && !feof(fd) ){
+  while ((c = fgetc(fd))  && !feof(fd)){
     /* if it's at the end of the line or max number of charatcter reached */
-    if (c == '\n' || (counter - cut) == num_chars){
-      /* add the line */
-      display_add(disp,buffer,num_chars);
-      /* refresh display */
-      refresh(disp);
+    if (c == '\n' || (((display_len(disp) - cut) == num_chars) && c != 8) ){
+      /* add the new line */
+      display_newline(disp,num_chars);
+      if (c != '\n')
+	display_add_char(disp,c);
       /* slow mode */
       if(slow_mode)
-        sleep(slow);
-      /* empty buffer */
-      strcpy(buffer,"");
-      
+	sleep(slow);
       /* ignore rest of line */
-      if ((counter - cut) == num_chars)
+      if ((display_len(disp) - cut) == num_chars && shell_mode == 0)
 	do { c = fgetc(fd); } while (c != '\n' || feof(fd) );
-      counter = 0;
       
     } else {
       /* If there is some cutted characters skip it */
       if (counter >= cut){
-	strncat(buffer, &c, 1);
+	
+	if (shell_mode == 1){
+      	  switch((int)c){
+	  case 7:
+	    /* just ignore it */
+	    break;
+	  case 8:
+	    /* tryin to fight shell macro - sorry guys */
+	    /* backspace */
+	    c = fgetc(fd);
+	    if (c == 27){
+	      c = fgetc(fd);
+	      if (c == 91){
+		c = fgetc(fd);
+		if (c == 75)	    
+		  display_rem_char(disp,num_chars);
+	      }
+	    }
+	    break;
+	  default:
+	    display_add_char(disp,c);
+	  }
+	} else {
+	  display_add_char(disp,c);
+	}
       }
-      counter++;
     }
+    refresh(disp);
   }
   /* wait until exit */
   sleep(seconds);
   /* free memory */
-  free(buffer);
+  //free(buffer);
   free(canvas);
   /* close input fd */
   fclose(fd);
@@ -212,7 +234,7 @@ int main(int argc,char **argv){
   /* default fd */
   fd = stdin;
   
-  while ((option = getopt(argc,argv,"td:hf:s:c:F:")) != -1){    
+  while ((option = getopt(argc,argv,"td:hf:s:c:F:S")) != -1){    
     switch(option){
     case 'F':
       fd = fopen(optarg, "r");
@@ -224,7 +246,10 @@ int main(int argc,char **argv){
       break;
     case 's':
       seconds = atoi(optarg);
-      break;       
+      break; 
+    case 'S':
+      shell_mode = 1;
+      break;
     case 'f':
       format = optarg;
       break;      
@@ -248,6 +273,7 @@ int main(int argc,char **argv){
   
   main_loop(); 
   return TRUE;  /* never reached */
+  
 }
 
 
