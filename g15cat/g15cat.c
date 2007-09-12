@@ -130,7 +130,7 @@ int refresh(display *buf){
 void main_loop(void){
   int num_chars;
   int num_lines;
-  int counter;
+  int counter = 0;
   char c;
   
   /* parse dimension of the text and take the values */
@@ -168,51 +168,55 @@ void main_loop(void){
   }
   /* fetch character while a new charater exist or EOF reached */
   while ((c = fgetc(fd))  && !feof(fd)){
-    /* if it's at the end of the line or max number of charatcter reached */
-    if (c == '\n' || (((display_len(disp) - cut) == num_chars) && c != 8) ){
-      /* add the new line */
-      display_newline(disp,num_chars);
-      if (c != '\n')
-	display_add_char(disp,c);
-      /* slow mode */
-      if(slow_mode)
-	sleep(slow);
+
+    /* If there is some cutted characters skip it */
+    if (counter < cut  && shell_mode == 0)
+      counter++;
+    else {
+
       /* ignore rest of line */
-      if ((display_len(disp) - cut) == num_chars && shell_mode == 0)
+      if (display_len(disp) == num_chars && shell_mode == 0)
 	do { c = fgetc(fd); } while (c != '\n' || feof(fd) );
-      
-    } else {
-      /* If there is some cutted characters skip it */
-      if (counter >= cut){
-	
-	if (shell_mode == 1){
-      	  switch((int)c){
-	  case 7:
-	    /* just ignore it */
-	    break;
-	  case 8:
-	    /* tryin to fight shell macro - sorry guys */
-	    /* backspace */
+
+      /* if it's at the end of the line or max number of charatcter reached 
+	 and char isn't a meta char (8) */
+      if (c == '\n' || ((display_len(disp) >= num_chars) && c != 8) ){
+	/* add the new line */
+	display_newline(disp,num_chars);
+	counter = 0;
+	/* if it was a normal char re-put it in the new line */
+	if (c != '\n')
+	  display_add_char(disp,c);
+	/* slow mode */
+	if(slow_mode)
+	  sleep(slow);
+      } else {
+	/* add a new char */
+	switch((int)c){
+	case 7:
+	  /* just ignore it */
+	  break;
+	case 8:
+	  /* tryin to fight shell macro - sorry guys */
+	  /* backspace */
+	  c = fgetc(fd);
+	  if (c == 27){
 	    c = fgetc(fd);
-	    if (c == 27){
+	    if (c == 91){
 	      c = fgetc(fd);
-	      if (c == 91){
-		c = fgetc(fd);
-		if (c == 75)	    
-		  display_rem_char(disp,num_chars);
-	      }
+	      if (c == 75)	    
+		display_rem_char(disp,num_chars);
 	    }
-	    break;
-	  default:
-	    display_add_char(disp,c);
 	  }
-	} else {
+	  break;
+	default:
 	  display_add_char(disp,c);
 	}
       }
+      /* refresh display anyway */
+      refresh(disp);
     }
-    refresh(disp);
-  }
+  } /* end main loop */
   /* wait until exit */
   sleep(seconds);
   /* free memory */
