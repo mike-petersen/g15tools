@@ -19,10 +19,10 @@ g15cat \- send a stream of data to a g15 LCD Display
 .B...
 .SH DESCRIPTION
 .B g15cat
-read data from standard input and put it on a display by the 
+read a stream of data and put it on a display by the 
 .BR g15daemon 
 running. 
-g15cat by default it wait 5 seconds until exit if unspecified by args.
+g15cat by default it wait 2 seconds until exit if unspecified by args.
 .SH OPTIONS
 .IP "-F FILENAME"
 Read 
@@ -50,12 +50,12 @@ for large size text. Default:
 .IP "-c NUMCHARS"
 Cut away the first 
 .I NUMCHARS 
-from input lines.
+from input lines. Ignored if -S specified.
 .IP -t
 Draw data from top to down
 .IP -S
 Enable Shell mode. This feature allow to run a shell inside the LCD. 
-Try it with: 
+Usage example: 
 "/bin/bash -i -l 2>&1 | g15cat -S"
 .IP "-s SECONDS"
 Enable the slow mode and wait n. 

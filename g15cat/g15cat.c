@@ -32,7 +32,6 @@
 #include <libg15.h>
 #include <libg15render.h>
 
-//#include "display.h"
 #include "g15cat.h"
 
 /* config variables */
@@ -128,8 +127,8 @@ int refresh(display *buf){
 /* main loop */
 
 void main_loop(void){
-  int num_chars;
-  int num_lines;
+  int num_chars = TS_LINES;
+  int num_lines = TS_CHARS;
   int counter = 0;
   char c;
   
@@ -220,7 +219,6 @@ void main_loop(void){
   /* wait until exit */
   sleep(seconds);
   /* free memory */
-  //free(buffer);
   free(canvas);
   /* close input fd */
   fclose(fd);

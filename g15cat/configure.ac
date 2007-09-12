@@ -13,7 +13,7 @@ AC_PREFIX_DEFAULT(/usr)
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
-
+CFLAGS="$CFLAGS -Wall -pedantic"
 
 # Checks for libraries.
 AC_CHECK_LIB([g15daemon_client], [g15_send], ,AC_MSG_ERROR(["libg15daemon_client not found. please install it"]))
