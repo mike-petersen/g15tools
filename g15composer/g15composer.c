@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -25,6 +26,7 @@
 #include <errno.h>
 #include <pwd.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <libgen.h>
 #include <libg15.h>
 #include <libg15render.h>
