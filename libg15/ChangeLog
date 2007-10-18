@@ -28,6 +28,9 @@
   Control message URBs are no longer being lost if sent by a different
   thread in the middle of a screen transfer etc.
 * Reset the keyboard before init to ensure correct initialisation on kernels > 2.6.19
-1.2.1 -> svn
+1.2.2
 * Add support for the logitech Z-10 speakers - many thanks to Dwayne Fontenot for
   detailed information and debugging.
+1.2.2 -> SVN
+* Add support for the newer G15 keyboards which have amber backlights and
+  six 'G' keys.
