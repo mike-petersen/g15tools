@@ -14,6 +14,10 @@
     You should have received a copy of the GNU General Public License
     along with g15lcd; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+    
+    (c) 2006 - 2007 The G15tools Project - g15tools.sf.net
+    
+    $Revision$ -  $Date$ $Author$
 */
 
 #ifndef _LIBG15_H_
