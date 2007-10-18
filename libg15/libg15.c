@@ -14,6 +14,10 @@
     You should have received a copy of the GNU General Public License
     along with g15lcd; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+    (c) 2006 - 2007 The G15tools Project - g15tools.sf.net
+    
+    $Revision$ -  $Date$ $Author$
 */
 
 #include <pthread.h>
@@ -41,6 +45,7 @@ const libg15_devices_t g15_devices[] = {
     DEVICE("Logitech G15",0x46d,0xc222,G15_LCD|G15_KEYS),
     DEVICE("Logitech G11",0x46d,0xc225,G15_KEYS),
     DEVICE("Logitech Z-10",0x46d,0x0a07,G15_LCD|G15_KEYS|G15_DEVICE_IS_SHARED),
+    DEVICE("Logitech G15 v2",0x46d,0xc227,G15_LCD|G15_KEYS),
     DEVICE(NULL,0,0,0)
 };
 
