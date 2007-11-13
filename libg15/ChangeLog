@@ -31,6 +31,6 @@
 1.2.2
 * Add support for the logitech Z-10 speakers - many thanks to Dwayne Fontenot for
   detailed information and debugging.
-1.2.2 -> SVN
+1.2.3
 * Add support for the newer G15 keyboards which have amber backlights and
   six 'G' keys.
