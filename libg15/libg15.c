@@ -704,14 +704,14 @@ int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
     pthread_mutex_unlock(&libusb_mutex);
 
     if(g15DeviceCapabilities() & G15_DEVICE_5BYTE_RETURN) { /* new 5byte protocol */
+      if (buffer[0] == 1)
+         return G15_ERROR_TRY_AGAIN;
       if (ret == 5) {
        
         processKeyEvent5Byte(pressed_keys, buffer);
        
         return G15_NO_ERROR;
       }
-      if (buffer[0] == 1)
-         return G15_ERROR_TRY_AGAIN;
     } 
     else 
     {
