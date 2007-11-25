@@ -196,7 +196,7 @@ static usb_dev_handle * findAndOpenDevice(libg15_devices_t handled_device, int d
                                     }
                                     else
                                     {
-                                        g15_log(stderr,G15_LOG_INFO,"Sorry, I could not detached the driver, giving up\n");
+                                        g15_log(stderr,G15_LOG_INFO,"Sorry, I could not detach the driver, giving up\n");
                                         return 0;
                                     }
 
@@ -334,32 +334,79 @@ int exitLibG15()
 
 static void dumpPixmapIntoLCDFormat(unsigned char *lcd_buffer, unsigned char const *data)
 {
-    unsigned int offset_from_start = G15_LCD_OFFSET;
+/*
+
+  For a set of bytes (A, B, C, etc.) the bits representing pixels will appear on the LCD like this:
+	
+	A0 B0 C0
+	A1 B1 C1
+	A2 B2 C2
+	A3 B3 C3 ... and across for G15_LCD_WIDTH bytes
+	A4 B4 C4
+	A5 B5 C5
+	A6 B6 C6
+	A7 B7 C7
+	
+	A0
+	A1  <- second 8-pixel-high row starts straight after the last byte on
+	A2     the previous row
+	A3
+	A4
+	A5
+	A6
+	A7
+	A8
+
+	A0
+	...
+	A0
+	...
+	A0
+	...
+	A0
+	A1 <- only the first three bits are shown on the bottom row (the last three
+	A2    pixels of the 43-pixel high display.)
+	
+
+*/
+
+    unsigned int output_offset = G15_LCD_OFFSET;
+    unsigned int base_offset = 0;
     unsigned int curr_row = 0;
     unsigned int curr_col = 0;
-  
-    for (curr_row=0;curr_row<G15_LCD_HEIGHT;++curr_row)
-    {
-        for (curr_col=0;curr_col<G15_LCD_WIDTH;++curr_col)
-        {
-            unsigned int pixel_offset = curr_row*G15_LCD_WIDTH + curr_col;
-            unsigned int byte_offset = pixel_offset / 8;
-            unsigned int bit_offset = pixel_offset % 8;
-            unsigned int val = data[byte_offset] & 1<<(7-bit_offset);
-      
-            unsigned int row = curr_row / 8;
-            unsigned int offset = G15_LCD_WIDTH*row + curr_col;
-            unsigned int bit = curr_row % 8;
-    
-/*
-            if (val)
-            printf("Setting pixel at row %d col %d to %d offset %d bit %d\n",curr_row,curr_col, val, offset, bit);
+
+    /* Five 8-pixel rows + a little 3-pixel row.  This formula will calculate
+       the minimum number of bytes required to hold a complete column.  (It
+       basically divides by eight and rounds up the result to the nearest byte,
+       but at compile time.
       */
-            if (val)
-                lcd_buffer[offset_from_start + offset] = lcd_buffer[offset_from_start + offset] | 1 << bit;
-            else
-                lcd_buffer[offset_from_start + offset] = lcd_buffer[offset_from_start + offset]  &  ~(1 << bit);
+
+#define G15_LCD_HEIGHT_IN_BYTES  ((G15_LCD_HEIGHT + ((8 - (G15_LCD_HEIGHT % 8)) % 8)) / 8)
+
+    for (curr_row = 0; curr_row < G15_LCD_HEIGHT_IN_BYTES; ++curr_row)
+    {
+        for (curr_col = 0; curr_col < G15_LCD_WIDTH; ++curr_col)
+        {
+            unsigned int bit = curr_col % 8;
+		/* Copy a 1x8 column of pixels across from the source image to the LCD buffer. */
+		
+            lcd_buffer[output_offset] =
+			(((data[base_offset                        ] << bit) & 0x80) >> 7) |
+			(((data[base_offset +  G15_LCD_WIDTH/8     ] << bit) & 0x80) >> 6) |
+			(((data[base_offset + (G15_LCD_WIDTH/8 * 2)] << bit) & 0x80) >> 5) |
+			(((data[base_offset + (G15_LCD_WIDTH/8 * 3)] << bit) & 0x80) >> 4) |
+			(((data[base_offset + (G15_LCD_WIDTH/8 * 4)] << bit) & 0x80) >> 3) |
+			(((data[base_offset + (G15_LCD_WIDTH/8 * 5)] << bit) & 0x80) >> 2) |
+			(((data[base_offset + (G15_LCD_WIDTH/8 * 6)] << bit) & 0x80) >> 1) |
+			(((data[base_offset + (G15_LCD_WIDTH/8 * 7)] << bit) & 0x80) >> 0);
+            ++output_offset;
+            if (bit == 7)
+              base_offset++;
         }
+	/* Jump down seven pixel-rows in the source image, since we've just
+	   done a row of eight pixels in one pass (and we counted one pixel-row
+  	   while we were going, so now we skip the next seven pixel-rows.) */
+	base_offset += G15_LCD_WIDTH - (G15_LCD_WIDTH / 8);
     }
 }
 
@@ -397,7 +444,10 @@ int writePixmapToLCD(unsigned char const *data)
     int ret = 0;
     int transfercount=0;
     unsigned char lcd_buffer[G15_BUFFER_LEN];
-    memset(lcd_buffer,0,G15_BUFFER_LEN);
+    /* The pixmap conversion function will overwrite everything after G15_LCD_OFFSET, so we only need to blank
+       the buffer up to this point.  (Even though the keyboard only cares about bytes 0-23.) */
+    memset(lcd_buffer, 0, G15_LCD_OFFSET);  /* G15_BUFFER_LEN); */
+
     dumpPixmapIntoLCDFormat(lcd_buffer, data);
 
     if(!(g15_devices[found_devicetype].caps & G15_LCD))
