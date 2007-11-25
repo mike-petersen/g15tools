@@ -45,7 +45,7 @@ const libg15_devices_t g15_devices[] = {
     DEVICE("Logitech G15",0x46d,0xc222,G15_LCD|G15_KEYS),
     DEVICE("Logitech G11",0x46d,0xc225,G15_KEYS),
     DEVICE("Logitech Z-10",0x46d,0x0a07,G15_LCD|G15_KEYS|G15_DEVICE_IS_SHARED),
-    DEVICE("Logitech G15 v2",0x46d,0xc227,G15_LCD|G15_KEYS),
+    DEVICE("Logitech G15 v2",0x46d,0xc227,G15_LCD|G15_KEYS|G15_DEVICE_5BYTE_RETURN),
     DEVICE(NULL,0,0,0)
 };
 
@@ -543,7 +543,7 @@ static unsigned char g15KeyToLogitechKeyCode(int key)
     }
 }
 
-static void processKeyEvent(unsigned int *pressed_keys, unsigned char *buffer)
+static void processKeyEvent8Byte(unsigned int *pressed_keys, unsigned char *buffer)
 {
     int i;
   
@@ -634,6 +634,67 @@ static void processKeyEvent(unsigned int *pressed_keys, unsigned char *buffer)
     }
 }
 
+static void processKeyEvent5Byte(unsigned int *pressed_keys, unsigned char *buffer)
+{
+    int i;
+  
+    *pressed_keys = 0;
+  
+    g15_log(stderr,G15_LOG_WARN,"Keyboard: %x, %x, %x, %x, %x\n",buffer[0],buffer[1],buffer[2],buffer[3],buffer[4]);
+  
+    if (buffer[0] == 0x02)
+    {
+        if (buffer[1]&0x01)
+            *pressed_keys |= G15_KEY_G1;
+    
+        if (buffer[1]&0x02)
+            *pressed_keys |= G15_KEY_G2;
+
+        if (buffer[1]&0x04)
+            *pressed_keys |= G15_KEY_G3;
+
+        if (buffer[1]&0x08)
+            *pressed_keys |= G15_KEY_G4;
+
+        if (buffer[1]&0x10)
+            *pressed_keys |= G15_KEY_G5;
+
+        if (buffer[1]&0x20)
+            *pressed_keys |= G15_KEY_G6;
+            
+        if (buffer[1]&0x40)
+            *pressed_keys |= G15_KEY_M1;
+            
+        if (buffer[1]&0x80)
+            *pressed_keys |= G15_KEY_M2;
+            
+        if (buffer[2]&0x20)
+            *pressed_keys |= G15_KEY_M3;
+            
+        if (buffer[2]&0x40)
+            *pressed_keys |= G15_KEY_MR;
+
+        if (buffer[2]&0x80)
+            *pressed_keys |= G15_KEY_L1;
+            
+        if (buffer[2]&0x2)
+            *pressed_keys |= G15_KEY_L2;
+            
+        if (buffer[2]&0x4)
+            *pressed_keys |= G15_KEY_L3;
+
+        if (buffer[2]&0x8)
+            *pressed_keys |= G15_KEY_L4;
+            
+        if (buffer[2]&0x10)
+            *pressed_keys |= G15_KEY_L5;
+            
+        if (buffer[2]&0x1)
+            *pressed_keys |= G15_KEY_LIGHT;
+    }
+}
+
+
 int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
 {
     unsigned char buffer[9];
@@ -641,15 +702,26 @@ int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
     pthread_mutex_lock(&libusb_mutex);
     ret = usb_interrupt_read(keyboard_device, g15_keys_endpoint, (char*)buffer, 9, timeout);
     pthread_mutex_unlock(&libusb_mutex);
-   
-    if (ret == 9)
+
+    if(g15DeviceCapabilities() & G15_DEVICE_5BYTE_RETURN) { /* new 5byte protocol */
+      if (ret != 5 || (buffer[0] != 2))
+        return G15_ERROR_TRY_AGAIN;
+        
+      processKeyEvent5Byte(pressed_keys, buffer);
+      
+      return G15_NO_ERROR;
+    } 
+    else 
     {
-        if (buffer[0] == 1)
-            return G15_ERROR_TRY_AGAIN;
+      if (ret == 9)
+      {
+          if (buffer[0] == 1)
+              return G15_ERROR_TRY_AGAIN;
     
-        processKeyEvent(pressed_keys, buffer);
+          processKeyEvent8Byte(pressed_keys, buffer);
     
-        return G15_NO_ERROR;
+          return G15_NO_ERROR;
+        }
     }
     return handle_usb_errors("Keyboard Read", ret); /* allow the app to deal with errors */
 }

@@ -34,3 +34,6 @@
 1.2.3
 * Add support for the newer G15 keyboards which have amber backlights and
   six 'G' keys.
+SVN
+* Turns out that the newer G15's have a different (5 byte) keyboard protocol.  Try
+  and support it.
