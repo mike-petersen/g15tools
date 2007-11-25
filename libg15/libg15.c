@@ -27,6 +27,7 @@
 #include <usb.h>
 #include <string.h>
 #include <errno.h>
+#include "config.h"
 
 static usb_dev_handle *keyboard_device = 0;
 static int libg15_debugging_enabled = 0;
@@ -38,14 +39,13 @@ static int g15_keys_endpoint = 0;
 static int g15_lcd_endpoint = 0;
 static pthread_mutex_t libusb_mutex;
 
-
 /* to add a new device, simply create a new DEVICE() in this list */
 /* Fields are: "Name",VendorID,ProductID,Capabilities */
 const libg15_devices_t g15_devices[] = {
     DEVICE("Logitech G15",0x46d,0xc222,G15_LCD|G15_KEYS),
     DEVICE("Logitech G11",0x46d,0xc225,G15_KEYS),
     DEVICE("Logitech Z-10",0x46d,0x0a07,G15_LCD|G15_KEYS|G15_DEVICE_IS_SHARED),
-    DEVICE("Logitech G15 v2",0x46d,0xc227,G15_LCD|G15_KEYS|G15_DEVICE_5BYTE_RETURN),
+    DEVICE("Logitech G15 v2",0x46d,0xc227,G15_LCD|G15_KEYS),
     DEVICE(NULL,0,0,0)
 };
 
@@ -593,7 +593,7 @@ static unsigned char g15KeyToLogitechKeyCode(int key)
     }
 }
 
-static void processKeyEvent8Byte(unsigned int *pressed_keys, unsigned char *buffer)
+static void processKeyEvent9Byte(unsigned int *pressed_keys, unsigned char *buffer)
 {
     int i;
   
@@ -753,27 +753,19 @@ int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
     ret = usb_interrupt_read(keyboard_device, g15_keys_endpoint, (char*)buffer, 9, timeout);
     pthread_mutex_unlock(&libusb_mutex);
 
-    if(g15DeviceCapabilities() & G15_DEVICE_5BYTE_RETURN) { /* new 5byte protocol */
-      if (buffer[0] == 1)
-         return G15_ERROR_TRY_AGAIN;
-      if (ret == 5) {
-       
-        processKeyEvent5Byte(pressed_keys, buffer);
-       
-        return G15_NO_ERROR;
-      }
-    } 
-    else 
-    {
-      if (ret == 9)
-      {
-          if (buffer[0] == 1)
-              return G15_ERROR_TRY_AGAIN;
-    
-          processKeyEvent8Byte(pressed_keys, buffer);
-    
-          return G15_NO_ERROR;
-        }
+    if(ret>0) {
+      if(buffer[0] == 1)
+        return G15_ERROR_TRY_AGAIN;    
     }
-    return handle_usb_errors("Keyboard Read", ret); /* allow the app to deal with errors */
+    
+    switch(ret) {
+      case 5:
+          processKeyEvent5Byte(pressed_keys, buffer);
+          return G15_NO_ERROR;
+      case 9:
+          processKeyEvent9Byte(pressed_keys, buffer);
+          return G15_NO_ERROR;
+      default:
+          return handle_usb_errors("Keyboard Read", ret); /* allow the app to deal with errors */
+    }
 }
