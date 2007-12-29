@@ -411,6 +411,7 @@ static void dumpPixmapIntoLCDFormat(unsigned char *lcd_buffer, unsigned char con
 }
 
 int handle_usb_errors(const char *prefix, int ret) {
+
     switch (ret){
         case -ETIMEDOUT:
             return G15_ERROR_READING_USB_DEVICE;  /* backward-compatibility */
@@ -425,7 +426,7 @@ int handle_usb_errors(const char *prefix, int ret) {
             case -EAGAIN: /* try again */
             case -EFBIG: /* too many frames to handle */
             case -EMSGSIZE: /* msgsize is invalid */
-                 g15_log(stderr,G15_LOG_INFO,"usb error: %s (%i)\n",prefix,ret);     
+                 g15_log(stderr,G15_LOG_INFO,"usb error: %s %s (%i)\n",prefix,usb_strerror(),ret);     
                  break;
             case -EPIPE: /* endpoint is stalled */
                  g15_log(stderr,G15_LOG_INFO,"usb error: %s EPIPE! clearing...\n",prefix);     
@@ -434,7 +435,7 @@ int handle_usb_errors(const char *prefix, int ret) {
                  pthread_mutex_unlock(&libusb_mutex);
                  break;
             default: /* timed out */
-                 g15_log(stderr,G15_LOG_INFO,"Unknown usb error: %s !! (err is %i)\n",prefix,ret);     
+                 g15_log(stderr,G15_LOG_INFO,"Unknown usb error: %s !! (err is %i (%s))\n",prefix,ret,usb_strerror());
     }
     return ret;
 }
