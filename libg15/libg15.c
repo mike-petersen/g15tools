@@ -470,7 +470,9 @@ int writePixmapToLCD(unsigned char const *data)
     I'm not sure how successful this will be in combatting ENOSPC, but we'll give it try in the real-world. */
 
     if(enospc_slowdown != 0){
+#ifndef LIBUSB_BLOCKS
         pthread_mutex_lock(&libusb_mutex);  
+#endif
         for(transfercount = 0;transfercount<=31;transfercount++){
             ret = usb_interrupt_write(keyboard_device, g15_lcd_endpoint, (char*)lcd_buffer+(32*transfercount), 32, 1000);
             if (ret != 32)
@@ -480,12 +482,18 @@ int writePixmapToLCD(unsigned char const *data)
             }
             usleep(100);
         }
+#ifndef LIBUSB_BLOCKS
         pthread_mutex_unlock(&libusb_mutex);
+#endif        
     }else{
         /* transfer entire buffer in one hit */
+#ifdef LIBUSB_BLOCKS
+        ret = usb_interrupt_write(keyboard_device, g15_lcd_endpoint, (char*)lcd_buffer, G15_BUFFER_LEN, 1000);
+#else
         pthread_mutex_lock(&libusb_mutex);
         ret = usb_interrupt_write(keyboard_device, g15_lcd_endpoint, (char*)lcd_buffer, G15_BUFFER_LEN, 1000);
         pthread_mutex_unlock(&libusb_mutex);
+#endif
         if (ret != G15_BUFFER_LEN)
         {
             handle_usb_errors ("LCDPixmap Write",ret);
@@ -758,7 +766,7 @@ int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
 {
     unsigned char buffer[9];
     int ret = 0;
-#ifdef OSTYPE_SOLARIS
+#ifdef LIBUSB_BLOCKS
     ret = usb_interrupt_read(keyboard_device, g15_keys_endpoint, (char*)buffer, 9, timeout);
 #else
     pthread_mutex_lock(&libusb_mutex);
