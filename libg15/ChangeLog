@@ -40,3 +40,5 @@
 1.2.4->SVN
 * Remove 5BYTE_RETURN flag and process key packets based on length. Please
   report any regressions.
+* Add Solaris detection and remove locks if detected.  Solaris' libUSB
+  blocks on read, forcing mutexes causes writes to block too.

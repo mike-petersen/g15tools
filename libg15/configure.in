@@ -2,9 +2,11 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(libg15, 1.2.4, mlampard@users.sourceforge.net)
+AC_INIT(libg15, 1.2.5, mlampard@users.sourceforge.net)
 AC_PREFIX_DEFAULT(/usr)
 AC_CONFIG_AUX_DIR(config)
+AC_CANONICAL_TARGET()
+
 AM_INIT_AUTOMAKE()
 AC_CONFIG_SRCDIR([libg15.c])
 AC_CONFIG_HEADER([config.h])
@@ -12,6 +14,21 @@ AC_CONFIG_HEADER([config.h])
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_LIBTOOL
+
+case $host_os in
+	*linux*) 
+	  AC_DEFINE([OSTYPE_LINUX], [1],[Target OS is Linux])
+	  ;;
+	*darwin*)
+	  AC_DEFINE([OSTYPE_DARWIN], [1],[Target OS is Darwin])
+	  ;;
+        *solaris*)
+          AC_DEFINE([OSTYPE_SOLARIS], [1],[Target OS is Solaris])
+	  AC_SEARCH_LIBS([nanosleep],rt,[],[],[])
+	  AC_SEARCH_LIBS([cos],m,[],[],[])
+          AC_DEFINE(SUN_LIBUSB, 1, [Define to 1 for Sun version of libusb.])
+	  ;;
+esac
 
 # Checks for libraries.
 AC_CHECK_LIB([usb], [main], ,AC_MSG_ERROR(["libusb not found. please install it"]))

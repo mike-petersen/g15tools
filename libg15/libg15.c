@@ -301,7 +301,13 @@ int initLibG15()
     retval = initLibUsb();
     if (retval)
         return retval;
-  
+
+    g15_log(stderr,G15_LOG_INFO,"%s\n",PACKAGE_STRING);
+    
+#ifdef SUN_LIBUSB
+    g15_log(stderr,G15_LOG_INFO,"Using Sun libusb.\n");
+#endif
+
     g15NumberOfConnectedDevices();
   
     keyboard_device = findAndOpenG15();
@@ -317,8 +323,10 @@ int exitLibG15()
 {
     int retval = G15_NO_ERROR;
     if (keyboard_device){
+#ifndef SUN_LIBUSB
         retval = usb_release_interface (keyboard_device, 0);
         usleep(50*1000);
+#endif
 #if 0
         retval = usb_reset(keyboard_device);
         usleep(50*1000);
@@ -750,10 +758,13 @@ int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
 {
     unsigned char buffer[9];
     int ret = 0;
+#ifdef OSTYPE_SOLARIS
+    ret = usb_interrupt_read(keyboard_device, g15_keys_endpoint, (char*)buffer, 9, timeout);
+#else
     pthread_mutex_lock(&libusb_mutex);
     ret = usb_interrupt_read(keyboard_device, g15_keys_endpoint, (char*)buffer, 9, timeout);
     pthread_mutex_unlock(&libusb_mutex);
-
+#endif
     if(ret>0) {
       if(buffer[0] == 1)
         return G15_ERROR_TRY_AGAIN;    
