@@ -37,7 +37,7 @@
 1.2.4
 * Turns out that the newer G15's have a different (5 byte) keyboard protocol.  
 * Optimise dumpPixmapIntoLCDFormat routine - Thanks to Adam Nielsen
-1.2.4->SVN
+1.2.5
 * Remove 5BYTE_RETURN flag and process key packets based on length. Please
   report any regressions.
 * Add Solaris detection and remove locks if detected.  Solaris' libUSB
