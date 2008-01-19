@@ -45,7 +45,7 @@ const libg15_devices_t g15_devices[] = {
     DEVICE("Logitech G15",0x46d,0xc222,G15_LCD|G15_KEYS),
     DEVICE("Logitech G11",0x46d,0xc225,G15_KEYS),
     DEVICE("Logitech Z-10",0x46d,0x0a07,G15_LCD|G15_KEYS|G15_DEVICE_IS_SHARED),
-    DEVICE("Logitech G15 v2",0x46d,0xc227,G15_LCD|G15_KEYS),
+    DEVICE("Logitech G15 v2",0x46d,0xc227,G15_LCD|G15_KEYS|G15_DEVICE_5BYTE_RETURN),
     DEVICE(NULL,0,0,0)
 };
 
@@ -776,6 +776,11 @@ int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
     if(ret>0) {
       if(buffer[0] == 1)
         return G15_ERROR_TRY_AGAIN;    
+    }
+
+    if(g15DeviceCapabilities() & G15_DEVICE_5BYTE_RETURN) {
+      processKeyEvent5Byte(pressed_keys, buffer);
+      return G15_NO_ERROR;  
     }
     
     switch(ret) {

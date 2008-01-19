@@ -31,6 +31,7 @@ extern "C"
 #define G15_LCD 1
 #define G15_KEYS 2
 #define G15_DEVICE_IS_SHARED 4
+#define G15_DEVICE_5BYTE_RETURN 8
 
 typedef struct libg15_devices_t libg15_devices_t;
 
