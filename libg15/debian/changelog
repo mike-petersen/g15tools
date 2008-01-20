@@ -1,3 +1,25 @@
+libg15 1.2.6 edgy; urgency=low
+  * Re-Add 5BYTE_RETURN flag. Auto-detect does not work with Solaris' libusb.
+  * Add laptop GamePanel support.
+
+libg15 1.2.5 edgy; urgency=low
+  * Remove 5BYTE_RETURN flag and process key packets based on length. Please
+    report any regressions.
+  * Add Solaris detection and remove locks if detected.  Solaris' libUSB
+    blocks on read, forcing mutexes causes writes to block too.
+
+libg15 1.2.4 edgy; urgency=low
+  * Turns out that the newer G15's have a different (5 byte) keyboard protocol.  
+  * Optimise dumpPixmapIntoLCDFormat routine - Thanks to Adam Nielsen
+
+libg15 1.2.3 edgy; urgency=low
+  * Add support for the newer G15 keyboards which have amber backlights and
+    six 'G' keys.
+
+libg15 1.2.2 edgy; urgency=low
+  * Add support for the logitech Z-10 speakers - many thanks to Dwayne Fontenot for
+    detailed information and debugging.
+
 libg15 (1.2.1) edgy; urgency=low
   * Add debugging function to enable/disable extra output
   * All debugging output is now prefixed with libg15 to aid localising

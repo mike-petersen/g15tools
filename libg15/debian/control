@@ -1,6 +1,6 @@
 Source: libg15
 Priority: optional
-Maintainer: Anthony J. Mirabella <mirabeaj@gmail.com>
+Maintainer: Mike Lampard <mlampard@users.sourceforge.net>
 Build-Depends: debhelper (>= 4.0.0), autotools-dev, libusb-dev
 Standards-Version: 3.6.2
 Section: libs

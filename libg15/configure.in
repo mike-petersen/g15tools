@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(libg15, 1.2.5, mlampard@users.sourceforge.net)
+AC_INIT(libg15, 1.2.6, mlampard@users.sourceforge.net)
 AC_PREFIX_DEFAULT(/usr)
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET()

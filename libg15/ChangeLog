@@ -42,6 +42,6 @@
   report any regressions.
 * Add Solaris detection and remove locks if detected.  Solaris' libUSB
   blocks on read, forcing mutexes causes writes to block too.
-SVN:
+1.2.6
 * Re-Add 5BYTE_RETURN flag. Auto-detect does not work with Solaris' libusb.
 * Add laptop GamePanel support.
