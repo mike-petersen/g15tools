@@ -95,8 +95,11 @@ nt_commands: /* empty */
 	{
 		if (((struct parserData *)param)->background == 1)
 		  return (0);
-		if (((struct parserData *)param)->leaving != 1)
+		if (((struct parserData *)param)->leaving != 1 && ((struct parserData *)param)->cmd_only!=1)
 		  updateScreen (((struct parserData *)param)->canvas, ((struct parserData *)param)->g15screen_fd, 0);
+		else
+		  ((struct parserData *)param)->cmd_only=0;
+
 	}
 
 	|
@@ -428,20 +431,16 @@ nt_mode_command:
 	{
 		if (((struct parserData *)param)->background == 1)
 		  return (0);
-		int fore = ($2 == 0 ? 1 : 0);
-		int rear = ($2 == 1 ? 1 : 0);
-		int revert = ($2 == 2 ? 1 : 0);
-		char msgbuf[1];
 
-		msgbuf[0] = 'v';	/* Is the display visible? */
-		send (((struct parserData *)param)->g15screen_fd, msgbuf, 1, MSG_OOB);
-		recv (((struct parserData *)param)->g15screen_fd, msgbuf, 1, 0);
-		int at_front = (msgbuf[0] != 0 ? 1 : 0);
-		msgbuf[0] = 'u';	/* Did the user make the display visible? */
-		send (((struct parserData *)param)->g15screen_fd, msgbuf, 1, MSG_OOB);
-		recv (((struct parserData *)param)->g15screen_fd, msgbuf, 1, 0);
-		int user_to_front = (msgbuf[0] != 0 ? 1 : 0);
-		msgbuf[0] = 'p';	/* We now want to change the priority */
+                int fore = ($2 == 0 ? 1 : 0);
+                int rear = ($2 == 1 ? 1 : 0);
+                int revert = ($2 == 2 ? 1 : 0);
+                                                                                  
+                int dummy=0;
+                
+                int at_front = g15_send_cmd (((struct parserData *)param)->g15screen_fd, G15DAEMON_IS_FOREGROUND, dummy);
+                int user_to_front = g15_send_cmd(((struct parserData *)param)->g15screen_fd,G15DAEMON_IS_USER_SELECTED, dummy);
+
 		int sendCmd = 0;
 		if (at_front == 1)
 		  {
@@ -465,8 +464,10 @@ nt_mode_command:
 			sendCmd = 1;
 		      }
 		  }
-		if (sendCmd == 1)
-		  send (((struct parserData *)param)->g15screen_fd, msgbuf, 1, MSG_OOB);
+		if (sendCmd == 1){
+		  g15_send_cmd(((struct parserData *)param)->g15screen_fd,G15DAEMON_SWITCH_PRIORITIES,dummy);
+               }
+              ((struct parserData *)param)->cmd_only=1;
 	}
 	;
 
@@ -625,6 +626,7 @@ nt_key_command:
 		      break;
 		    }
 		  }
+		((struct parserData *)param)->cmd_only=1;
 		if (sendCmd == 1)
 		  send (((struct parserData *)param)->g15screen_fd, &((struct parserData *)param)->mkey_state, 1, MSG_OOB);
 	}
@@ -635,8 +637,9 @@ nt_lcd_command:
 	{
 		if (((struct parserData *)param)->background == 1)
 		  return (0);
-		char msgbuf = G15DAEMON_BACKLIGHT | $2;
-		send (((struct parserData *)param)->g15screen_fd, &msgbuf, 1, MSG_OOB);
+	        g15_send_cmd(((struct parserData *)param)->g15screen_fd,G15DAEMON_BACKLIGHT, $2);
+		((struct parserData *)param)->cmd_only=1;
+
 	}
 
 	|
@@ -647,6 +650,7 @@ nt_lcd_command:
 		  return (0);
 		char msgbuf = G15DAEMON_CONTRAST | $2;
 		send (((struct parserData *)param)->g15screen_fd, &msgbuf, 1, MSG_OOB);
+		((struct parserData *)param)->cmd_only=1;
 	}
 	;
 

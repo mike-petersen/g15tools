@@ -85,6 +85,7 @@ struct parserData
 	struct threadList *threads;
 	struct bufList *buflist;
 	struct bufItem *bufitem;
+	int cmd_only;
 };
 
 int yyerror (char *err);

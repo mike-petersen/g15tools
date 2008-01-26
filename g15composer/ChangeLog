@@ -1,3 +1,7 @@
+3.2
+* Use libg15daemon_client for status commands - fixes MP etc
+* Stop sending blank buffers in addition to commands.
+
 3.1
 * Add support for new WBMP and bignum routines in libg15render-1.2
 * Improve FIFO handling to recover dangling FIFOs
