@@ -18,6 +18,8 @@ extern "C"
 #include FT_BITMAP_H
 #endif
 
+#define G15R_FONT_SUPPORT 1
+
 #define BYTE_SIZE 		8
 #define G15_BUFFER_LEN  	1048
 #define G15_LCD_OFFSET  	32
@@ -28,6 +30,7 @@ extern "C"
 #define G15_TEXT_SMALL  	0
 #define G15_TEXT_MED    	1
 #define G15_TEXT_LARGE  	2
+#define G15_TEXT_HUGE 		3
 #define G15_PIXEL_NOFILL 	0
 #define G15_PIXEL_FILL  	1
 #define G15_MAX_FACE		5
@@ -49,6 +52,40 @@ extern "C"
     int ttf_fontsize[G15_MAX_FACE];
 #endif
   } g15canvas;
+
+/** \brief Structure holding glyph data for g15render font types */
+  typedef struct g15glyph {
+      /** g15glyph::buffer holds glyph data */
+    unsigned char *buffer;
+    /** g15glyph::width - width of the glyph, without padding */
+    unsigned char width; 
+    /** g15glyph::gap - recommended gap between this character and the next */
+    unsigned char gap; 
+}g15glyph;
+
+/** \brief Structure holding a single font */
+typedef struct g15font {
+    /** g15font::font_height - total max height of font in pixels */
+    unsigned int font_height;
+    /** g15font::ascender_height - height in pixels from baseline to the top pixel of an ascender character */
+    unsigned int ascender_height;
+    /** g15font::lineheight - height in pixels from decender to ascender */
+    unsigned int lineheight;
+    /** g15font::numchars - number of glyphs available in this font */
+    unsigned int numchars;
+    /** g15font::glyph - contains all glyphs available in this font */
+    g15glyph glyph[256]; // allow 256 chars.. ought to be enough for our purposes
+    /** g15font::default_gap - default gap between glyphs (in pixels). */
+    unsigned int default_gap;
+    /** g15font::active - each active glyph is set to 1 else 0 */
+    unsigned char active[256];
+    /** g15font::glyph_buffer memory pool for glyphs */
+    char *glyph_buffer;
+}g15font;
+/** \brief size of font header */
+static const int fntHeaderSize = 15;
+/** \brief size of glyph header */
+static const int charHeaderSize = 4;
 
 /** \brief Fills an area bounded by (x1, y1) and (x2, y2)*/
   void g15r_pixelReverseFill (g15canvas * canvas, int x1, int y1, int x2,
@@ -115,6 +152,28 @@ void g15r_drawBigNum (g15canvas * canvas, unsigned int x1, unsigned int y1, unsi
   void g15r_renderString (g15canvas * canvas, unsigned char stringOut[],
 			  int row, int size, unsigned int sx,
 			  unsigned int sy);
+
+/** \brief Load G15 font and return it in g15font struct */
+g15font * g15r_loadG15Font(char *filename);
+/** \brief Save font in font struct to given file, return 0 on success */
+int g15r_saveG15Font(char *oFilename, g15font *font);
+/** \brief De-allocate memory associated with font */
+void g15r_deleteG15Font(g15font*font);
+/** \brief Returns length (in pixels) of string if rendered in font 'font'  */
+int g15r_testG15FontWidth(g15font *font,char *string);
+/** \brief render glyph 'character' from loaded font struct 'font'.  Returns width (in pixels) of rendered glyph */
+int g15r_renderG15Glyph(g15canvas *canvas, g15font *font,
+                        unsigned char character,
+                        int top_left_pixel_x, int top_left_pixel_y, 
+                        int colour, int paint_bg);
+/** \brief Render a string in font 'font' to canvas */
+void g15r_G15FontRenderString (g15canvas * canvas, g15font *font,
+                               char *string,
+                               int row, unsigned int sx, unsigned int sy,
+                               int colour, int paint_bg);
+/** \brief Print a string using the G15 default font at size 'size' */
+void g15r_G15FPrint (g15canvas *canvas, char *string, int x, int y, 
+                int size, int center, int colour, int row);
 
 #ifdef TTF_SUPPORT
 /** \brief Loads a font through the FreeType2 library*/

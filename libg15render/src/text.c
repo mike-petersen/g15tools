@@ -17,119 +17,83 @@
 */
 
 #include "libg15render.h"
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
 
+/** Render a character in std large font 
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
+ * \param col size-dependent column to start rendering.
+ * \param row size-dependent row to start rendering.
+ * \param character ascii character to render.
+ * \param sx horizontal top-left pixel location.
+ * \param sy vertical top-left pixel location.
+*/
 void
 g15r_renderCharacterLarge (g15canvas * canvas, int col, int row,
 			   unsigned char character, unsigned int sx,
 			   unsigned int sy)
 {
-  int helper = character * 8;	/* for our font which is 8x8 */
-
-  int top_left_pixel_x = sx + col * (8);	/* 1 pixel spacing */
-  int top_left_pixel_y = sy + row * (8);	/* once again 1 pixel spacing */
-
-  int x, y;
-  for (y = 0; y < 8; ++y)
-    {
-      for (x = 0; x < 8; ++x)
-	{
-	  char font_entry = fontdata_8x8[helper + y];
-
-	  if (font_entry & 1 << (7 - x))
-	    g15r_setPixel (canvas, top_left_pixel_x + x, top_left_pixel_y + y,
-			   G15_COLOR_BLACK);
-	  else
-	    g15r_setPixel (canvas, top_left_pixel_x + x, top_left_pixel_y + y,
-			   G15_COLOR_WHITE);
-
-	}
-    }
+    unsigned char buf[2];
+    buf[0]=character;
+    buf[1]=0;
+    g15r_G15FPrint (canvas, buf, sx, sy, G15_TEXT_LARGE, 0, G15_COLOR_BLACK, row);
 }
 
+/** Render a character in std medium font.
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
+ * \param col size-dependent column to start rendering.
+ * \param row size-dependent row to start rendering.
+ * \param character ascii character to render.
+ * \param sx horizontal top-left pixel location.
+ * \param sy vertical top-left pixel location.
+*/
 void
 g15r_renderCharacterMedium (g15canvas * canvas, int col, int row,
 			    unsigned char character, unsigned int sx,
 			    unsigned int sy)
 {
-  int helper = character * 7 * 5;	/* for our font which is 6x4 */
+    unsigned char buf[2];
+    buf[0]=character;
+    buf[1]=0;
+    g15r_G15FPrint (canvas, buf, sx, sy, G15_TEXT_MED, 0, G15_COLOR_BLACK, row);
 
-  int top_left_pixel_x = sx + col * (5);	/* 1 pixel spacing */
-  int top_left_pixel_y = sy + row * (7);	/* once again 1 pixel spacing */
-
-  int x, y;
-  for (y = 0; y < 7; ++y)
-    {
-      for (x = 0; x < 5; ++x)
-	{
-	  char font_entry = fontdata_7x5[helper + y * 5 + x];
-	  if (font_entry)
-	    g15r_setPixel (canvas, top_left_pixel_x + x, top_left_pixel_y + y,
-			   G15_COLOR_BLACK);
-	  else
-	    g15r_setPixel (canvas, top_left_pixel_x + x, top_left_pixel_y + y,
-			   G15_COLOR_WHITE);
-
-	}
-    }
 }
 
+/** Render a character in std small font.
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
+ * \param col size-dependent column to start rendering.
+ * \param row size-dependent row to start rendering.
+ * \param character ascii character to render.
+ * \param sx horizontal top-left pixel location.
+ * \param sy vertical top-left pixel location.
+*/
 void
 g15r_renderCharacterSmall (g15canvas * canvas, int col, int row,
 			   unsigned char character, unsigned int sx,
 			   unsigned int sy)
 {
-  int helper = character * 6 * 4;	/* for our font which is 6x4 */
+    unsigned char buf[2];
+    buf[0]=character;
+    buf[1]=0;
+    g15r_G15FPrint (canvas, buf, sx, sy, G15_TEXT_SMALL, 0, G15_COLOR_BLACK, row);
 
-  int top_left_pixel_x = sx + col * (4);	/* 1 pixel spacing */
-  int top_left_pixel_y = sy + row * (6);	/* once again 1 pixel spacing */
-
-  int x, y;
-  for (y = 0; y < 6; ++y)
-    {
-      for (x = 0; x < 4; ++x)
-	{
-	  char font_entry = fontdata_6x4[helper + y * 4 + x];
-	  if (font_entry)
-	    g15r_setPixel (canvas, top_left_pixel_x + x, top_left_pixel_y + y,
-			   G15_COLOR_BLACK);
-	  else
-	    g15r_setPixel (canvas, top_left_pixel_x + x, top_left_pixel_y + y,
-			   G15_COLOR_WHITE);
-
-	}
-    }
 }
 
+/** 
+ * Render a string in the designated size
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
+ * \param stringOut An unsigned char pointer to the string which is to be printed.
+ * \param row size-dependent row to start rendering.
+ * \param size size of printed string.  May be 0-3 for standard sizes, or 5-39 in pixel height.
+ * \param sx horizontal top-left pixel location.
+ * \param sy vertical top-left pixel location.
+*/
 void
 g15r_renderString (g15canvas * canvas, unsigned char stringOut[], int row,
 		   int size, unsigned int sx, unsigned int sy)
 {
-
-  int i = 0;
-  for (i; stringOut[i] != 0; ++i)
-    {
-      switch (size)
-	{
-	case G15_TEXT_SMALL:
-	  {
-	    g15r_renderCharacterSmall (canvas, i, row, stringOut[i], sx, sy);
-	    break;
-	  }
-	case G15_TEXT_MED:
-	  {
-	    g15r_renderCharacterMedium (canvas, i, row, stringOut[i], sx, sy);
-	    break;
-	  }
-	case G15_TEXT_LARGE:
-	  {
-	    g15r_renderCharacterLarge (canvas, i, row, stringOut[i], sx, sy);
-	    break;
-	  }
-	default:
-	  break;
-	}
-    }
-
+      g15r_G15FPrint (canvas, stringOut, sx, sy, size, 0, G15_COLOR_BLACK, row);
 }
 
 #ifdef TTF_SUPPORT
@@ -306,5 +270,297 @@ g15r_ttfPrint (g15canvas * canvas, int x, int y, int fontsize, int face_num,
       draw_ttf_str (canvas, print_string, x, y, color,
 		    canvas->ttf_face[face_num][0]);
     }
+    else { /* fall back to our default bitmap font */
+        g15r_G15FPrint (canvas, print_string, x, y, fontsize, center, color, 0);
+    }
 }
+
 #endif /* TTF_SUPPORT */
+
+/* G15Font Support */
+
+/** 
+ * Load a g15 font from file.
+ * \param filename string containing full name and location of font to load.
+ * \return pointer to completed g15font structure.
+*/
+g15font * g15r_loadG15Font(char *filename) {
+    FILE *file;
+    g15font *font = calloc(1,sizeof(g15font));
+    unsigned char buffer[128];
+    int i;
+    if(access(filename,O_RDONLY)!=0)
+        return NULL;
+
+    if(!(file=fopen(filename,"rb")))
+        return NULL;
+
+    fread(buffer,fntHeaderSize,1,file);
+    if(buffer[0] != 'G' ||
+       buffer[1] != 'F' ||
+       buffer[2] != 'N' ||
+       buffer[3] != 'T' )
+    {
+        fclose(file);
+        return NULL;
+    }
+
+    font->font_height = buffer[4] | (buffer[5] << 8);
+    font->ascender_height = buffer[6] | (buffer[7] << 8);
+    font->lineheight = buffer[8] | (buffer[9] << 8);
+    
+    /* any future expansion that require more than one bit to be set should be recorded at the end of the file, */
+    /* with the extended-feature bit (not defined as yet, probably 1) set here */
+    /* The first byte of the extended packet should indicate the extension data type (none defined yet) */
+    /* The second byte should indicate length in bytes of the packet to read, not inclusive of these two bytes */
+    /* followed by the extended data.  This should allow for a degree of backward compatibility between future versions */
+    /* should they arise. */
+    
+    /* features = buffer[10] | (buffer[11] << 8) */
+    
+    font->numchars = buffer[12] | (buffer[13] << 8);
+    font->default_gap = buffer[14];
+    unsigned int current_alloc = 2048;
+    char *glyphBuf =  malloc(current_alloc);
+    char *glyphPtr = glyphBuf;
+    unsigned int memsize=0;
+    for (i=0;i <font->numchars; i++) {
+        unsigned char charheader[charHeaderSize];
+        unsigned int character;
+        fread(charheader, charHeaderSize, 1, file);
+        character = charheader[0] | (charheader[1] << 8);
+        font->glyph[character].width = charheader[2] | (charheader[3] << 8);
+        memsize+=(font->font_height * ((font->glyph[character].width + 7) / 8));
+        if(memsize>current_alloc) { /* attempt to semi-coherently allocate additional memory */
+            current_alloc+=((font->font_height * ((font->glyph[character].width + 7) / 8)*(font->numchars - i)));
+            glyphBuf = realloc(glyphBuf,(size_t)current_alloc);
+        }
+        font->glyph[character].buffer = glyphPtr;
+        font->glyph[character].gap = 0;
+        fread(font->glyph[character].buffer, font->font_height * ((font->glyph[character].width + 7) / 8), 1, file);
+        glyphPtr+=(font->font_height * ((font->glyph[character].width + 7) / 8));
+    }
+    
+    fclose(file);
+    return (font);  
+}
+
+/** 
+ * Save g15font struct to given file.
+ * \param ofilename string containing full name and location of font to save.
+ * \param font g15font structure containing glyphs.  Glyphs to be saved should have the corresponding active[glyph] set.
+ * \return 0 on success, -1 on failure.
+*/
+
+int g15r_saveG15Font(char *oFilename, g15font *font) {
+    FILE *f;
+    unsigned int i;
+    unsigned char fntheader[fntHeaderSize];
+ 
+    if(font==NULL)
+        return -1;
+    
+    f = fopen(oFilename, "w+b");
+    if(f==NULL)
+        return -1;
+
+    font->numchars=0;
+    for(i=0;i<256;i++) {
+        if(font->active[i]) {
+            font->numchars++;
+        }
+    }
+
+    fntheader[0] = 'G';
+    fntheader[1] = 'F';
+    fntheader[2] = 'N';
+    fntheader[3] = 'T';
+    fntheader[4] = (unsigned char)font->font_height;
+    fntheader[5] = (unsigned char)(font->font_height >> 8);
+    fntheader[6] = (unsigned char)font->ascender_height;
+    fntheader[7] = (unsigned char)(font->ascender_height >> 8);
+    fntheader[8] = (unsigned char)font->lineheight;
+    fntheader[9] = (unsigned char)(font->lineheight >> 8);
+    /* any future expansion that require more than one bit to be set should be recorded at the end of the file, */
+    /* with the extended-feature bit (not defined as yet, probably 1) set here */
+    /* The first byte of the extended packet should indicate the extension data type (none defined yet) */
+    /* The second byte should indicate length in bytes of the packet to read, not inclusive of these two bytes */
+    /* followed by the extended data.  This should allow for a degree of backward compatibility between future versions */
+    /* should they arise. */
+    fntheader[10] = 0; /* features */
+    fntheader[11] = 0; /* features >> 8 */
+    fntheader[12] = (unsigned char)font->numchars;
+    fntheader[13] = (unsigned char)(font->numchars >> 8);
+    fntheader[14] = (unsigned char)font->default_gap;
+
+    fwrite (fntheader, fntHeaderSize, 1, f);
+
+    for(i=0;i<256;i++) {
+        if(font->active[i]) {
+            unsigned char charheader[charHeaderSize];
+
+            charheader[0] = (unsigned char)i;
+            charheader[1] = (unsigned char)(i >> 8);
+            charheader[2] = (unsigned char)font->glyph[i].width;
+            charheader[3] = (unsigned char)(font->glyph[i].width >> 8);
+            fwrite(charheader,charHeaderSize,1,f);
+            fwrite(font->glyph[i].buffer,font->font_height * ((font->glyph[i].width + 7) / 8),1,f);
+        }
+    }
+    fclose(f);
+    return 0;
+}
+
+/** 
+ * De-allocate memory associated with g15font struct, including glyph buffers
+  * \param font g15font structure containing glyphs.
+*/
+void g15r_deleteG15Font(g15font*font){
+    int i;
+    if(font) {
+        if(font->glyph_buffer!=NULL)
+            free(font->glyph_buffer);
+        free(font);
+    }
+}
+
+/** 
+ * Calculate width (in pixels) of given string if rendered in font 'font'.
+ * \param font Loaded g15font structure as returned by g15r_loadG15Font()
+ * \param string Pointer to string for width calculations.
+ * \return total width in pixels of given string.
+*/
+int g15r_testG15FontWidth(g15font *font,char *string){
+    int i;
+    int totalwidth=0;
+    if(font==NULL) return 0;
+    
+    font->glyph[32].gap = 0;
+
+    for(i=0;i<strlen(string);i++)
+        totalwidth += font->glyph[(int)string[i]].width + font->glyph[(int)string[i]].gap + font->default_gap;
+
+    return totalwidth;
+}
+
+/** Render a character in given font.
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
+ * \param font Loaded g15font structure as returned by g15r_loadG15Font()
+ * \param character ascii character to render.
+ * \param top_left_pixel_x horizontal top-left pixel location.
+ * \param top_left_pixel_y vertical top-left pixel location.
+ * \param colour desired colour of character when rendered.
+*/
+int g15r_renderG15Glyph(g15canvas *canvas, g15font *font,unsigned char character,int top_left_pixel_x, int top_left_pixel_y, int colour, int paint_bg)
+{
+    int x,y,w,bp;
+
+    if(font->glyph[character].buffer==NULL)
+        return 0;
+
+    unsigned char *buffer = font->glyph[character].buffer;
+    unsigned int height = font->font_height;
+    int i = 0;
+
+    int bufferlen = height * ((font->glyph[character].width + 7) / 8);
+//    top_left_pixel_y-=font->font_height - font->lineheight;
+    top_left_pixel_y-=font->font_height - font->ascender_height - 1 ;
+
+    w = font->glyph[character].width + (7-(font->glyph[character].width % 8 ));
+    if(font->glyph[character].width%8==0) 
+        w = font->glyph[character].width-1;
+
+    x=0;y=0;
+
+    for (bp=0;bp<bufferlen ;bp++){
+        for (i=0;i<8;i++) {
+            if( x > w ) { 
+                x=0;y++;
+            }
+            x++;
+            if( buffer[bp] & (0x80 >> i))
+                g15r_setPixel (canvas, top_left_pixel_x + x, top_left_pixel_y + y,colour);
+            else
+                if(paint_bg)
+                    g15r_setPixel (canvas, top_left_pixel_x + x, top_left_pixel_y + y,colour^1);
+        } 
+    }
+    if(character!=32)
+        return font->glyph[character].width + font->default_gap;
+    else
+        return font->glyph[character].width;
+}
+
+/** Render a string in given font.
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
+ * \param font Loaded g15font structure as returned by g15r_loadG15Font()
+ * \param string Pointer to string to operate on.
+ * \param row vertical font-dependent row to start printing on. can usually be left at 0
+ * \param sx horizontal top-left pixel location.
+ * \param sy vertical top-left pixel location.
+ * \param colour desired colour of character when rendered.
+ * \param paint_bg if !0, pixels in the glyph background will also be painted, obstructing any image behind the text.
+*/
+void g15r_G15FontRenderString (g15canvas * canvas, g15font *font, char *string, int row, unsigned int sx, unsigned int sy, int colour, int paint_bg)
+{
+    int i=0;
+    int prevwidth=0;
+    if(font==NULL)
+        return;
+    sy=sy+(font->ascender_height*row);
+    for(i=0;i<strlen(string);i++){
+        prevwidth=g15r_renderG15Glyph(canvas, font,string[i],sx+=prevwidth, sy,colour, paint_bg);
+    }
+}
+
+/** Render a string in the default font.
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
+ * \param string Pointer to string to operate on.
+ * \param x horizontal top-left pixel location.
+ * \param y vertical top-left pixel location.
+ * \param size if size>= 4, denotes height in pixels.  if size<4, standard font sizes are used.
+ * \param center Desired text justification. 0==left, 1==centered, 2==right justified.
+ * \param colour desired colour of character when rendered.
+ * \param row vertical font-dependent row to start printing on. can usually be left at 0
+*/
+/* print string with the default G15Font, with on-demand loading of required sized bitmaps */
+void g15r_G15FPrint (g15canvas *canvas, char *string, int x, int y, int size, int center, int colour, int row) {
+  static g15font *defaultfont[40];
+  static int initialised = 0;
+  char filename[128];
+  int xc, paint_bg;
+  
+  if(size<0)
+      size=0;
+  if(size>39)
+      size=39;
+
+  /* check if previously loaded, otherwise load it now */
+  if(!defaultfont[size]) {
+    snprintf(filename,128,"%s/G15/default-%.2i.fnt",G15FONT_DIR,size);
+    defaultfont[size] = g15r_loadG15Font(filename);
+    if((defaultfont[size])==NULL) {
+          return;
+      }
+  }
+  
+  if(size<3)
+      paint_bg=1;
+  else
+      paint_bg=0;
+
+  switch(center) {
+    case 0:
+      g15r_G15FontRenderString (canvas, defaultfont[size], string, row, x, y, colour, paint_bg);
+      break;
+    case 1:
+      xc = g15r_testG15FontWidth(defaultfont[size],string);
+      g15r_G15FontRenderString (canvas, defaultfont[size], string, row, 80-(xc/2),y, colour, paint_bg);
+      break;
+    case 2:
+      xc = g15r_testG15FontWidth(defaultfont[size],string);
+      g15r_G15FontRenderString (canvas, defaultfont[size], string, row, 160-xc,y, colour, paint_bg);
+      break;
+  }
+}
+
