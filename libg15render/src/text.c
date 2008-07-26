@@ -37,7 +37,7 @@ g15r_renderCharacterLarge (g15canvas * canvas, int col, int row,
     unsigned char buf[2];
     buf[0]=character;
     buf[1]=0;
-    g15r_G15FPrint (canvas, buf, sx, sy, G15_TEXT_LARGE, 0, G15_COLOR_BLACK, row);
+    g15r_G15FPrint (canvas, buf, ((col * 8) + sx - 1), sy - 1, G15_TEXT_LARGE, 0, G15_COLOR_BLACK, row);
 }
 
 /** Render a character in std medium font.
@@ -56,7 +56,7 @@ g15r_renderCharacterMedium (g15canvas * canvas, int col, int row,
     unsigned char buf[2];
     buf[0]=character;
     buf[1]=0;
-    g15r_G15FPrint (canvas, buf, sx, sy, G15_TEXT_MED, 0, G15_COLOR_BLACK, row);
+    g15r_G15FPrint (canvas, buf, ((col * 7) + sx - 1), sy - 1, G15_TEXT_MED, 0, G15_COLOR_BLACK, row);
 
 }
 
@@ -76,7 +76,7 @@ g15r_renderCharacterSmall (g15canvas * canvas, int col, int row,
     unsigned char buf[2];
     buf[0]=character;
     buf[1]=0;
-    g15r_G15FPrint (canvas, buf, sx, sy, G15_TEXT_SMALL, 0, G15_COLOR_BLACK, row);
+    g15r_G15FPrint (canvas, buf, ((col * 6) + sx - 1), sy - 1, G15_TEXT_SMALL, 0, G15_COLOR_BLACK, row);
 
 }
 
