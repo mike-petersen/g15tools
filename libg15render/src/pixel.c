@@ -611,3 +611,46 @@ g15r_drawBigNum (g15canvas * canvas, unsigned int x1, unsigned int y1, unsigned 
     }
 }
 
+/**
+ * Draw an XBM Image to the canvas
+ *
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated in is found.
+ * \param data A pointer to the buffer holding the icon to be displayed.
+ * \param width Width of the image in data.
+ * \param height Height of the image in data.
+ * \param pos_x Leftmost boundary of image.
+ * \param pos_y Topmost boundary of image.
+ */
+static void
+g15r_drawXBM (g15canvas *canvas, unsigned char* data, int width, int height, int pos_x, int pos_y)
+{
+   int y = 0;
+   int z = 0;
+   unsigned char byte;
+   int bytes_per_row = ceil ((double) width / 8);
+   
+   int bits_left = width;
+   int current_bit = 0;
+
+   for (y = 0; y < height; y++)
+   {
+      bits_left = width;
+      for (z=0; z < bytes_per_row; z++)
+      {
+         byte = data[(y * bytes_per_row) + z];
+         current_bit = 0;
+         while (current_bit < 8)
+         {
+            if (bits_left > 0)
+            {
+               if ((byte >> current_bit) & 1)
+               {
+                  g15r_setPixel(canvas, (current_bit + (z*8) + pos_x),y + pos_y,G15_COLOR_BLACK);
+               }
+               bits_left--;
+            }
+            current_bit++;
+         }
+      }
+   }
+}
