@@ -34,6 +34,8 @@ extern "C"
 #define G15_PIXEL_NOFILL 	0
 #define G15_PIXEL_FILL  	1
 #define G15_MAX_FACE		5
+#define G15_FONT_HEADER_SIZE 	15
+#define G15_CHAR_HEADER_SIZE 	4
 
 /** \brief This structure holds the data need to render objects to the LCD screen.*/
   typedef struct g15canvas
@@ -82,10 +84,6 @@ typedef struct g15font {
     /** g15font::glyph_buffer memory pool for glyphs */
     char *glyph_buffer;
 }g15font;
-/** \brief size of font header */
-static const int fntHeaderSize = 15;
-/** \brief size of glyph header */
-static const int charHeaderSize = 4;
 
 /** \brief Fills an area bounded by (x1, y1) and (x2, y2)*/
   void g15r_pixelReverseFill (g15canvas * canvas, int x1, int y1, int x2,

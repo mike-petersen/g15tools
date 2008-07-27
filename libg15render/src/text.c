@@ -37,7 +37,7 @@ g15r_renderCharacterLarge (g15canvas * canvas, int col, int row,
     unsigned char buf[2];
     buf[0]=character;
     buf[1]=0;
-    g15r_G15FPrint (canvas, buf, ((col * 8) + sx - 1), sy - 1, G15_TEXT_LARGE, 0, G15_COLOR_BLACK, row);
+    g15r_G15FPrint (canvas, buf, ((col * 8) + sx), sy, G15_TEXT_LARGE, 0, G15_COLOR_BLACK, row);
 }
 
 /** Render a character in std medium font.
@@ -56,7 +56,7 @@ g15r_renderCharacterMedium (g15canvas * canvas, int col, int row,
     unsigned char buf[2];
     buf[0]=character;
     buf[1]=0;
-    g15r_G15FPrint (canvas, buf, ((col * 7) + sx - 1), sy - 1, G15_TEXT_MED, 0, G15_COLOR_BLACK, row);
+    g15r_G15FPrint (canvas, buf, ((col * 5) + sx), sy, G15_TEXT_MED, 0, G15_COLOR_BLACK, row);
 
 }
 
@@ -76,7 +76,7 @@ g15r_renderCharacterSmall (g15canvas * canvas, int col, int row,
     unsigned char buf[2];
     buf[0]=character;
     buf[1]=0;
-    g15r_G15FPrint (canvas, buf, ((col * 6) + sx - 1), sy - 1, G15_TEXT_SMALL, 0, G15_COLOR_BLACK, row);
+    g15r_G15FPrint (canvas, buf, ((col * 4) + sx), sy, G15_TEXT_SMALL, 0, G15_COLOR_BLACK, row);
 
 }
 
@@ -295,7 +295,7 @@ g15font * g15r_loadG15Font(char *filename) {
     if(!(file=fopen(filename,"rb")))
         return NULL;
 
-    fread(buffer,fntHeaderSize,1,file);
+    fread(buffer,G15_FONT_HEADER_SIZE,1,file);
     if(buffer[0] != 'G' ||
        buffer[1] != 'F' ||
        buffer[2] != 'N' ||
@@ -325,9 +325,9 @@ g15font * g15r_loadG15Font(char *filename) {
     char *glyphPtr = glyphBuf;
     unsigned int memsize=0;
     for (i=0;i <font->numchars; i++) {
-        unsigned char charheader[charHeaderSize];
+        unsigned char charheader[G15_CHAR_HEADER_SIZE];
         unsigned int character;
-        fread(charheader, charHeaderSize, 1, file);
+        fread(charheader, G15_CHAR_HEADER_SIZE, 1, file);
         character = charheader[0] | (charheader[1] << 8);
         font->glyph[character].width = charheader[2] | (charheader[3] << 8);
         memsize+=(font->font_height * ((font->glyph[character].width + 7) / 8));
@@ -355,7 +355,7 @@ g15font * g15r_loadG15Font(char *filename) {
 int g15r_saveG15Font(char *oFilename, g15font *font) {
     FILE *f;
     unsigned int i;
-    unsigned char fntheader[fntHeaderSize];
+    unsigned char fntheader[G15_FONT_HEADER_SIZE];
  
     if(font==NULL)
         return -1;
@@ -393,17 +393,17 @@ int g15r_saveG15Font(char *oFilename, g15font *font) {
     fntheader[13] = (unsigned char)(font->numchars >> 8);
     fntheader[14] = (unsigned char)font->default_gap;
 
-    fwrite (fntheader, fntHeaderSize, 1, f);
+    fwrite (fntheader, G15_FONT_HEADER_SIZE, 1, f);
 
     for(i=0;i<256;i++) {
         if(font->active[i]) {
-            unsigned char charheader[charHeaderSize];
+            unsigned char charheader[G15_CHAR_HEADER_SIZE];
 
             charheader[0] = (unsigned char)i;
             charheader[1] = (unsigned char)(i >> 8);
             charheader[2] = (unsigned char)font->glyph[i].width;
             charheader[3] = (unsigned char)(font->glyph[i].width >> 8);
-            fwrite(charheader,charHeaderSize,1,f);
+            fwrite(charheader,G15_CHAR_HEADER_SIZE,1,f);
             fwrite(font->glyph[i].buffer,font->font_height * ((font->glyph[i].width + 7) / 8),1,f);
         }
     }
@@ -463,7 +463,6 @@ int g15r_renderG15Glyph(g15canvas *canvas, g15font *font,unsigned char character
     int i = 0;
 
     int bufferlen = height * ((font->glyph[character].width + 7) / 8);
-//    top_left_pixel_y-=font->font_height - font->lineheight;
     top_left_pixel_y-=font->font_height - font->ascender_height - 1 ;
 
     w = font->glyph[character].width + (7-(font->glyph[character].width % 8 ));
@@ -545,9 +544,15 @@ void g15r_G15FPrint (g15canvas *canvas, char *string, int x, int y, int size, in
   }
   
   if(size<3)
+  {
       paint_bg=1;
+      x-=1;
+      y-=1;
+  }
   else
+  {
       paint_bg=0;
+  }
 
   switch(center) {
     case 0:
