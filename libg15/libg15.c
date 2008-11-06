@@ -767,11 +767,12 @@ int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
 {
     unsigned char buffer[9];
     int ret = 0;
+    int read_size = (g15DeviceCapabilities() & G15_DEVICE_5BYTE_RETURN) ? 5 : 9;
 #ifdef LIBUSB_BLOCKS
-    ret = usb_interrupt_read(keyboard_device, g15_keys_endpoint, (char*)buffer, 9, timeout);
+    ret = usb_interrupt_read(keyboard_device, g15_keys_endpoint, (char*)buffer, read_size, timeout);
 #else
     pthread_mutex_lock(&libusb_mutex);
-    ret = usb_interrupt_read(keyboard_device, g15_keys_endpoint, (char*)buffer, 9, timeout);
+    ret = usb_interrupt_read(keyboard_device, g15_keys_endpoint, (char*)buffer, read_size, timeout);
     pthread_mutex_unlock(&libusb_mutex);
 #endif
     if(ret>0) {
@@ -779,11 +780,6 @@ int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
         return G15_ERROR_TRY_AGAIN;    
     }
 
-    if(g15DeviceCapabilities() & G15_DEVICE_5BYTE_RETURN) {
-      processKeyEvent5Byte(pressed_keys, buffer);
-      return G15_NO_ERROR;  
-    }
-    
     switch(ret) {
       case 5:
           processKeyEvent5Byte(pressed_keys, buffer);
