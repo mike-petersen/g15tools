@@ -765,9 +765,9 @@ static void processKeyEvent5Byte(unsigned int *pressed_keys, unsigned char *buff
 
 int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
 {
-    unsigned char buffer[9];
+    int read_size = 9;
+    unsigned char buffer[read_size];
     int ret = 0;
-    int read_size = (g15DeviceCapabilities() & G15_DEVICE_5BYTE_RETURN) ? 5 : 9;
 #ifdef LIBUSB_BLOCKS
     ret = usb_interrupt_read(keyboard_device, g15_keys_endpoint, (char*)buffer, read_size, timeout);
 #else
