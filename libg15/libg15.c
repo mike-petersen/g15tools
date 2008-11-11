@@ -765,14 +765,13 @@ static void processKeyEvent5Byte(unsigned int *pressed_keys, unsigned char *buff
 
 int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
 {
-    int read_size = 9;
-    unsigned char buffer[read_size];
+    unsigned char buffer[G15_KEY_READ_LENGTH];
     int ret = 0;
 #ifdef LIBUSB_BLOCKS
-    ret = usb_interrupt_read(keyboard_device, g15_keys_endpoint, (char*)buffer, read_size, timeout);
+    ret = usb_interrupt_read(keyboard_device, g15_keys_endpoint, (char*)buffer, G15_KEY_READ_LENGTH, timeout);
 #else
     pthread_mutex_lock(&libusb_mutex);
-    ret = usb_interrupt_read(keyboard_device, g15_keys_endpoint, (char*)buffer, read_size, timeout);
+    ret = usb_interrupt_read(keyboard_device, g15_keys_endpoint, (char*)buffer, G15_KEY_READ_LENGTH, timeout);
     pthread_mutex_unlock(&libusb_mutex);
 #endif
     if(ret>0) {
