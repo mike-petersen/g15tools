@@ -1,3 +1,8 @@
+libg15 1.2.7 edgy; urgency=low
+  * Fix keypress detection for G15v2 keyboards
+
+ -- Anthony J. Mirabella <mirabeaj@gmail.com>  Mon, 24 Nov 2008 22:48:13 -0500
+
 libg15 1.2.6 edgy; urgency=low
   * Re-Add 5BYTE_RETURN flag. Auto-detect does not work with Solaris' libusb.
   * Add laptop GamePanel support.
