@@ -1,15 +1,13 @@
 #define TTF_SUPPORT 1
-#include <iostream>
-#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 #include <libg15.h>
 #include <g15daemon_client.h>
 #include <libg15render.h>
 #include "g15logo.h"
 
-using namespace std;
-
 int const NUM_BYTES = G15_LCD_WIDTH * G15_LCD_HEIGHT / 8;
-unsigned char test_data[NUM_BYTES];
+unsigned char test_data[G15_LCD_WIDTH * G15_LCD_HEIGHT / 8];
 extern short logo_data[];
 int g15screen_fd = 0;
 g15canvas *canvas;
@@ -26,7 +24,7 @@ connectToScreen (void)
 {
   if ((g15screen_fd = new_g15_screen (G15_G15RBUF)) < 0)
     {
-      cout << "Sorry, cant connect to the G15daemon" << endl;
+      printf("Sorry, cant connect to the G15daemon\n");
       exit (-1);
     }
 
@@ -38,26 +36,24 @@ connectToScreen (void)
 int
 main (int argc, char *argv[])
 {
+  int ret, width, height;
+  int i = 0, x = 0, y = 0;
+  unsigned char character = 0;
+  char *buf;
+
   connectToScreen ();
 
   g15r_setPixel (canvas, 20, 20, 1);
-  int ret = g15r_getPixel (canvas, 20, 20);
-  cout << "g15r_getPixel(20, 20) returns " << ret << " which should be 1" <<
-    endl;
+  ret = g15r_getPixel (canvas, 20, 20);
+  printf("g15r_getPixel(20, 20) returns %d which should be 1\n", ret);
   ret = g15r_getPixel (canvas, 21, 20);
-  cout << "g15r_getPixel(21, 20) returns " << ret << " which should be 0" <<
-    endl;
+  printf("g15r_getPixel(21, 20) returns %d which should be 0\n", ret);
 
   g15r_setPixel (canvas, 20, 20, 0);
   ret = g15r_getPixel (canvas, 20, 20);
-  cout << "g15r_getPixel(20, 20) returns " << ret << " which should be 0" <<
-    endl;
+  printf("g15r_getPixel(20, 20) returns %d which should be 0\n", ret);
   ret = g15r_getPixel (canvas, 21, 20);
-  cout << "g15r_getPixel(21, 20) returns " << ret << " which should be 0" <<
-    endl;
-
-  int i = 0, x = 0, y = 0;
-  unsigned char character = 0;
+  printf("g15r_getPixel(21, 20) returns %d which should be 0\n", ret);
 
   g15r_clearScreen (canvas, 0);
 
@@ -155,8 +151,7 @@ main (int argc, char *argv[])
   sleep (3);
 
   g15r_clearScreen (canvas, 0);
-  int width, height;
-  char *buf = g15r_loadWbmpToBuf ("./splash.wbmp", &width, &height);
+  buf = g15r_loadWbmpToBuf ("./splash.wbmp", &width, &height);
   g15r_drawSprite (canvas, buf, 30, 10, 43, 20, 30, 10, width);
   g15r_drawSprite (canvas, buf, 10, 20, 15, 20, 10, 20, width);
   g15r_drawSprite (canvas, buf, 100, 20, 25, 20, 100, 20, width);
