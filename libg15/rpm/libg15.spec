@@ -5,7 +5,7 @@ Summary: library to control logitech G15 keyboards
 Name: libg15
 Version: 1.2.7
 Release: 1
-Copyright: GPL
+License: GPL
 Group: Applications/System
 Source: http://prdownloads.sourceforge.net/g15tools/libg15-1.2.7.tar.bz2
 URL: http://sourceforge.net/projects/g15tools
