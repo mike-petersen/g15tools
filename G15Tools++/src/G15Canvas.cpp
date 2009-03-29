@@ -5,7 +5,7 @@
 
 using namespace G15Tools;
 
-G15Canvas::G15Canvas(bool debug) : debug(debug)
+G15Canvas::G15Canvas(const bool debug) : debug(debug)
 {
 	if (this->debug)
 	{
@@ -13,6 +13,10 @@ G15Canvas::G15Canvas(bool debug) : debug(debug)
 		std::cerr << "Created." << std::endl;
 	}
 	this->canvas = new g15canvas;
+	memset(this->canvas->buffer, 0, G15_BUFFER_LEN);
+	this->canvas->mode_xor = 0;
+	this->canvas->mode_cache = 0;
+	this->canvas->mode_reverse = 0;
 }
 
 G15Canvas::G15Canvas(const G15Canvas& in)
@@ -24,6 +28,9 @@ G15Canvas::G15Canvas(const G15Canvas& in)
 		std::cerr << "Created as copy from G15Canvas(" << &in << ")." << std::endl;
 	}
 	this->canvas = new g15canvas;
+	this->canvas->mode_xor = in.canvas->mode_xor;
+	this->canvas->mode_cache = in.canvas->mode_cache;
+	this->canvas->mode_reverse = in.canvas->mode_reverse;
 	memcpy(this->canvas->buffer, in.canvas->buffer, G15_BUFFER_LEN);
 }
 
@@ -50,7 +57,7 @@ void G15Canvas::render(G15Screen &screen)
 	}
 }
 
-void G15Canvas::clearScreen(int color)
+void G15Canvas::clearScreen(const int color)
 {
 	if (this->debug)
 	{
@@ -60,7 +67,7 @@ void G15Canvas::clearScreen(int color)
 	g15r_clearScreen(this->canvas, color);
 }
 
-void G15Canvas::drawBar(int x1, int y1, int x2, int y2, int color, int num, int max, int type)
+void G15Canvas::drawBar(const int x1, const int y1, const int x2, const int y2, const int color, const int num, const int max, const int type)
 {
 	if (this->debug)
 	{
@@ -74,7 +81,7 @@ void G15Canvas::drawBar(int x1, int y1, int x2, int y2, int color, int num, int 
 	g15r_drawBar(this->canvas, x1, y1, x2, y2, color, num, max, type);
 }
 
-void G15Canvas::drawBigNum(int x1, int y1, int x2, int y2, int color, int num)
+void G15Canvas::drawBigNum(const int x1, const int y1, const int x2, const int y2, const int color, const int num)
 {
 	if (this->debug)
 	{
@@ -86,7 +93,7 @@ void G15Canvas::drawBigNum(int x1, int y1, int x2, int y2, int color, int num)
 	g15r_drawBigNum(this->canvas, x1, y1, x2, y2, color, num);
 }
 
-void G15Canvas::drawCircle(int x, int y, int r, bool fill, int color)
+void G15Canvas::drawCircle(const int x, const int y, const int r, const bool fill, const int color)
 {
 	if (this->debug)
 	{
@@ -101,7 +108,7 @@ void G15Canvas::drawCircle(int x, int y, int r, bool fill, int color)
 	g15r_drawCircle(this->canvas, x, y, r, fill, color);
 }
 
-void G15Canvas::drawLine(int x1, int y1, int x2, int y2, int color)
+void G15Canvas::drawLine(const int x1, const int y1, const int x2, const int y2, const int color)
 {
 	if (this->debug)
 	{
@@ -113,7 +120,7 @@ void G15Canvas::drawLine(int x1, int y1, int x2, int y2, int color)
 	g15r_drawLine(this->canvas, x1, y1, x2, y2, color);
 }
 
-void G15Canvas::drawRoundBox(int x1, int y1, int x2, int y2, bool fill, int color)
+void G15Canvas::drawRoundBox(const int x1, const int y1, const int x2, const int y2, const bool fill, const int color)
 {
 	if (this->debug)
 	{
@@ -130,7 +137,7 @@ void G15Canvas::drawRoundBox(int x1, int y1, int x2, int y2, bool fill, int colo
 	g15r_drawRoundBox(this->canvas, x1, y1, x2, y2, fill, color);
 }
 
-void G15Canvas::drawBox(int x1, int y1, int x2, int y2, int color, int thick, bool fill)
+void G15Canvas::drawBox(const int x1, const int y1, const int x2, const int y2, const int color, const int thick, const bool fill)
 {
 	if (this->debug)
 	{
@@ -147,7 +154,7 @@ void G15Canvas::drawBox(int x1, int y1, int x2, int y2, int color, int thick, bo
 	g15r_pixelBox(this->canvas, x1, y1, x2, y2, color, thick, fill);
 }
 
-void G15Canvas::drawOverlay(int x, int y, int width, int height, short colormap[])
+void G15Canvas::drawOverlay(const int x, const int y, const int width, const int height, short colormap[])
 {	
 	if (this->debug)
 	{
@@ -158,7 +165,7 @@ void G15Canvas::drawOverlay(int x, int y, int width, int height, short colormap[
 	g15r_pixelOverlay(this->canvas, x, y, width, height, colormap);
 }
 
-void G15Canvas::drawCharacter(int size, int x, int y, unsigned char character, int sx, int sy)
+void G15Canvas::drawCharacter(const int size, const int x, const int y, const unsigned char character, const int sx, const int sy)
 {
 	if (this->debug)
 	{
@@ -213,7 +220,7 @@ void G15Canvas::drawCharacter(int size, int x, int y, unsigned char character, i
 	}
 }
 
-void G15Canvas::drawString(std::string stringOut, int row, int size, int sx, int sy)
+void G15Canvas::drawString(const std::string stringOut, const int row, const int size, const int sx, const int sy)
 {
 	if (this->debug)
 	{
@@ -249,7 +256,7 @@ void G15Canvas::drawString(std::string stringOut, int row, int size, int sx, int
 	g15r_renderString(this->canvas, (unsigned char*)stringOut.c_str(), row, size, sx, sy);
 }
 
-void G15Canvas::drawSplash(std::string filename)
+void G15Canvas::drawSplash(const std::string filename)
 {
 	if (filename.length() < 1)
 	{
@@ -270,7 +277,7 @@ void G15Canvas::drawSplash(std::string filename)
 	g15r_loadWbmpSplash(this->canvas, (char *)filename.c_str());
 }
 
-void G15Canvas::drawSprite(G15Wbmp &wbmp, int x, int y, int width, int height, int sx, int sy)
+void G15Canvas::drawSprite(G15Wbmp &wbmp, const int x, const int y, const int width, const int height, const int sx, const int sy)
 {
 	if (this->debug)
 	{
@@ -287,7 +294,7 @@ void G15Canvas::drawSprite(G15Wbmp &wbmp, int x, int y, int width, int height, i
 	g15r_drawSprite(this->canvas, (char *)wbmp.getBuffer(), x, y, width, height, sx, sy, wbmp.getWidth());
 }
 
-void G15Canvas::drawIcon(G15Wbmp &wbmp, int x, int y)
+void G15Canvas::drawIcon(G15Wbmp &wbmp, const int x, const int y)
 {
 	if (this->debug)
 	{
@@ -300,7 +307,7 @@ void G15Canvas::drawIcon(G15Wbmp &wbmp, int x, int y)
 	g15r_drawIcon(this->canvas, (char *)wbmp.getBuffer(), x, y, wbmp.getWidth(), wbmp.getHeight());
 }
 
-int G15Canvas::getPixel(int x, int y)
+int G15Canvas::getPixel(const int x, const int y)
 {
 	int r = g15r_getPixel(this->canvas, x, y);
 	if (this->debug)
@@ -311,7 +318,7 @@ int G15Canvas::getPixel(int x, int y)
 	return r;
 }
 
-void G15Canvas::setPixel(int x, int y, int color)
+void G15Canvas::setPixel(const int x, const int y, const int color)
 {
 	if (this->debug)
 	{

@@ -12,18 +12,18 @@ namespace G15Tools
 		void _init(int type);
 		int _sendCommand(unsigned char command, unsigned char value);
 	public:
-		explicit G15Screen(bool debug = false);
-		explicit G15Screen(int type, bool debug = false);
+		explicit G15Screen(const bool debug = false);
+		explicit G15Screen(const int type, const bool debug = false);
 		G15Screen(const G15Screen& in);
 		~G15Screen();
-		int sendData(char *data, unsigned int len);
-		int setKeyboardBacklight(unsigned char brightness);
-		int setBacklight(unsigned char brightness);
-		int setContrast(unsigned char contrast);
-		int setM1Led(bool on = true);
-		int setM2Led(bool on = true);
-		int setM3Led(bool on = true);
-		int setMRLed(bool on = true);
+		int sendData(const char *data, const unsigned int len);
+		int setKeyboardBacklight(const unsigned char brightness);
+		int setBacklight(const unsigned char brightness);
+		int setContrast(const unsigned char contrast);
+		int setM1Led(const bool on = true);
+		int setM2Led(const bool on = true);
+		int setM3Led(const bool on = true);
+		int setMRLed(const bool on = true);
 		int getKeystate();
 	};
 }

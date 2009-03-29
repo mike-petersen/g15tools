@@ -15,7 +15,7 @@ namespace G15Tools
 		char *buffer;
 
 	public:
-		explicit G15Wbmp(char *filename, bool debug = false);
+		explicit G15Wbmp(const char *filename, const bool debug = false);
 		G15Wbmp(const G15Wbmp& in);
 		~G15Wbmp();
 		inline int getWidth() { return this->width; };

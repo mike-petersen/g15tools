@@ -14,26 +14,26 @@ namespace G15Tools
 		bool debug;
 
 	public:
-		explicit G15Canvas(bool debug = false);
+		explicit G15Canvas(const bool debug = false);
 		G15Canvas(const G15Canvas& in);
 		~G15Canvas();
 		void render(G15Screen &screen);
-		void clearScreen(int color);
-		void drawBar(int x1, int y1, int x2, int y2, int color, int num, int max, int type);
-		void drawBigNum(int x1, int y1, int x2, int y2, int color, int num);
-		void drawCircle(int x, int y, int r, bool fill, int color);
-		void drawLine(int x1, int y1, int x2, int y2, int color);
-		void drawRoundBox(int x1, int y1, int x2, int y2, bool fill, int color);
-		void drawBox(int x1, int y1, int x2, int y2, int color, int thick, bool fill);
-		void drawOverlay(int x, int y, int width, int height, short colormap[]);
-		void drawCharacter(int size, int x, int y, unsigned char character, int sx = 0, int sy = 0);
-		void drawString(std::string stringOut, int row, int size, int sx = 0, int sy = 0);
-		void drawSplash(std::string filename);
-		void drawSprite(G15Wbmp &wbmp, int x, int y, int width, int height, int sx = 0, int sy = 0);
-		void drawIcon(G15Wbmp &wbmp, int x, int y);
+		void clearScreen(const int color);
+		void drawBar(const int x1, const int y1, const int x2, const int y2, const int color, const int num, const int max, const int type);
+		void drawBigNum(const int x1, const int y1, const int x2, const int y2, const int color, const int num);
+		void drawCircle(const int x, const int y, const int r, const bool fill, const int color);
+		void drawLine(const int x1, const int y1, const int x2, const int y2, const int color);
+		void drawRoundBox(const int x1, const int y1, const int x2, const int y2, const bool fill, const int color);
+		void drawBox(const int x1, const int y1, const int x2, const int y2, const int color, const int thick, const bool fill);
+		void drawOverlay(const int x, const int y, const int width, const int height, short colormap[]);
+		void drawCharacter(const int size, const int x, const int y, const unsigned char character, const int sx = 0, const int sy = 0);
+		void drawString(const std::string stringOut, const int row, const int size, const int sx = 0, const int sy = 0);
+		void drawSplash(const std::string filename);
+		void drawSprite(G15Wbmp &wbmp, const int x, const int y, const int width, const int height, const int sx = 0, const int sy = 0);
+		void drawIcon(G15Wbmp &wbmp, const int x, const int y);
 
-		void setPixel(int x, int y, int color);
-		int getPixel(int x, int y);
+		void setPixel(const int x, const int y, const int color);
+		int getPixel(const int x, const int y);
 	};
 }
 

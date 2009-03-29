@@ -6,14 +6,14 @@
 
 using namespace G15Tools;
 
-G15Wbmp::G15Wbmp(char *filename, bool debug) : debug(debug)
+G15Wbmp::G15Wbmp(const char *filename, const bool debug) : debug(debug)
 {
 	if (this->debug)
 	{
 		std::cerr << "G15Wbmp(" << this << "): ";
 		std::cerr << "Created from file " << filename << "." << std::endl;
 	}
-	this->buffer = g15r_loadWbmpToBuf(filename, &this->width, &this->height);
+	this->buffer = g15r_loadWbmpToBuf((char *)filename, &this->width, &this->height);
 }
 
 G15Wbmp::G15Wbmp(const G15Wbmp& in)
