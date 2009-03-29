@@ -1,6 +1,7 @@
 #include <libg15.h>
 #include "G15Canvas.h"
 #include "G15Screen.h"
+#include "G15Wbmp.h"
 #include "g15logo.h"
 #include <unistd.h>
 
@@ -41,6 +42,23 @@ int main()
 	canvas.clearScreen(G15_COLOR_WHITE);
 	canvas.drawCharacter(G15_TEXT_LARGE, 0, 0, (unsigned char)'H');
 	canvas.drawString(std::string("Hello World!"), 1, G15_TEXT_LARGE);
+	canvas.render(screen);
+	sleep(3);
+	canvas.clearScreen(G15_COLOR_WHITE);
+	canvas.drawSplash("./splash.wbmp");
+	canvas.render(screen);
+	sleep(3);
+
+	G15Wbmp splash = G15Wbmp("./splash.wbmp", debug);
+	canvas.clearScreen(G15_COLOR_WHITE);
+	canvas.drawSprite(splash, 30, 10, 43, 20, 30, 10);
+	canvas.drawSprite(splash, 10, 20, 15, 20, 10, 20);
+	canvas.drawSprite(splash, 100, 20, 25, 20, 100, 20);
+	canvas.render(screen);
+	sleep(3);
+
+	canvas.clearScreen(G15_COLOR_WHITE);
+	canvas.drawIcon(splash, 0, 0);
 	canvas.render(screen);
 	sleep(3);
 	return 0;

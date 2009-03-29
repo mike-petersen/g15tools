@@ -2,6 +2,7 @@
 #define G15CANVAS_H_
 
 #include <G15Screen.h>
+#include <G15Wbmp.h>
 #include <libg15render.h>
 #include <string>
 
@@ -27,6 +28,9 @@ namespace G15Tools
 		void drawOverlay(int x, int y, int width, int height, short colormap[]);
 		void drawCharacter(int size, int x, int y, unsigned char character, int sx = 0, int sy = 0);
 		void drawString(std::string stringOut, int row, int size, int sx = 0, int sy = 0);
+		void drawSplash(std::string filename);
+		void drawSprite(G15Wbmp &wbmp, int x, int y, int width, int height, int sx = 0, int sy = 0);
+		void drawIcon(G15Wbmp &wbmp, int x, int y);
 
 		void setPixel(int x, int y, int color);
 		int getPixel(int x, int y);

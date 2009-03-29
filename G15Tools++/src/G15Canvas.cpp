@@ -249,6 +249,57 @@ void G15Canvas::drawString(std::string stringOut, int row, int size, int sx, int
 	g15r_renderString(this->canvas, (unsigned char*)stringOut.c_str(), row, size, sx, sy);
 }
 
+void G15Canvas::drawSplash(std::string filename)
+{
+	if (filename.length() < 1)
+	{
+		if (this->debug)
+		{
+		std::cerr << "G15Canvas(" << this << "): ";
+		std::cerr << "Invalid filename provided to drawSplash: " << filename << "." << std::endl;
+		}
+		return;
+	}
+
+	if (this->debug)
+	{
+		std::cerr << "G15Canvas(" << this << "): ";
+		std::cerr << "Drawing splashscreen from file: " << filename << "." << std::endl;
+	}
+	
+	g15r_loadWbmpSplash(this->canvas, (char *)filename.c_str());
+}
+
+void G15Canvas::drawSprite(G15Wbmp &wbmp, int x, int y, int width, int height, int sx, int sy)
+{
+	if (this->debug)
+	{
+		std::cerr << "G15Canvas(" << this << "): ";
+		std::cerr << "Drawing (" << width << "," << height << ") sprite ";
+		std::cerr << "at (" << x << "," << y << ")";
+		if (sx > 0 || sy > 0)
+		{
+			std::cerr << " with offset (" << sx << "," << sy << ")";
+		}
+		std::cerr << "." << std::endl;
+	}
+
+	g15r_drawSprite(this->canvas, (char *)wbmp.getBuffer(), x, y, width, height, sx, sy, wbmp.getWidth());
+}
+
+void G15Canvas::drawIcon(G15Wbmp &wbmp, int x, int y)
+{
+	if (this->debug)
+	{
+		std::cerr << "G15Canvas(" << this << "): ";
+		std::cerr << "Drawing (" << wbmp.getWidth() << "," << wbmp.getHeight() << ") icon ";
+		std::cerr << "at (" << x << "," << y << ")";
+		std::cerr << "." << std::endl;
+	}
+
+	g15r_drawIcon(this->canvas, (char *)wbmp.getBuffer(), x, y, wbmp.getWidth(), wbmp.getHeight());
+}
+
 int G15Canvas::getPixel(int x, int y)
 {
 	int r = g15r_getPixel(this->canvas, x, y);
