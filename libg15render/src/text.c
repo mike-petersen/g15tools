@@ -288,22 +288,29 @@ g15font * g15r_loadG15Font(char *filename) {
     g15font *font = calloc(1,sizeof(g15font));
     unsigned char buffer[128];
     int i;
-    if(access(filename,O_RDONLY)!=0)
+    if(access(filename,F_OK)!=0) {
+        fprintf(stderr,"loadG15Font: %s doesn't exist or has permissions problem.\n",filename);
         return NULL;
-
+    }
+    if(access(filename,R_OK)!=0) {
+        fprintf(stderr,"loadG15Font: %s exists but cannot be read. Permissions problem?\n",filename);
+        return NULL;
+    }
+    
     if(!(file=fopen(filename,"rb")))
         return NULL;
 
-    fread(buffer,G15_FONT_HEADER_SIZE,1,file);
-    if(buffer[0] != 'G' ||
-       buffer[1] != 'F' ||
-       buffer[2] != 'N' ||
-       buffer[3] != 'T' )
-    {
-        fclose(file);
-        return NULL;
-    }
-
+    if(fread(buffer,G15_FONT_HEADER_SIZE,1,file)) {
+      if(buffer[0] != 'G' ||
+         buffer[1] != 'F' ||
+         buffer[2] != 'N' ||
+         buffer[3] != 'T' )
+      {
+          fclose(file);
+          return NULL;
+      }
+    } else
+      return NULL;
     font->font_height = buffer[4] | (buffer[5] << 8);
     font->ascender_height = buffer[6] | (buffer[7] << 8);
     font->lineheight = buffer[8] | (buffer[9] << 8);
@@ -537,6 +544,7 @@ void g15r_G15FPrint (g15canvas *canvas, char *string, int x, int y, int size, in
     snprintf(filename,128,"%s/G15/default-%.2i.fnt",G15FONT_DIR,size);
     defaultfont[size] = g15r_loadG15Font(filename);
     if((defaultfont[size])==NULL) {
+          fprintf(stderr,"libg15render: Unable to load font \"%s\"\n",filename);
           return;
       }
   }
