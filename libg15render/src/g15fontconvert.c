@@ -20,6 +20,7 @@
 #include "libg15render.h"
 #include <sys/types.h>
 #include <fcntl.h>
+#include <unistd.h>
 #ifdef TTF_SUPPORT
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -82,11 +83,11 @@ int convertG15Font(char *inFilename, char *oFilename, int size, int gap){
     if(font->ascender_height==0) {
         font->ascender_height = font->font_height;
         face->size->metrics.ascender = font->font_height<<6;
-        printf("modded ascender to %i\n", face->size->metrics.ascender>>6);
+        printf("modded ascender to %i\n", (int)face->size->metrics.ascender>>6);
     }
     if(face->size->metrics.descender==0) {
         face->size->metrics.descender = (font->font_height<<6) - (face->available_sizes->size)  ;
-        printf("modded descender to %i\n",face->size->metrics.descender>>6);
+        printf("modded descender to %i\n",(int)face->size->metrics.descender>>6);
          font->font_height = (face->size->metrics.ascender >> 6) + (face->size->metrics.descender >> 6);
     }
     if(font->lineheight==0) {

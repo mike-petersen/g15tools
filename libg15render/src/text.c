@@ -37,7 +37,7 @@ g15r_renderCharacterLarge (g15canvas * canvas, int col, int row,
     unsigned char buf[2];
     buf[0]=character;
     buf[1]=0;
-    g15r_G15FPrint (canvas, buf, ((col * 8) + sx), sy, G15_TEXT_LARGE, 0, G15_COLOR_BLACK, row);
+    g15r_G15FPrint (canvas, (char*)buf, ((col * 8) + sx), sy, G15_TEXT_LARGE, 0, G15_COLOR_BLACK, row);
 }
 
 /** Render a character in std medium font.
@@ -56,7 +56,7 @@ g15r_renderCharacterMedium (g15canvas * canvas, int col, int row,
     unsigned char buf[2];
     buf[0]=character;
     buf[1]=0;
-    g15r_G15FPrint (canvas, buf, ((col * 5) + sx), sy, G15_TEXT_MED, 0, G15_COLOR_BLACK, row);
+    g15r_G15FPrint (canvas, (char*)buf, ((col * 5) + sx), sy, G15_TEXT_MED, 0, G15_COLOR_BLACK, row);
 
 }
 
@@ -76,7 +76,7 @@ g15r_renderCharacterSmall (g15canvas * canvas, int col, int row,
     unsigned char buf[2];
     buf[0]=character;
     buf[1]=0;
-    g15r_G15FPrint (canvas, buf, ((col * 4) + sx), sy, G15_TEXT_SMALL, 0, G15_COLOR_BLACK, row);
+    g15r_G15FPrint (canvas, (char*)buf, ((col * 4) + sx), sy, G15_TEXT_SMALL, 0, G15_COLOR_BLACK, row);
 
 }
 
@@ -93,7 +93,7 @@ void
 g15r_renderString (g15canvas * canvas, unsigned char stringOut[], int row,
 		   int size, unsigned int sx, unsigned int sy)
 {
-      g15r_G15FPrint (canvas, stringOut, sx, sy, size, 0, G15_COLOR_BLACK, row);
+      g15r_G15FPrint (canvas, (char*)stringOut, sx, sy, size, 0, G15_COLOR_BLACK, row);
 }
 
 #ifdef TTF_SUPPORT
@@ -247,7 +247,6 @@ void
 g15r_ttfPrint (g15canvas * canvas, int x, int y, int fontsize, int face_num,
 	       int color, int center, char *print_string)
 {
-  int errcode = 0;
 
   if (canvas->ttf_fontsize[face_num])
     {
@@ -335,7 +334,7 @@ g15font * g15r_loadG15Font(char *filename) {
             current_alloc+=((font->font_height * ((font->glyph[character].width + 7) / 8)*(font->numchars - i)));
             glyphBuf = realloc(glyphBuf,(size_t)current_alloc);
         }
-        font->glyph[character].buffer = glyphPtr;
+        font->glyph[character].buffer = (unsigned char*)glyphPtr;
         font->glyph[character].gap = 0;
         fread(font->glyph[character].buffer, font->font_height * ((font->glyph[character].width + 7) / 8), 1, file);
         glyphPtr+=(font->font_height * ((font->glyph[character].width + 7) / 8));
@@ -416,7 +415,7 @@ int g15r_saveG15Font(char *oFilename, g15font *font) {
   * \param font g15font structure containing glyphs.
 */
 void g15r_deleteG15Font(g15font*font){
-    int i;
+
     if(font) {
         if(font->glyph_buffer!=NULL)
             free(font->glyph_buffer);
@@ -525,7 +524,6 @@ void g15r_G15FontRenderString (g15canvas * canvas, g15font *font, char *string, 
 /* print string with the default G15Font, with on-demand loading of required sized bitmaps */
 void g15r_G15FPrint (g15canvas *canvas, char *string, int x, int y, int size, int center, int colour, int row) {
   static g15font *defaultfont[40];
-  static int initialised = 0;
   char filename[128];
   int xc, paint_bg;
   

@@ -117,7 +117,7 @@ char *g15r_loadWbmpToBuf(char *filename, int *img_width, int *img_height);
 /** \brief Draw a large number*/
 void g15r_drawBigNum (g15canvas * canvas, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, int color, int num);
 /** \brief Draw an XML image*/
-static void
+void
 g15r_drawXBM (g15canvas *canvas, unsigned char* data, int width, int height, int pos_x, int pos_y);
 
 /** \brief Gets the value of the pixel at (x, y)*/

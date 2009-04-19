@@ -341,7 +341,6 @@ g15r_drawBar (g15canvas * canvas, int x1, int y1, int x2, int y2, int color,
 	      int num, int max, int type)
 {
   float len, length;
-  int x;
   if (max <= 0 || num <= 0)
     return;
   if (num > max)
@@ -621,7 +620,7 @@ g15r_drawBigNum (g15canvas * canvas, unsigned int x1, unsigned int y1, unsigned 
  * \param pos_x Leftmost boundary of image.
  * \param pos_y Topmost boundary of image.
  */
-static void
+void
 g15r_drawXBM (g15canvas *canvas, unsigned char* data, int width, int height, int pos_x, int pos_y)
 {
    int y = 0;
