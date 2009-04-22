@@ -483,11 +483,13 @@ int g15r_renderG15Glyph(g15canvas *canvas, g15font *font,unsigned char character
                 x=0;y++;
             }
             x++;
-            if( buffer[bp] & (0x80 >> i))
+            if(x<=font->glyph[character].width) {
+              if( buffer[bp] & (0x80 >> i))
                 g15r_setPixel (canvas, top_left_pixel_x + x, top_left_pixel_y + y,colour);
-            else
+              else
                 if(paint_bg)
                     g15r_setPixel (canvas, top_left_pixel_x + x, top_left_pixel_y + y,colour^1);
+            }
         } 
     }
     if(character!=32)
