@@ -455,7 +455,7 @@ int g15r_testG15FontWidth(g15font *font,char *string){
 /** 
  * Return g15font structure containing the default font at requested size 
  * \param integer pointsize argument in the range of 0-39
- * \return g15font struct containing font at requested size or NULL if not valid.
+ * \return pointer to g15font struct containing font at requested size or NULL if not valid.
 */
 g15font * g15r_requestG15DefaultFont (int size) 
 {
