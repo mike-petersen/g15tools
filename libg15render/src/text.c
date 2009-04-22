@@ -344,6 +344,7 @@ g15font * g15r_loadG15Font(char *filename) {
         font->glyph[character].buffer = (unsigned char*)glyphPtr;
         font->glyph[character].gap = 0;
         fread(font->glyph[character].buffer, font->font_height * ((font->glyph[character].width + 7) / 8), 1, file);
+        font->active[character] = 1;
         glyphPtr+=(font->font_height * ((font->glyph[character].width + 7) / 8));
     }
     
@@ -462,7 +463,7 @@ int g15r_renderG15Glyph(g15canvas *canvas, g15font *font,unsigned char character
 {
     int x,y,w,bp;
 
-    if(font->glyph[character].buffer==NULL)
+    if(font->glyph[character].buffer==NULL || font->active[character] == 0)
         return 0;
 
     unsigned char *buffer = font->glyph[character].buffer;
