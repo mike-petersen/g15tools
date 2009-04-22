@@ -66,7 +66,7 @@ extern "C"
     unsigned char gap; 
 }g15glyph;
 
-/** \brief Structure holding a single font */
+/** \brief Structure holding a single font.  One g15font struct is needed per size. */
 typedef struct g15font {
     /** g15font::font_height - total max height of font in pixels */
     unsigned int font_height;
@@ -130,13 +130,6 @@ g15r_drawXBM (g15canvas *canvas, unsigned char* data, int width, int height, int
   void g15r_clearScreen (g15canvas * canvas, int color);
 /** \brief Clears the canvas and resets the mode switches*/
   void g15r_initCanvas (g15canvas * canvas);
-
-/** \brief Font data for the large (8x8) font*/
-  extern unsigned char fontdata_8x8[];
-/** \brief Font data for the medium (7x5) font*/
-  extern unsigned char fontdata_7x5[];
-/** \brief Font data for the small (6x4) font*/
-  extern unsigned char fontdata_6x4[];
 
 /** \brief Renders a character in the large font at (x, y)*/
   void g15r_renderCharacterLarge (g15canvas * canvas, int x, int y,
