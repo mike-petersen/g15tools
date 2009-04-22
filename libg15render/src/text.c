@@ -479,6 +479,11 @@ int g15r_renderG15Glyph(g15canvas *canvas, g15font *font,unsigned char character
 
     x=0;y=0;
 
+    if(paint_bg)
+      g15r_pixelBox (canvas, top_left_pixel_x, top_left_pixel_y-1, 
+          top_left_pixel_x + font->glyph[character].width+font->default_gap, 
+          top_left_pixel_y + font->lineheight, colour^1, 1, 1);
+
     for (bp=0;bp<bufferlen ;bp++){
         for (i=0;i<8;i++) {
             if( x > w ) { 
