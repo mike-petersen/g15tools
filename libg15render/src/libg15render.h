@@ -163,6 +163,8 @@ int g15r_saveG15Font(char *oFilename, g15font *font);
 void g15r_deleteG15Font(g15font*font);
 /** \brief Returns length (in pixels) of string if rendered in font 'font'  */
 int g15r_testG15FontWidth(g15font *font,char *string);
+/** \brief Returns g15font structure containing the default font at requested size if available */
+g15font * g15r_requestG15DefaultFont (int size);
 /** \brief render glyph 'character' from loaded font struct 'font'.  Returns width (in pixels) of rendered glyph */
 int g15r_renderG15Glyph(g15canvas *canvas, g15font *font,
                         unsigned char character,

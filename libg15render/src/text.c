@@ -21,6 +21,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+static g15font *defaultfont[40];
+
 /** Render a character in std large font 
  * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
  * \param col size-dependent column to start rendering.
@@ -450,6 +452,29 @@ int g15r_testG15FontWidth(g15font *font,char *string){
     return totalwidth;
 }
 
+/** 
+ * Return g15font structure containing the default font at requested size 
+ * \param integer pointsize argument in the range of 0-39
+ * \return g15font struct containing font at requested size or NULL if not valid.
+*/
+g15font * g15r_requestG15DefaultFont (int size) 
+{
+  char filename[128];
+  if (size<0)  size=0;
+  if (size>39) size=39;
+  
+  /* check if previously loaded, otherwise load it now */
+  if(!defaultfont[size]) {
+    snprintf(filename,128,"%s/G15/default-%.2i.fnt",G15FONT_DIR,size);
+    defaultfont[size] = g15r_loadG15Font(filename);
+    if((defaultfont[size])==NULL) {
+          fprintf(stderr,"libg15render: Unable to load font \"%s\"\n",filename);
+          return NULL;
+      }
+  }
+  return defaultfont[size];
+}
+
 /** Render a character in given font.
  * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
  * \param font Loaded g15font structure as returned by g15r_loadG15Font()
@@ -539,24 +564,11 @@ void g15r_G15FontRenderString (g15canvas * canvas, g15font *font, char *string, 
 */
 /* print string with the default G15Font, with on-demand loading of required sized bitmaps */
 void g15r_G15FPrint (g15canvas *canvas, char *string, int x, int y, int size, int center, int colour, int row) {
-  static g15font *defaultfont[40];
-  char filename[128];
   int xc, paint_bg;
   
-  if(size<0)
-      size=0;
-  if(size>39)
-      size=39;
-
   /* check if previously loaded, otherwise load it now */
-  if(!defaultfont[size]) {
-    snprintf(filename,128,"%s/G15/default-%.2i.fnt",G15FONT_DIR,size);
-    defaultfont[size] = g15r_loadG15Font(filename);
-    if((defaultfont[size])==NULL) {
-          fprintf(stderr,"libg15render: Unable to load font \"%s\"\n",filename);
-          return;
-      }
-  }
+  if(g15r_requestG15DefaultFont(size)==NULL)
+    return;
   
   if(size<3)
   {
