@@ -541,6 +541,7 @@ g15r_loadWbmpToBuf(char *filename, int *img_width, int *img_height)
  * \param y1 Defines uppermost bound of the number.
  * \param x2 Defines rightmost bound of the number.
  * \param y2 Defines bottommost bound of the number.
+ * \param color The number will be drawn this color.
  * \param num The number to be drawn.
  */ 
 void 

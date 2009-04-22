@@ -36,6 +36,7 @@ extern "C"
 #define G15_MAX_FACE		5
 #define G15_FONT_HEADER_SIZE 	15
 #define G15_CHAR_HEADER_SIZE 	4
+#define G15_MAX_GLYPH		256
 
 /** \brief This structure holds the data need to render objects to the LCD screen.*/
   typedef struct g15canvas
@@ -76,11 +77,11 @@ typedef struct g15font {
     /** g15font::numchars - number of glyphs available in this font */
     unsigned int numchars;
     /** g15font::glyph - contains all glyphs available in this font */
-    g15glyph glyph[256]; // allow 256 chars.. ought to be enough for our purposes
+    g15glyph glyph[G15_MAX_GLYPH]; // allow 256 chars.. ought to be enough for our purposes
     /** g15font::default_gap - default gap between glyphs (in pixels). */
     unsigned int default_gap;
     /** g15font::active - each active glyph is set to 1 else 0 */
-    unsigned char active[256];
+    unsigned char active[G15_MAX_GLYPH];
     /** g15font::glyph_buffer memory pool for glyphs */
     char *glyph_buffer;
 }g15font;
@@ -116,7 +117,7 @@ void g15r_drawSprite(g15canvas *canvas, char *buf, int my_x, int my_y, int width
 char *g15r_loadWbmpToBuf(char *filename, int *img_width, int *img_height);
 /** \brief Draw a large number*/
 void g15r_drawBigNum (g15canvas * canvas, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, int color, int num);
-/** \brief Draw an XML image*/
+/** \brief Draw an XBM image*/
 void
 g15r_drawXBM (g15canvas *canvas, unsigned char* data, int width, int height, int pos_x, int pos_y);
 

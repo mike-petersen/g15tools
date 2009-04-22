@@ -1,4 +1,4 @@
-.TH "libg15render" 3 "16 Nov 2006" "libg15render" \" -*- nroff -*-
+.TH "libg15render.h" 3 "21 Apr 2009" "libg15render" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -19,6 +19,14 @@ or
 .RI "struct \fBg15canvas\fP"
 .br
 .RI "\fIThis structure holds the data need to render objects to the LCD screen. \fP"
+.ti -1c
+.RI "struct \fBg15font\fP"
+.br
+.RI "\fIStructure holding a single font. \fP"
+.ti -1c
+.RI "struct \fBg15glyph\fP"
+.br
+.RI "\fIStructure holding glyph data for g15render font types. \fP"
 .in -1c
 .SS "Defines"
 
@@ -30,10 +38,16 @@ or
 .RI "#define \fBG15_BUFFER_LEN\fP   1048"
 .br
 .ti -1c
+.RI "#define \fBG15_CHAR_HEADER_SIZE\fP   4"
+.br
+.ti -1c
 .RI "#define \fBG15_COLOR_BLACK\fP   1"
 .br
 .ti -1c
 .RI "#define \fBG15_COLOR_WHITE\fP   0"
+.br
+.ti -1c
+.RI "#define \fBG15_FONT_HEADER_SIZE\fP   15"
 .br
 .ti -1c
 .RI "#define \fBG15_LCD_HEIGHT\fP   43"
@@ -48,10 +62,16 @@ or
 .RI "#define \fBG15_MAX_FACE\fP   5"
 .br
 .ti -1c
+.RI "#define \fBG15_MAX_GLYPH\fP   256"
+.br
+.ti -1c
 .RI "#define \fBG15_PIXEL_FILL\fP   1"
 .br
 .ti -1c
 .RI "#define \fBG15_PIXEL_NOFILL\fP   0"
+.br
+.ti -1c
+.RI "#define \fBG15_TEXT_HUGE\fP   3"
 .br
 .ti -1c
 .RI "#define \fBG15_TEXT_LARGE\fP   2"
@@ -62,6 +82,9 @@ or
 .ti -1c
 .RI "#define \fBG15_TEXT_SMALL\fP   0"
 .br
+.ti -1c
+.RI "#define \fBG15R_FONT_SUPPORT\fP   1"
+.br
 .in -1c
 .SS "Functions"
 
@@ -71,11 +94,15 @@ or
 .br
 .RI "\fIFills the screen with pixels of color. \fP"
 .ti -1c
+.RI "void \fBg15r_deleteG15Font\fP (\fBg15font\fP *font)"
+.br
+.RI "\fIDe-allocate memory associated with font. \fP"
+.ti -1c
 .RI "void \fBg15r_drawBar\fP (\fBg15canvas\fP *canvas, int x1, int y1, int x2, int y2, int color, int num, int max, int type)"
 .br
 .RI "\fIDraws a completion bar. \fP"
 .ti -1c
-.RI "void \fBg15r_drawBigNum\fP (\fBg15canvas\fP *canvas, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, int num)"
+.RI "void \fBg15r_drawBigNum\fP (\fBg15canvas\fP *canvas, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, int color, int num)"
 .br
 .RI "\fIDraw a large number. \fP"
 .ti -1c
@@ -99,6 +126,18 @@ or
 .br
 .RI "\fIDraw a sprite to the screen from a wbmp buffer. \fP"
 .ti -1c
+.RI "void \fBg15r_drawXBM\fP (\fBg15canvas\fP *canvas, unsigned char *data, int width, int height, int pos_x, int pos_y)"
+.br
+.RI "\fIDraw an XBM image. \fP"
+.ti -1c
+.RI "void \fBg15r_G15FontRenderString\fP (\fBg15canvas\fP *canvas, \fBg15font\fP *font, char *string, int row, unsigned int sx, unsigned int sy, int colour, int paint_bg)"
+.br
+.RI "\fIRender a string in font 'font' to canvas. \fP"
+.ti -1c
+.RI "void \fBg15r_G15FPrint\fP (\fBg15canvas\fP *canvas, char *string, int x, int y, int size, int center, int colour, int row)"
+.br
+.RI "\fIPrint a string using the G15 default font at size 'size'. \fP"
+.ti -1c
 .RI "int \fBg15r_getPixel\fP (\fBg15canvas\fP *canvas, unsigned int x, unsigned int y)"
 .br
 .RI "\fIGets the value of the pixel at (x, y). \fP"
@@ -107,11 +146,15 @@ or
 .br
 .RI "\fIClears the canvas and resets the mode switches. \fP"
 .ti -1c
+.RI "\fBg15font\fP * \fBg15r_loadG15Font\fP (char *filename)"
+.br
+.RI "\fILoad G15 font and return it in \fBg15font\fP struct. \fP"
+.ti -1c
 .RI "int \fBg15r_loadWbmpSplash\fP (\fBg15canvas\fP *canvas, char *filename)"
 .br
 .RI "\fIDraw a splash screen from 160x43 wbmp file. \fP"
 .ti -1c
-.RI "int \fBg15r_loadWbmpToBuf\fP (char *buf, char *filename, int *img_width, int *img_height, int maxlen)"
+.RI "char * \fBg15r_loadWbmpToBuf\fP (char *filename, int *img_width, int *img_height)"
 .br
 .RI "\fILoad a wbmp file into a buffer. \fP"
 .ti -1c
@@ -139,13 +182,25 @@ or
 .br
 .RI "\fIRenders a character in the small font at (x, y). \fP"
 .ti -1c
+.RI "int \fBg15r_renderG15Glyph\fP (\fBg15canvas\fP *canvas, \fBg15font\fP *font, unsigned char character, int top_left_pixel_x, int top_left_pixel_y, int colour, int paint_bg)"
+.br
+.RI "\fIrender glyph 'character' from loaded font struct 'font'. Returns width (in pixels) of rendered glyph \fP"
+.ti -1c
 .RI "void \fBg15r_renderString\fP (\fBg15canvas\fP *canvas, unsigned char stringOut[], int row, int size, unsigned int sx, unsigned int sy)"
 .br
 .RI "\fIRenders a string with font size in row. \fP"
 .ti -1c
+.RI "int \fBg15r_saveG15Font\fP (char *oFilename, \fBg15font\fP *font)"
+.br
+.RI "\fISave font in font struct to given file, return 0 on success. \fP"
+.ti -1c
 .RI "void \fBg15r_setPixel\fP (\fBg15canvas\fP *canvas, unsigned int x, unsigned int y, int val)"
 .br
 .RI "\fISets the value of the pixel at (x, y). \fP"
+.ti -1c
+.RI "int \fBg15r_testG15FontWidth\fP (\fBg15font\fP *font, char *string)"
+.br
+.RI "\fIReturns length (in pixels) of string if rendered in font 'font'. \fP"
 .ti -1c
 .RI "void \fBg15r_ttfLoad\fP (\fBg15canvas\fP *canvas, char *fontname, int fontsize, int face_num)"
 .br
@@ -175,63 +230,84 @@ or
 .PP 
 .SS "#define BYTE_SIZE   8"
 .PP
-Definition at line 21 of file libg15render.h.
+Definition at line 23 of file libg15render.h.
 .PP
 Referenced by g15r_drawIcon(), g15r_drawSprite(), g15r_getPixel(), g15r_loadWbmpToBuf(), and g15r_setPixel().
 .SS "#define G15_BUFFER_LEN   1048"
 .PP
-Definition at line 22 of file libg15render.h.
+Definition at line 24 of file libg15render.h.
 .PP
 Referenced by g15r_clearScreen(), g15r_initCanvas(), and g15r_loadWbmpSplash().
+.SS "#define G15_CHAR_HEADER_SIZE   4"
+.PP
+Definition at line 38 of file libg15render.h.
+.PP
+Referenced by g15r_loadG15Font(), and g15r_saveG15Font().
 .SS "#define G15_COLOR_BLACK   1"
 .PP
-Definition at line 27 of file libg15render.h.
+Definition at line 29 of file libg15render.h.
 .PP
-Referenced by g15r_drawBigNum(), g15r_drawRoundBox(), g15r_pixelOverlay(), g15r_renderCharacterLarge(), g15r_renderCharacterMedium(), and g15r_renderCharacterSmall().
+Referenced by g15r_drawRoundBox(), g15r_drawXBM(), g15r_pixelOverlay(), g15r_renderCharacterLarge(), g15r_renderCharacterMedium(), g15r_renderCharacterSmall(), and g15r_renderString().
 .SS "#define G15_COLOR_WHITE   0"
 .PP
-Definition at line 26 of file libg15render.h.
+Definition at line 28 of file libg15render.h.
 .PP
-Referenced by g15r_drawBigNum(), g15r_drawRoundBox(), g15r_pixelOverlay(), g15r_renderCharacterLarge(), g15r_renderCharacterMedium(), and g15r_renderCharacterSmall().
+Referenced by g15r_drawRoundBox(), and g15r_pixelOverlay().
+.SS "#define G15_FONT_HEADER_SIZE   15"
+.PP
+Definition at line 37 of file libg15render.h.
+.PP
+Referenced by g15r_loadG15Font(), and g15r_saveG15Font().
 .SS "#define G15_LCD_HEIGHT   43"
 .PP
-Definition at line 24 of file libg15render.h.
+Definition at line 26 of file libg15render.h.
 .PP
 Referenced by g15r_getPixel(), and g15r_setPixel().
 .SS "#define G15_LCD_OFFSET   32"
 .PP
-Definition at line 23 of file libg15render.h.
+Definition at line 25 of file libg15render.h.
 .SS "#define G15_LCD_WIDTH   160"
 .PP
-Definition at line 25 of file libg15render.h.
+Definition at line 27 of file libg15render.h.
 .PP
 Referenced by g15r_getPixel(), and g15r_setPixel().
 .SS "#define G15_MAX_FACE   5"
 .PP
-Definition at line 33 of file libg15render.h.
+Definition at line 36 of file libg15render.h.
 .PP
 Referenced by g15r_ttfLoad().
+.SS "#define G15_MAX_GLYPH   256"
+.PP
+Definition at line 39 of file libg15render.h.
+.PP
+Referenced by g15r_saveG15Font().
 .SS "#define G15_PIXEL_FILL   1"
 .PP
-Definition at line 32 of file libg15render.h.
+Definition at line 35 of file libg15render.h.
 .SS "#define G15_PIXEL_NOFILL   0"
 .PP
-Definition at line 31 of file libg15render.h.
+Definition at line 34 of file libg15render.h.
+.SS "#define G15_TEXT_HUGE   3"
+.PP
+Definition at line 33 of file libg15render.h.
 .SS "#define G15_TEXT_LARGE   2"
+.PP
+Definition at line 32 of file libg15render.h.
+.PP
+Referenced by g15r_renderCharacterLarge().
+.SS "#define G15_TEXT_MED   1"
+.PP
+Definition at line 31 of file libg15render.h.
+.PP
+Referenced by g15r_renderCharacterMedium().
+.SS "#define G15_TEXT_SMALL   0"
 .PP
 Definition at line 30 of file libg15render.h.
 .PP
-Referenced by g15r_renderString().
-.SS "#define G15_TEXT_MED   1"
+Referenced by g15r_renderCharacterSmall().
+.SS "#define G15R_FONT_SUPPORT   1"
 .PP
-Definition at line 29 of file libg15render.h.
-.PP
-Referenced by g15r_renderString().
-.SS "#define G15_TEXT_SMALL   0"
-.PP
-Definition at line 28 of file libg15render.h.
-.PP
-Referenced by g15r_renderString().
+Definition at line 21 of file libg15render.h.
 .SH "Function Documentation"
 .PP 
 .SS "void g15r_clearScreen (\fBg15canvas\fP * canvas, int color)"
@@ -252,6 +328,23 @@ Clears the screen and fills it with pixels of color
 Definition at line 80 of file screen.c.
 .PP
 References g15canvas::buffer, and G15_BUFFER_LEN.
+.PP
+.SS "void g15r_deleteG15Font (\fBg15font\fP * font)"
+.PP
+De-allocate memory associated with font. 
+.PP
+De-allocate memory associated with \fBg15font\fP struct, including glyph buffers 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfont\fP \fBg15font\fP structure containing glyphs. 
+.RE
+.PP
+
+.PP
+Definition at line 424 of file text.c.
+.PP
+References g15font::glyph_buffer.
 .PP
 .SS "void g15r_drawBar (\fBg15canvas\fP * canvas, int x1, int y1, int x2, int y2, int color, int num, int max, int type)"
 .PP
@@ -282,11 +375,11 @@ Given a maximum value, and a value between 0 and that maximum value, calculate a
 .PP
 
 .PP
-Definition at line 337 of file pixel.c.
+Definition at line 340 of file pixel.c.
 .PP
 References g15r_drawLine(), and g15r_pixelBox().
 .PP
-.SS "void g15r_drawBigNum (\fBg15canvas\fP * canvas, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, int num)"
+.SS "void g15r_drawBigNum (\fBg15canvas\fP * canvas, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, int color, int num)"
 .PP
 Draw a large number. 
 .PP
@@ -304,14 +397,16 @@ Draw a large number to a canvas
 .br
 \fIy2\fP Defines bottommost bound of the number. 
 .br
+\fIcolor\fP The number will be drawn this color. 
+.br
 \fInum\fP The number to be drawn. 
 .RE
 .PP
 
 .PP
-Definition at line 542 of file pixel.c.
+Definition at line 548 of file pixel.c.
 .PP
-References G15_COLOR_BLACK, G15_COLOR_WHITE, and g15r_pixelBox().
+References g15r_pixelBox().
 .PP
 .SS "void g15r_drawCircle (\fBg15canvas\fP * canvas, int x, int y, int r, int fill, int color)"
 .PP
@@ -338,7 +433,7 @@ The circle will be filled if fill != 0.
 .PP
 
 .PP
-Definition at line 203 of file pixel.c.
+Definition at line 206 of file pixel.c.
 .PP
 References g15r_drawLine(), and g15r_setPixel().
 .PP
@@ -365,7 +460,7 @@ Draw an icon to a canvas
 .PP
 
 .PP
-Definition at line 408 of file pixel.c.
+Definition at line 413 of file pixel.c.
 .PP
 References BYTE_SIZE, and g15r_setPixel().
 .PP
@@ -392,7 +487,7 @@ A line of color is drawn from (px1, py1) to (px2, py2).
 .PP
 
 .PP
-Definition at line 99 of file pixel.c.
+Definition at line 102 of file pixel.c.
 .PP
 References g15r_setPixel(), and swap().
 .PP
@@ -425,7 +520,7 @@ The box will be filled if fill != 0.
 .PP
 
 .PP
-Definition at line 252 of file pixel.c.
+Definition at line 255 of file pixel.c.
 .PP
 References G15_COLOR_BLACK, G15_COLOR_WHITE, g15r_drawLine(), and g15r_setPixel().
 .PP
@@ -458,9 +553,102 @@ Draw a sprite to a canvas
 .PP
 
 .PP
-Definition at line 440 of file pixel.c.
+Definition at line 445 of file pixel.c.
 .PP
 References BYTE_SIZE, and g15r_setPixel().
+.PP
+.SS "void g15r_drawXBM (\fBg15canvas\fP * canvas, unsigned char * data, int width, int height, int pos_x, int pos_y)"
+.PP
+Draw an XBM image. 
+.PP
+Draw an XBM Image to the canvas
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated in is found. 
+.br
+\fIdata\fP A pointer to the buffer holding the icon to be displayed. 
+.br
+\fIwidth\fP Width of the image in data. 
+.br
+\fIheight\fP Height of the image in data. 
+.br
+\fIpos_x\fP Leftmost boundary of image. 
+.br
+\fIpos_y\fP Topmost boundary of image. 
+.RE
+.PP
+
+.PP
+Definition at line 625 of file pixel.c.
+.PP
+References G15_COLOR_BLACK, and g15r_setPixel().
+.PP
+.SS "void g15r_G15FontRenderString (\fBg15canvas\fP * canvas, \fBg15font\fP * font, char * string, int row, unsigned int sx, unsigned int sy, int colour, int paint_bg)"
+.PP
+Render a string in font 'font' to canvas. 
+.PP
+Render a string in given font. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated on is found. 
+.br
+\fIfont\fP Loaded \fBg15font\fP structure as returned by \fBg15r_loadG15Font()\fP 
+.br
+\fIstring\fP Pointer to string to operate on. 
+.br
+\fIrow\fP vertical font-dependent row to start printing on. can usually be left at 0 
+.br
+\fIsx\fP horizontal top-left pixel location. 
+.br
+\fIsy\fP vertical top-left pixel location. 
+.br
+\fIcolour\fP desired colour of character when rendered. 
+.br
+\fIpaint_bg\fP if !0, pixels in the glyph background will also be painted, obstructing any image behind the text. 
+.RE
+.PP
+
+.PP
+Definition at line 512 of file text.c.
+.PP
+References g15font::ascender_height, and g15r_renderG15Glyph().
+.PP
+Referenced by g15r_G15FPrint().
+.PP
+.SS "void g15r_G15FPrint (\fBg15canvas\fP * canvas, char * string, int x, int y, int size, int center, int colour, int row)"
+.PP
+Print a string using the G15 default font at size 'size'. 
+.PP
+Render a string in the default font. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated on is found. 
+.br
+\fIstring\fP Pointer to string to operate on. 
+.br
+\fIx\fP horizontal top-left pixel location. 
+.br
+\fIy\fP vertical top-left pixel location. 
+.br
+\fIsize\fP if size>= 4, denotes height in pixels. if size<4, standard font sizes are used. 
+.br
+\fIcenter\fP Desired text justification. 0==left, 1==centered, 2==right justified. 
+.br
+\fIcolour\fP desired colour of character when rendered. 
+.br
+\fIrow\fP vertical font-dependent row to start printing on. can usually be left at 0 
+.RE
+.PP
+
+.PP
+Definition at line 535 of file text.c.
+.PP
+References g15r_G15FontRenderString(), g15r_loadG15Font(), and g15r_testG15FontWidth().
+.PP
+Referenced by g15r_renderCharacterLarge(), g15r_renderCharacterMedium(), g15r_renderCharacterSmall(), g15r_renderString(), and g15r_ttfPrint().
 .PP
 .SS "int g15r_getPixel (\fBg15canvas\fP * canvas, unsigned int x, unsigned int y)"
 .PP
@@ -502,6 +690,30 @@ Definition at line 91 of file screen.c.
 .PP
 References g15canvas::buffer, g15canvas::ftLib, G15_BUFFER_LEN, g15canvas::mode_cache, g15canvas::mode_reverse, and g15canvas::mode_xor.
 .PP
+.SS "\fBg15font\fP* g15r_loadG15Font (char * filename)"
+.PP
+Load G15 font and return it in \fBg15font\fP struct. 
+.PP
+Load a g15 font from file. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfilename\fP string containing full name and location of font to load. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+pointer to completed \fBg15font\fP structure. 
+.RE
+.PP
+
+.PP
+Definition at line 286 of file text.c.
+.PP
+References g15font::ascender_height, g15glyph::buffer, g15font::default_gap, g15font::font_height, G15_CHAR_HEADER_SIZE, G15_FONT_HEADER_SIZE, g15glyph::gap, g15font::glyph, g15font::lineheight, g15font::numchars, and g15glyph::width.
+.PP
+Referenced by g15r_G15FPrint().
+.PP
 .SS "int g15r_loadWbmpSplash (\fBg15canvas\fP * canvas, char * filename)"
 .PP
 Draw a splash screen from 160x43 wbmp file. 
@@ -517,32 +729,28 @@ wbmp splash screen loader - assumes image is 160x43
 .PP
 
 .PP
-Definition at line 385 of file pixel.c.
+Definition at line 389 of file pixel.c.
 .PP
 References g15canvas::buffer, G15_BUFFER_LEN, and g15r_loadWbmpToBuf().
 .PP
-.SS "int g15r_loadWbmpToBuf (char * buf, char * filename, int * img_width, int * img_height, int maxlen)"
+.SS "char* g15r_loadWbmpToBuf (char * filename, int * img_width, int * img_height)"
 .PP
 Load a wbmp file into a buffer. 
 .PP
-basic wbmp loader - loads wbmp into pre-prepared buf.
+basic wbmp loader - loads a wbmp image into a buffer.
 .PP
 \fBParameters:\fP
 .RS 4
-\fIbuf\fP A pointer to the buffer into which the wbmp will be loaded. 
-.br
 \fIfilename\fP A string holding the path to the wbmp to be loaded. 
 .br
 \fIimg_width\fP A pointer to an int that will hold the image width on return. 
 .br
 \fIimg_height\fP A pointer to an int that will hold the image height on return. 
-.br
-\fImaxlen\fP The maximum number of bytes that should be read from filename. 
 .RE
 .PP
 
 .PP
-Definition at line 468 of file pixel.c.
+Definition at line 471 of file pixel.c.
 .PP
 References BYTE_SIZE.
 .PP
@@ -577,7 +785,7 @@ The box will be filled if fill != 0 and the sides will be thick pixels wide.
 .PP
 
 .PP
-Definition at line 163 of file pixel.c.
+Definition at line 166 of file pixel.c.
 .PP
 References g15r_drawLine(), and g15r_setPixel().
 .PP
@@ -606,7 +814,7 @@ A 1-bit bitmap defined in colormap[] is drawn to the canvas with an upper left c
 .PP
 
 .PP
-Definition at line 74 of file pixel.c.
+Definition at line 77 of file pixel.c.
 .PP
 References G15_COLOR_BLACK, G15_COLOR_WHITE, and g15r_setPixel().
 .PP
@@ -635,47 +843,172 @@ The area with an upper left corner at (x1, y1) and lower right corner at (x2, y2
 .PP
 
 .PP
-Definition at line 45 of file pixel.c.
+Definition at line 48 of file pixel.c.
 .PP
 References g15r_getPixel(), and g15r_setPixel().
 .PP
-.SS "void g15r_renderCharacterLarge (\fBg15canvas\fP * canvas, int x, int y, unsigned char character, unsigned int sx, unsigned int sy)"
+.SS "void g15r_renderCharacterLarge (\fBg15canvas\fP * canvas, int col, int row, unsigned char character, unsigned int sx, unsigned int sy)"
 .PP
 Renders a character in the large font at (x, y). 
 .PP
-Definition at line 22 of file text.c.
+Render a character in std large font 
 .PP
-References fontdata_8x8, G15_COLOR_BLACK, G15_COLOR_WHITE, and g15r_setPixel().
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated on is found. 
+.br
+\fIcol\fP size-dependent column to start rendering. 
+.br
+\fIrow\fP size-dependent row to start rendering. 
+.br
+\fIcharacter\fP ascii character to render. 
+.br
+\fIsx\fP horizontal top-left pixel location. 
+.br
+\fIsy\fP vertical top-left pixel location. 
+.RE
 .PP
-Referenced by g15r_renderString().
+
 .PP
-.SS "void g15r_renderCharacterMedium (\fBg15canvas\fP * canvas, int x, int y, unsigned char character, unsigned int sx, unsigned int sy)"
+Definition at line 33 of file text.c.
+.PP
+References G15_COLOR_BLACK, G15_TEXT_LARGE, and g15r_G15FPrint().
+.PP
+.SS "void g15r_renderCharacterMedium (\fBg15canvas\fP * canvas, int col, int row, unsigned char character, unsigned int sx, unsigned int sy)"
 .PP
 Renders a character in the meduim font at (x, y). 
 .PP
-Definition at line 50 of file text.c.
+Render a character in std medium font. 
 .PP
-References fontdata_7x5, G15_COLOR_BLACK, G15_COLOR_WHITE, and g15r_setPixel().
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated on is found. 
+.br
+\fIcol\fP size-dependent column to start rendering. 
+.br
+\fIrow\fP size-dependent row to start rendering. 
+.br
+\fIcharacter\fP ascii character to render. 
+.br
+\fIsx\fP horizontal top-left pixel location. 
+.br
+\fIsy\fP vertical top-left pixel location. 
+.RE
 .PP
-Referenced by g15r_renderString().
+
 .PP
-.SS "void g15r_renderCharacterSmall (\fBg15canvas\fP * canvas, int x, int y, unsigned char character, unsigned int sx, unsigned int sy)"
+Definition at line 52 of file text.c.
+.PP
+References G15_COLOR_BLACK, G15_TEXT_MED, and g15r_G15FPrint().
+.PP
+.SS "void g15r_renderCharacterSmall (\fBg15canvas\fP * canvas, int col, int row, unsigned char character, unsigned int sx, unsigned int sy)"
 .PP
 Renders a character in the small font at (x, y). 
 .PP
-Definition at line 77 of file text.c.
+Render a character in std small font. 
 .PP
-References fontdata_6x4, G15_COLOR_BLACK, G15_COLOR_WHITE, and g15r_setPixel().
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated on is found. 
+.br
+\fIcol\fP size-dependent column to start rendering. 
+.br
+\fIrow\fP size-dependent row to start rendering. 
+.br
+\fIcharacter\fP ascii character to render. 
+.br
+\fIsx\fP horizontal top-left pixel location. 
+.br
+\fIsy\fP vertical top-left pixel location. 
+.RE
 .PP
-Referenced by g15r_renderString().
+
+.PP
+Definition at line 72 of file text.c.
+.PP
+References G15_COLOR_BLACK, G15_TEXT_SMALL, and g15r_G15FPrint().
+.PP
+.SS "int g15r_renderG15Glyph (\fBg15canvas\fP * canvas, \fBg15font\fP * font, unsigned char character, int top_left_pixel_x, int top_left_pixel_y, int colour, int paint_bg)"
+.PP
+render glyph 'character' from loaded font struct 'font'. Returns width (in pixels) of rendered glyph 
+.PP
+Render a character in given font. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated on is found. 
+.br
+\fIfont\fP Loaded \fBg15font\fP structure as returned by \fBg15r_loadG15Font()\fP 
+.br
+\fIcharacter\fP ascii character to render. 
+.br
+\fItop_left_pixel_x\fP horizontal top-left pixel location. 
+.br
+\fItop_left_pixel_y\fP vertical top-left pixel location. 
+.br
+\fIcolour\fP desired colour of character when rendered. 
+.br
+\fIpaint_bg\fP should the background of the character cell be painted? 
+.RE
+.PP
+
+.PP
+Definition at line 461 of file text.c.
+.PP
+References g15font::ascender_height, g15glyph::buffer, g15font::default_gap, g15font::font_height, g15r_setPixel(), g15font::glyph, and g15glyph::width.
+.PP
+Referenced by g15r_G15FontRenderString().
 .PP
 .SS "void g15r_renderString (\fBg15canvas\fP * canvas, unsigned char stringOut[], int row, int size, unsigned int sx, unsigned int sy)"
 .PP
 Renders a string with font size in row. 
 .PP
-Definition at line 104 of file text.c.
+Render a string in the designated size 
 .PP
-References G15_TEXT_LARGE, G15_TEXT_MED, G15_TEXT_SMALL, g15r_renderCharacterLarge(), g15r_renderCharacterMedium(), and g15r_renderCharacterSmall().
+\fBParameters:\fP
+.RS 4
+\fIcanvas\fP A pointer to a \fBg15canvas\fP struct in which the buffer to be operated on is found. 
+.br
+\fIstringOut\fP An unsigned char pointer to the string which is to be printed. 
+.br
+\fIrow\fP size-dependent row to start rendering. 
+.br
+\fIsize\fP size of printed string. May be 0-3 for standard sizes, or 5-39 in pixel height. 
+.br
+\fIsx\fP horizontal top-left pixel location. 
+.br
+\fIsy\fP vertical top-left pixel location. 
+.RE
+.PP
+
+.PP
+Definition at line 93 of file text.c.
+.PP
+References G15_COLOR_BLACK, and g15r_G15FPrint().
+.PP
+.SS "int g15r_saveG15Font (char * oFilename, \fBg15font\fP * font)"
+.PP
+Save font in font struct to given file, return 0 on success. 
+.PP
+Save \fBg15font\fP struct to given file. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIoFilename\fP string containing full name and location of font to save. 
+.br
+\fIfont\fP \fBg15font\fP structure containing glyphs. Glyphs to be saved should have the corresponding active[glyph] set. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+0 on success, -1 on failure. 
+.RE
+.PP
+
+.PP
+Definition at line 361 of file text.c.
+.PP
+References g15font::active, g15font::ascender_height, g15glyph::buffer, g15font::default_gap, g15font::font_height, G15_CHAR_HEADER_SIZE, G15_FONT_HEADER_SIZE, G15_MAX_GLYPH, g15font::glyph, g15font::lineheight, g15font::numchars, and g15glyph::width.
 .PP
 .SS "void g15r_setPixel (\fBg15canvas\fP * canvas, unsigned int x, unsigned int y, int val)"
 .PP
@@ -700,7 +1033,33 @@ Definition at line 50 of file screen.c.
 .PP
 References g15canvas::buffer, BYTE_SIZE, G15_LCD_HEIGHT, G15_LCD_WIDTH, g15r_getPixel(), g15canvas::mode_reverse, and g15canvas::mode_xor.
 .PP
-Referenced by draw_ttf_char(), g15r_drawCircle(), g15r_drawIcon(), g15r_drawLine(), g15r_drawRoundBox(), g15r_drawSprite(), g15r_pixelBox(), g15r_pixelOverlay(), g15r_pixelReverseFill(), g15r_renderCharacterLarge(), g15r_renderCharacterMedium(), and g15r_renderCharacterSmall().
+Referenced by draw_ttf_char(), g15r_drawCircle(), g15r_drawIcon(), g15r_drawLine(), g15r_drawRoundBox(), g15r_drawSprite(), g15r_drawXBM(), g15r_pixelBox(), g15r_pixelOverlay(), g15r_pixelReverseFill(), and g15r_renderG15Glyph().
+.PP
+.SS "int g15r_testG15FontWidth (\fBg15font\fP * font, char * string)"
+.PP
+Returns length (in pixels) of string if rendered in font 'font'. 
+.PP
+Calculate width (in pixels) of given string if rendered in font 'font'. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfont\fP Loaded \fBg15font\fP structure as returned by \fBg15r_loadG15Font()\fP 
+.br
+\fIstring\fP Pointer to string for width calculations. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+total width in pixels of given string. 
+.RE
+.PP
+
+.PP
+Definition at line 439 of file text.c.
+.PP
+References g15font::default_gap, g15glyph::gap, g15font::glyph, and g15glyph::width.
+.PP
+Referenced by g15r_G15FPrint().
 .PP
 .SS "void g15r_ttfLoad (\fBg15canvas\fP * canvas, char * fontname, int fontsize, int face_num)"
 .PP
@@ -721,7 +1080,7 @@ Load a font for use with FreeType2 font support
 .PP
 
 .PP
-Definition at line 145 of file text.c.
+Definition at line 109 of file text.c.
 .PP
 References g15canvas::ftLib, G15_MAX_FACE, g15canvas::ttf_face, and g15canvas::ttf_fontsize.
 .PP
@@ -752,9 +1111,9 @@ Render a string with a FreeType2 font
 .PP
 
 .PP
-Definition at line 283 of file text.c.
+Definition at line 247 of file text.c.
 .PP
-References calc_ttf_centering(), calc_ttf_right_justify(), calc_ttf_true_ypos(), draw_ttf_str(), g15canvas::ttf_face, and g15canvas::ttf_fontsize.
+References calc_ttf_centering(), calc_ttf_right_justify(), calc_ttf_true_ypos(), draw_ttf_str(), g15r_G15FPrint(), g15canvas::ttf_face, and g15canvas::ttf_fontsize.
 .PP
 .SH "Variable Documentation"
 .PP 
@@ -762,17 +1121,14 @@ References calc_ttf_centering(), calc_ttf_right_justify(), calc_ttf_true_ypos(),
 .PP
 Font data for the small (6x4) font. 
 .PP
-Referenced by g15r_renderCharacterSmall().
 .SS "unsigned char \fBfontdata_7x5\fP[]"
 .PP
 Font data for the medium (7x5) font. 
 .PP
-Referenced by g15r_renderCharacterMedium().
 .SS "unsigned char \fBfontdata_8x8\fP[]"
 .PP
 Font data for the large (8x8) font. 
 .PP
-Referenced by g15r_renderCharacterLarge().
 .SH "Author"
 .PP 
 Anthony J. Mirabella <mirabeaj@gmail.com>

@@ -353,7 +353,7 @@ g15font * g15r_loadG15Font(char *filename) {
 
 /** 
  * Save g15font struct to given file.
- * \param ofilename string containing full name and location of font to save.
+ * \param oFilename string containing full name and location of font to save.
  * \param font g15font structure containing glyphs.  Glyphs to be saved should have the corresponding active[glyph] set.
  * \return 0 on success, -1 on failure.
 */
@@ -371,7 +371,7 @@ int g15r_saveG15Font(char *oFilename, g15font *font) {
         return -1;
 
     font->numchars=0;
-    for(i=0;i<256;i++) {
+    for(i=0;i<G15_MAX_GLYPH;i++) {
         if(font->active[i]) {
             font->numchars++;
         }
@@ -401,7 +401,7 @@ int g15r_saveG15Font(char *oFilename, g15font *font) {
 
     fwrite (fntheader, G15_FONT_HEADER_SIZE, 1, f);
 
-    for(i=0;i<256;i++) {
+    for(i=0;i<G15_MAX_GLYPH;i++) {
         if(font->active[i]) {
             unsigned char charheader[G15_CHAR_HEADER_SIZE];
 
@@ -456,6 +456,7 @@ int g15r_testG15FontWidth(g15font *font,char *string){
  * \param top_left_pixel_x horizontal top-left pixel location.
  * \param top_left_pixel_y vertical top-left pixel location.
  * \param colour desired colour of character when rendered.
+ * \param paint_bg should the background of the character cell be painted?
 */
 int g15r_renderG15Glyph(g15canvas *canvas, g15font *font,unsigned char character,int top_left_pixel_x, int top_left_pixel_y, int colour, int paint_bg)
 {
