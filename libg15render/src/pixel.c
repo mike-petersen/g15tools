@@ -341,7 +341,7 @@ g15r_drawBar (g15canvas * canvas, int x1, int y1, int x2, int y2, int color,
 	      int num, int max, int type)
 {
   float len, length;
-  if (max <= 0 || num <= 0)
+  if (max <= 0 || num < 0)
     return;
   if (num > max)
     num = max;
