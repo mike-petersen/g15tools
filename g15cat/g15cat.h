@@ -29,7 +29,7 @@
 #define TM_LINES 5
 #define TS_LINES 7
 #define TL_LINES 3
-#define G15CAT_VERSION "1.2"
+#define G15CAT_VERSION "1.3"
 
 #define TRUE 1
 #define FALSE 0
