@@ -453,7 +453,8 @@ int g15r_testG15FontWidth(g15font *font,char *string){
 }
 
 /** 
- * Return g15font structure containing the default font at requested size 
+ * Return g15font structure containing the default font at requested size
+ * loading the font if needed.
  * \param integer pointsize argument in the range of 0-39
  * \return pointer to g15font struct containing font at requested size or NULL if not valid.
 */
@@ -546,9 +547,11 @@ void g15r_G15FontRenderString (g15canvas * canvas, g15font *font, char *string, 
     int prevwidth=0;
     if(font==NULL)
         return;
-    sy=sy+(font->ascender_height*row);
+    
+    sy += ( font->lineheight * row );
+    
     for(i=0;i<strlen(string);i++){
-        prevwidth=g15r_renderG15Glyph(canvas, font,string[i],sx+=prevwidth, sy,colour, paint_bg);
+        prevwidth = g15r_renderG15Glyph (canvas, font,string[i], sx += prevwidth, sy, colour, paint_bg);
     }
 }
 
