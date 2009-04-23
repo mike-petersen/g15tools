@@ -27,8 +27,8 @@
 #define TS_CHARS 40
 #define TL_CHARS 20
 #define TM_LINES 5
-#define TS_LINES 6
-#define TL_LINES 4
+#define TS_LINES 7
+#define TL_LINES 3
 #define G15CAT_VERSION "1.2"
 
 #define TRUE 1

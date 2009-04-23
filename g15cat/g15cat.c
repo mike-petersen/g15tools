@@ -140,11 +140,11 @@ void main_loop(void){
   } else if(*format == 'M'){
     num_chars = TM_CHARS;
     num_lines = TM_LINES;
-    dim =  G15_TEXT_MED;
+    dim =  7;
   } else if(*format == 'L'){
     num_chars = TL_CHARS;
     num_lines = TL_LINES;
-    dim =  G15_TEXT_LARGE;
+    dim =  11;
   } else {
     main_usage();
   }
