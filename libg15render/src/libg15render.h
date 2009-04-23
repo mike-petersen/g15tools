@@ -19,6 +19,7 @@ extern "C"
 #endif
 
 #define G15R_FONT_SUPPORT 1
+#define G15R_FONT_API_V2 1
 
 #define BYTE_SIZE 		8
 #define G15_BUFFER_LEN  	1048
