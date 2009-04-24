@@ -39,6 +39,9 @@ extern "C"
 #define G15_CHAR_HEADER_SIZE 	4
 #define G15_MAX_GLYPH		256
 
+#define G15_JUSTIFY_LEFT	0
+#define G15_JUSTIFY_CENTER	1
+#define G15_JUSTIFY_RIGHT	2
 /** \brief This structure holds the data need to render objects to the LCD screen.*/
   typedef struct g15canvas
   {
