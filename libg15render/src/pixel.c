@@ -32,11 +32,11 @@ swap (int *x, int *y)
   *y = tmp;
 }
 
-/** 
+/**
  *  The area with an upper left corner at (x1, y1) and lower right corner at (x2, y2) will be
  *  filled with color if fill>0 or the current contents of the area will be reversed if fill==0.
- * 
- *  \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found. 
+ *
+ *  \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
  *  \param x1 Defines leftmost bound of area to be filled.
  *  \param y1 Defines uppermost bound of area to be filled.
  *  \param x2 Defines rightmost bound of area to be filled.
@@ -65,7 +65,7 @@ g15r_pixelReverseFill (g15canvas * canvas, int x1, int y1, int x2, int y2,
 /**
  * A 1-bit bitmap defined in colormap[] is drawn to the canvas with an upper left corner at (x1, y1)
  * and a lower right corner at (x1+width, y1+height).
- * 
+ *
  * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
  * \param x1 Defines the leftmost bound of the area to be drawn.
  * \param y1 Defines the uppermost bound of the area to be drawn.
@@ -90,7 +90,7 @@ g15r_pixelOverlay (g15canvas * canvas, int x1, int y1, int width, int height,
 
 /**
  * A line of color is drawn from (px1, py1) to (px2, py2).
- * 
+ *
  * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
  * \param px1 X component of point 1.
  * \param py1 Y component of point 1.
@@ -102,7 +102,7 @@ void
 g15r_drawLine (g15canvas * canvas, int px1, int py1, int px2, int py2,
 	       const int color)
 {
-  /* 
+  /*
    * Bresenham's Line Algorithm
    * http://en.wikipedia.org/wiki/Bresenham's_algorithm
    */
@@ -150,10 +150,10 @@ g15r_drawLine (g15canvas * canvas, int px1, int py1, int px2, int py2,
 
 /**
  * Draws a box around the area bounded by (x1, y1) and (x2, y2).
- * 
+ *
  * The box will be filled if fill != 0 and the sides will be thick pixels wide.
- * 
- * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found. 
+ *
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
  * \param x1 Defines leftmost bound of the box.
  * \param y1 Defines uppermost bound of the box.
  * \param x2 Defines rightmost bound of the box.
@@ -192,10 +192,10 @@ g15r_pixelBox (g15canvas * canvas, int x1, int y1, int x2, int y2, int color,
 
 /**
  * Draws a circle centered at (x, y) with a radius of r.
- * 
+ *
  * The circle will be filled if fill != 0.
- * 
- * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found. 
+ *
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
  * \param x Defines horizontal center of the circle.
  * \param y Defines vertical center of circle.
  * \param r Defines radius of circle.
@@ -240,10 +240,10 @@ g15r_drawCircle (g15canvas * canvas, int x, int y, int r, int fill, int color)
 
 /**
  * Draws a rounded box around the area bounded by (x1, y1) and (x2, y2).
- * 
+ *
  * The box will be filled if fill != 0.
- * 
- * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found. 
+ *
+ * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
  * \param x1 Defines leftmost bound of the box.
  * \param y1 Defines uppermost bound of the box.
  * \param x2 Defines rightmost bound of the box.
@@ -325,7 +325,7 @@ g15r_drawRoundBox (g15canvas * canvas, int x1, int y1, int x2, int y2,
 
 /**
  * Given a maximum value, and a value between 0 and that maximum value, calculate and draw a bar showing that percentage.
- * 
+ *
  * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
  * \param x1 Defines leftmost bound of the bar.
  * \param y1 Defines uppermost bound of the bar.
@@ -381,16 +381,16 @@ g15r_drawBar (g15canvas * canvas, int x1, int y1, int x2, int y2, int color,
 
 /**
  * wbmp splash screen loader - assumes image is 160x43
- * 
+ *
  * \param canvas A pointer to a g15canvas struct in which the buffer to be operated on is found.
  * \param filename A string holding the path to the wbmp to be displayed.
  */
-int 
+int
 g15r_loadWbmpSplash(g15canvas *canvas, char *filename)
 {
     int width=0, height=0;
     char *buf;
-     
+
     buf = g15r_loadWbmpToBuf(filename,
                              &width,
                              &height);
@@ -400,7 +400,7 @@ g15r_loadWbmpSplash(g15canvas *canvas, char *filename)
 }
 
 /**
- * Draw an icon to a canvas 
+ * Draw an icon to a canvas
  *
  * \param canvas A pointer to a g15canvas struct in which the buffer to be operated in is found.
  * \param buf A pointer to the buffer holding the icon to be displayed.
@@ -409,15 +409,18 @@ g15r_loadWbmpSplash(g15canvas *canvas, char *filename)
  * \param width Width of the image in buf.
  * \param height Height of the image in buf.
  */
-void 
+void
 g15r_drawIcon(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int height)
 {
     int y,x,val;
     unsigned int pixel_offset = 0;
     unsigned int byte_offset, bit_offset;
 
-    for (y=0; y < height - 1; y++)
-      for (x=0; x < width - 1; x++)
+	//TODO:http://www.g15tools.com/forum/viewtopic.php?p=314#p314
+	// Does his new piece of code work? Is it better than below? If so, replace.
+    for (y=0; y < height; y++)
+	{
+      for (x=0; x < width; x++)
         {
 		pixel_offset = y * width + x;
 		byte_offset = pixel_offset / BYTE_SIZE;
@@ -426,6 +429,7 @@ g15r_drawIcon(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int h
 		val = (buf[byte_offset] & (1 << bit_offset)) >> bit_offset;
 		g15r_setPixel (canvas, x + my_x, y + my_y, val);
         }
+	}
 }
 
 /**
@@ -441,7 +445,7 @@ g15r_drawIcon(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int h
  * \param start_y Y offset for reading sprite from buf.
  * \param total_width Width of the set of sprites held in buf.
  */
-void 
+void
 g15r_drawSprite(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int height, int start_x, int start_y, int total_width)
 {
     int y,x,val;
@@ -467,7 +471,7 @@ g15r_drawSprite(g15canvas *canvas, char *buf, int my_x, int my_y, int width, int
  * \param img_width A pointer to an int that will hold the image width on return.
  * \param img_height A pointer to an int that will hold the image height on return.
  */
-char * 
+char *
 g15r_loadWbmpToBuf(char *filename, int *img_width, int *img_height)
 {
     int wbmp_fd;
@@ -478,14 +482,14 @@ g15r_loadWbmpToBuf(char *filename, int *img_width, int *img_height)
     unsigned char headerbytes[5];
     unsigned int pixel_offset = 0;
     unsigned int byte_offset, bit_offset;
-    
+
     wbmp_fd=open(filename,O_RDONLY);
     if(!wbmp_fd){
         return NULL;
     }
-    
+
     retval=read(wbmp_fd,headerbytes,5);
-    
+
     if(retval){
         if (headerbytes[2] & 1) {
             *img_width = ((unsigned char)headerbytes[2] ^ 1) | (unsigned char)headerbytes[3];
@@ -543,19 +547,19 @@ g15r_loadWbmpToBuf(char *filename, int *img_width, int *img_height)
  * \param y2 Defines bottommost bound of the number.
  * \param color The number will be drawn this color.
  * \param num The number to be drawn.
- */ 
-void 
+ */
+void
 g15r_drawBigNum (g15canvas * canvas, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, int color, int num)
 {
     x1 += 2;
     x2 -= 2;
-    
+
     switch(num){
         case 0:
             g15r_pixelBox (canvas, x1, y1, x2, y2 , color, 1, 1);
             g15r_pixelBox (canvas, x1 +5, y1 +5, x2 -5, y2 - 6, 1 - color, 1, 1);
             break;
-        case 1: 
+        case 1:
             g15r_pixelBox (canvas, x2-5, y1, x2, y2 , color, 1, 1);
             g15r_pixelBox (canvas, x1, y1, x2 -5, y2, 1 - color, 1, 1);
             break;
@@ -598,11 +602,11 @@ g15r_drawBigNum (g15canvas * canvas, unsigned int x1, unsigned int y1, unsigned 
             g15r_pixelBox (canvas, x1+5, y1+5, x2-5 , y1+((y2/2)-3), 1 - color, 1, 1);
             g15r_pixelBox (canvas, x1, y1+((y2/2)+3), x2-5 , y2, 1 - color, 1, 1);
             break;
-        case 10: 
+        case 10:
             g15r_pixelBox (canvas, x2-5, y1+5, x2, y1+10 , color, 1, 1);
             g15r_pixelBox (canvas, x2-5, y2-10, x2, y2-5 , color, 1, 1);
             break;
-        case 11: 
+        case 11:
             g15r_pixelBox (canvas, x1, y1+((y2/2)-2), x2, y1+((y2/2)+2), color, 1, 1);
             break;
         case 12:
@@ -628,7 +632,7 @@ g15r_drawXBM (g15canvas *canvas, unsigned char* data, int width, int height, int
    int z = 0;
    unsigned char byte;
    int bytes_per_row = ceil ((double) width / 8);
-   
+
    int bits_left = width;
    int current_bit = 0;
 

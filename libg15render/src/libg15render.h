@@ -65,9 +65,9 @@ extern "C"
       /** g15glyph::buffer holds glyph data */
     unsigned char *buffer;
     /** g15glyph::width - width of the glyph, without padding */
-    unsigned char width; 
+    unsigned char width;
     /** g15glyph::gap - recommended gap between this character and the next */
-    unsigned char gap; 
+    unsigned char gap;
 }g15glyph;
 
 /** \brief Structure holding a single font.  One g15font struct is needed per size. */
@@ -165,7 +165,7 @@ g15font * g15r_requestG15DefaultFont (int size);
 /** \brief render glyph 'character' from loaded font struct 'font'.  Returns width (in pixels) of rendered glyph */
 int g15r_renderG15Glyph(g15canvas *canvas, g15font *font,
                         unsigned char character,
-                        int top_left_pixel_x, int top_left_pixel_y, 
+                        int top_left_pixel_x, int top_left_pixel_y,
                         int colour, int paint_bg);
 /** \brief Render a string in font 'font' to canvas */
 void g15r_G15FontRenderString (g15canvas * canvas, g15font *font,
@@ -173,12 +173,12 @@ void g15r_G15FontRenderString (g15canvas * canvas, g15font *font,
                                int row, unsigned int sx, unsigned int sy,
                                int colour, int paint_bg);
 /** \brief Print a string using the G15 default font at size 'size' */
-void g15r_G15FPrint (g15canvas *canvas, char *string, int x, int y, 
+void g15r_G15FPrint (g15canvas *canvas, char *string, int x, int y,
                 int size, int center, int colour, int row);
 
 #ifdef TTF_SUPPORT
 /** \brief Loads a font through the FreeType2 library*/
-  void g15r_ttfLoad (g15canvas * canvas, char *fontname, int fontsize,
+  int g15r_ttfLoad (g15canvas * canvas, char *fontname, int fontsize,
 		     int face_num);
 /** \brief Prints a string in a given font*/
   void g15r_ttfPrint (g15canvas * canvas, int x, int y, int fontsize,
