@@ -3,6 +3,8 @@
 #include "G15Wbmp.h"
 #include <iostream>
 #include <string>
+#include <cstdlib>
+#include <cstring>
 
 using namespace G15Tools;
 
@@ -27,7 +29,7 @@ G15Wbmp::G15Wbmp(const G15Wbmp& in)
 	this->width = in.width;
 	this->height = in.height;
 	// FIXME: This is likely a bad calculation of the size of this->buffer
-	std::memcpy(this->buffer, in.buffer, (this->width * this->height) + 5);
+	memcpy(this->buffer, in.buffer, (this->width * this->height) + 5);
 }
 
 G15Wbmp::~G15Wbmp()
@@ -37,5 +39,5 @@ G15Wbmp::~G15Wbmp()
 		std::cerr << "G15Wbmp(" << this << "): ";
 		std::cerr << "Destroyed." << std::endl;
 	}
-	std::free(this->buffer);
+	free(this->buffer);
 }
