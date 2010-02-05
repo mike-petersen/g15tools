@@ -47,6 +47,7 @@ const libg15_devices_t g15_devices[] = {
     DEVICE("Logitech Z-10",0x46d,0x0a07,G15_LCD|G15_KEYS|G15_DEVICE_IS_SHARED),
     DEVICE("Logitech G15 v2",0x46d,0xc227,G15_LCD|G15_KEYS|G15_DEVICE_5BYTE_RETURN),
     DEVICE("Logitech Gamepanel",0x46d,0xc251,G15_LCD|G15_KEYS|G15_DEVICE_IS_SHARED),
+    DEVICE("Logitech G13",0x46d,0xc21c,G15_LCD|G15_KEYS),
     DEVICE(NULL,0,0,0)
 };
 
@@ -611,6 +612,96 @@ static unsigned char g15KeyToLogitechKeyCode(int key)
     }
 }
 
+static void processKeyEventG13(unsigned int *pressed_keys, unsigned char *buffer)
+{
+    int i;
+
+    *pressed_keys = 0;
+
+    g15_log(stderr,G15_LOG_WARN,"Keyboard G13: %x, %x, %x, %x, %x, %x, %x, %x, %x\n",buffer[0],buffer[1],buffer[2],buffer[3],buffer[4],buffer[5],buffer[6],buffer[7],buffer[8]);
+
+    if (buffer[0] == 0x25)
+    {
+        if (buffer[3]&0x01)
+      *pressed_keys |= G15_KEY_G1;
+        if (buffer[3]&0x02)
+      *pressed_keys |= G15_KEY_G2;
+        if (buffer[3]&0x04)
+      *pressed_keys |= G15_KEY_G3;
+        if (buffer[3]&0x08)
+      *pressed_keys |= G15_KEY_G4;
+        if (buffer[3]&0x10)
+      *pressed_keys |= G15_KEY_G5;
+        if (buffer[3]&0x20)
+      *pressed_keys |= G15_KEY_G6;
+        if (buffer[3]&0x40)
+      *pressed_keys |= G15_KEY_G7;
+        if (buffer[3]&0x80)
+      *pressed_keys |= G15_KEY_G8;
+
+        if (buffer[4]&0x01)
+      *pressed_keys |= G15_KEY_G9;
+        if (buffer[4]&0x02)
+      *pressed_keys |= G15_KEY_G10;
+        if (buffer[4]&0x04)
+      *pressed_keys |= G15_KEY_G11;
+        if (buffer[4]&0x08)
+      *pressed_keys |= G15_KEY_G12;
+        if (buffer[4]&0x10)
+      *pressed_keys |= G15_KEY_G13;
+        if (buffer[4]&0x20)
+      *pressed_keys |= G15_KEY_G14;
+        if (buffer[4]&0x40)
+      *pressed_keys |= G15_KEY_G15;
+        if (buffer[4]&0x80)
+      *pressed_keys |= G15_KEY_G16;
+        if (buffer[5]&0x01)
+      *pressed_keys |= G15_KEY_G17;
+        if (buffer[5]&0x02)
+      *pressed_keys |= G15_KEY_G18;
+        if (buffer[5]&0x04)
+      *pressed_keys |= G15_KEY_G19;
+        if (buffer[5]&0x08)
+      *pressed_keys |= G15_KEY_G20;
+        if (buffer[5]&0x10)
+      *pressed_keys |= G15_KEY_G21;
+        if (buffer[5]&0x20)
+      *pressed_keys |= G15_KEY_G22;
+        if (buffer[5]&0x80)
+      *pressed_keys |= G15_KEY_LIGHT;
+
+        if (buffer[6]&0x01)
+      *pressed_keys |= G15_KEY_L1;
+        if (buffer[6]&0x02)
+      *pressed_keys |= G15_KEY_L2;
+        if (buffer[6]&0x04)
+      *pressed_keys |= G15_KEY_L3;
+        if (buffer[6]&0x08)
+      *pressed_keys |= G15_KEY_L4;
+        if (buffer[6]&0x10)
+      *pressed_keys |= G15_KEY_L5;
+
+        if (buffer[6]&0x20)
+      *pressed_keys |= G15_KEY_M1;
+        if (buffer[6]&0x40)
+      *pressed_keys |= G15_KEY_M2;
+        if (buffer[6]&0x80)
+      *pressed_keys |= G15_KEY_M3;
+        if (buffer[7]&0x01)
+      *pressed_keys |= G15_KEY_MR;
+
+      /*
+        if (buffer[7]&0x02)
+      *pressed_keys |= G15_KEY_JOYBL;
+        if (buffer[7]&0x04)
+      *pressed_keys |= G15_KEY_JOYBD;
+        if (buffer[7]&0x08)
+      *pressed_keys |= G15_KEY_JOYBS;
+      */
+    }
+
+}
+
 static void processKeyEvent9Byte(unsigned int *pressed_keys, unsigned char *buffer)
 {
     int i;
@@ -777,6 +868,11 @@ int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
     if(ret>0) {
       if(buffer[0] == 1)
         return G15_ERROR_TRY_AGAIN;    
+    }
+   
+    if(buffer[0]==0x25){
+      processKeyEventG13(pressed_keys, buffer);
+      return G15_NO_ERROR;
     }
 
     switch(ret) {

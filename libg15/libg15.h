@@ -126,22 +126,31 @@ struct libg15_devices_t {
     G15_KEY_G16 = 1<<15,
     G15_KEY_G17 = 1<<16,
     G15_KEY_G18 = 1<<17,
-    
+    G15_KEY_G19 = 1<<28,
+    G15_KEY_G20 = 1<<29,
+    G15_KEY_G21 = 1<<30,
+    G15_KEY_G22 = 1<<31,
+
     G15_KEY_M1  = 1<<18,
     G15_KEY_M2  = 1<<19,
     G15_KEY_M3  = 1<<20,
     G15_KEY_MR  = 1<<21,
-    
+
     G15_KEY_L1  = 1<<22,
     G15_KEY_L2  = 1<<23,
     G15_KEY_L3  = 1<<24,
     G15_KEY_L4  = 1<<25,
     G15_KEY_L5  = 1<<26,
-    
+
     G15_KEY_LIGHT = 1<<27
+
+    //need to add them to the enum but not enough positions left
+    //  G15_KEY_JOYBL = 1<<32,
+    //  G15_KEY_JOYBD = 1<<33,
+    //  G15_KEY_JOYBS = 1<<34
   };
 
-  
+
   /* this one return G15_NO_ERROR on success, something
    * else otherwise (for instance G15_ERROR_OPENING_USB_DEVICE */
   int initLibG15();
