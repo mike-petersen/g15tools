@@ -62,6 +62,14 @@ for (;;)
     cout << "G17 ";
   if (key_state & G15_KEY_G18)
     cout << "G18 ";
+  if (key_state & G15_KEY_G19)
+    cout << "G19 ";
+  if (key_state & G15_KEY_G20)
+    cout << "G20 ";
+  if (key_state & G15_KEY_G21)
+    cout << "G21 ";
+  if (key_state & G15_KEY_G22)
+    cout << "G22 "; 
   
   if (key_state & G15_KEY_M1)
     cout << "M1 " ;
@@ -84,6 +92,13 @@ for (;;)
     cout << "L5 " ;
   if (key_state & G15_KEY_LIGHT)
     cout << "LIGHT ";
+/*  if (key_state & G15_KEY_JOYBL)
+    cout << "JOYBL ";
+  if (key_state & G15_KEY_JOYBD)
+    cout << "JOYBD ";
+  if (key_state & G15_KEY_JOYBS)
+    cout << "JOYBS ";
+  */
   cout << endl;
 }
   
