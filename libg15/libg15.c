@@ -47,7 +47,7 @@ const libg15_devices_t g15_devices[] = {
     DEVICE("Logitech Z-10",0x46d,0x0a07,G15_LCD|G15_KEYS|G15_DEVICE_IS_SHARED),
     DEVICE("Logitech G15 v2",0x46d,0xc227,G15_LCD|G15_KEYS|G15_DEVICE_5BYTE_RETURN),
     DEVICE("Logitech Gamepanel",0x46d,0xc251,G15_LCD|G15_KEYS|G15_DEVICE_IS_SHARED),
-    DEVICE("Logitech G13",0x46d,0xc21c,G15_LCD|G15_KEYS),
+    DEVICE("Logitech G13",0x46d,0xc21c,G15_LCD|G15_KEYS|G15_DEVICE_G13),
     DEVICE(NULL,0,0,0)
 };
 
@@ -858,6 +858,8 @@ int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
 {
     unsigned char buffer[G15_KEY_READ_LENGTH];
     int ret = 0;
+    int caps = 0;
+
 #ifdef LIBUSB_BLOCKS
     ret = usb_interrupt_read(keyboard_device, g15_keys_endpoint, (char*)buffer, G15_KEY_READ_LENGTH, timeout);
 #else
@@ -870,7 +872,8 @@ int getPressedKeys(unsigned int *pressed_keys, unsigned int timeout)
         return G15_ERROR_TRY_AGAIN;    
     }
    
-    if(buffer[0]==0x25){
+    caps = g15DeviceCapabilities();
+    if((caps & G15_DEVICE_G13) && buffer[0]==0x25){
       processKeyEventG13(pressed_keys, buffer);
       return G15_NO_ERROR;
     }
