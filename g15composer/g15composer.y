@@ -108,11 +108,11 @@ nt_commands: /* empty */
 	;
 
 nt_command:
-	nt_pixel_command 
-	| nt_draw_command 
+	nt_pixel_command
+	| nt_draw_command
 	| nt_wbmp_command
-	| nt_mode_command 
-	| nt_font_command 
+	| nt_mode_command
+	| nt_font_command
 	| nt_text_command
 	{
 		((struct parserData *)param)->itemptr = ((struct parserData *)param)->listptr->first_string;
@@ -127,13 +127,13 @@ nt_command:
 		((struct parserData *)param)->listptr = NULL;
 		((struct parserData *)param)->itemptr = NULL;
 	}
-	| nt_key_command 
-	| nt_lcd_command 
+	| nt_key_command
+	| nt_lcd_command
 	| nt_screen_command
 	;
 
 nt_string:
-	T_STRING 
+	T_STRING
 	{
 		$$ = $1;
 	}
@@ -144,8 +144,8 @@ nt_strings: /* empty */
 		$$ = new_strList ();
 	}
 
-	| 
-	
+	|
+
 	nt_strings nt_string
 	{
 		add_string ($1, $2);
@@ -184,25 +184,25 @@ nt_pixel_command:
 	T_PIXELOVERLAY T_NUMBER T_NUMBER T_NUMBER T_NUMBER nt_string T_NEWLINE
 	{
 		if (((struct parserData *)param)->background == 1)
-		  return (0);
-		short output_line[G15_BUFFER_LEN];
+			return (0);
+		short output_line[G15_LCD_HEIGHT * G15_LCD_WIDTH];
 		int len = strlen ($6);
 		int exp = $4 * $5;
 
-		if ((len != exp) || (len > G15_BUFFER_LEN))
-		  {
-		  	fprintf (stderr, "Error: Expected %d pixels but received %d.\n", exp, len);
+		if ((len != exp) || (len > G15_LCD_HEIGHT * G15_LCD_WIDTH))
+		{
+			fprintf (stderr, "Error: Expected %d pixels but received %d.\n", exp, len);
 			return (1);
-		  }
+		}
 
 		int i = 0;
 
 		for (i = 0; i < len; ++i)
-		  {
-	  	    	output_line[i] = 0;
-		    	if ($6[i] == '1')
-	      	          output_line[i] = 1;
-	      	  }
+		{
+				output_line[i] = 0;
+				if ($6[i] == '1')
+					output_line[i] = 1;
+		}
 	  	g15r_pixelOverlay (((struct parserData *)param)->canvas, $2, $3, $4, $5, output_line);
 		free ($6);
 	}
@@ -280,7 +280,7 @@ nt_draw_command:
 	{
 		if (((struct parserData *)param)->background == 1)
 		  return (0);
-		
+
 		struct bufItem *buf = ((struct parserData *)param)->buflist->first_buf;
 
 		while ((buf->id != $2) && (buf != NULL))
@@ -298,7 +298,7 @@ nt_draw_command:
 	{
 		if (((struct parserData *)param)->background == 1)
 		  return (0);
-		
+
 		struct bufItem *buf = ((struct parserData *)param)->buflist->first_buf;
 
 		while ((buf->id != $2) && (buf != NULL))
@@ -435,9 +435,9 @@ nt_mode_command:
                 int fore = ($2 == 0 ? 1 : 0);
                 int rear = ($2 == 1 ? 1 : 0);
                 int revert = ($2 == 2 ? 1 : 0);
-                                                                                  
+
                 int dummy=0;
-                
+
                 int at_front = g15_send_cmd (((struct parserData *)param)->g15screen_fd, G15DAEMON_IS_FOREGROUND, dummy);
                 int user_to_front = g15_send_cmd(((struct parserData *)param)->g15screen_fd,G15DAEMON_IS_USER_SELECTED, dummy);
 
@@ -561,7 +561,7 @@ nt_text_command:
 			  {
 			  	unsigned int dispcol = 0;
 				unsigned int len = strlen (((struct parserData *)param)->itemptr->string);
-				
+
 				dispcol = getDispCol (len, $4, $5);
 				g15r_renderString (((struct parserData *)param)->canvas, ((struct parserData *)param)->itemptr->string, row, $4, dispcol, $3);
 			  }
@@ -573,7 +573,7 @@ nt_text_command:
 	;
 
 nt_key_command:
-	T_KEYL T_NUMBER T_NEWLINE 
+	T_KEYL T_NUMBER T_NEWLINE
 	{
 	}
 
