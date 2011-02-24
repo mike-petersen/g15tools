@@ -33,8 +33,10 @@ extern "C"
 #define G15_DEVICE_IS_SHARED 4
 #define G15_DEVICE_5BYTE_RETURN 8
 #define G15_DEVICE_G13 16
+#define G15_DEVICE_G510 32
 
 #define G15_KEY_READ_LENGTH 9
+#define G510_STANDARD_KEYBOARD_INTERFACE	0x0
 
 typedef struct libg15_devices_t libg15_devices_t;
 
@@ -167,6 +169,7 @@ struct libg15_devices_t {
   int setLEDs(unsigned int leds);
   int setLCDBrightness(unsigned int level);
   int setKBBrightness(unsigned int level);  
+  int setG510LEDColor(unsigned char r, unsigned char g, unsigned char b);  
 
   /* Please be warned
    * the g15 sends two different usb msgs for each key press
