@@ -20,7 +20,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <usb.h>
-#include <string>
+#include <cstring>
 #include <fstream>
 #include <vector>
 #include <sys/types.h>
