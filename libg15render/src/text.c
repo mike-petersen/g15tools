@@ -330,26 +330,17 @@ g15font * g15r_loadG15Font(char *filename) {
 
     font->numchars = buffer[12] | (buffer[13] << 8);
     font->default_gap = buffer[14];
-    unsigned int current_alloc = 2048;
-    char *glyphBuf =  malloc(current_alloc);
-    char *glyphPtr = glyphBuf;
-    unsigned int memsize=0;
     for (i=0;i <font->numchars; i++) {
         unsigned char charheader[G15_CHAR_HEADER_SIZE];
         unsigned int character;
         fread(charheader, G15_CHAR_HEADER_SIZE, 1, file);
         character = charheader[0] | (charheader[1] << 8);
         font->glyph[character].width = charheader[2] | (charheader[3] << 8);
-        memsize+=(font->font_height * ((font->glyph[character].width + 7) / 8));
-        if(memsize>current_alloc) { /* attempt to semi-coherently allocate additional memory */
-            current_alloc+=((font->font_height * ((font->glyph[character].width + 7) / 8)*(font->numchars - i)));
-            glyphBuf = realloc(glyphBuf,(size_t)current_alloc);
-        }
-        font->glyph[character].buffer = (unsigned char*)glyphPtr;
+        size_t glyphMemSize = (font->font_height * ((font->glyph[character].width + 7) / 8));
+        font->glyph[character].buffer = malloc(glyphMemSize);
         font->glyph[character].gap = 0;
-        fread(font->glyph[character].buffer, font->font_height * ((font->glyph[character].width + 7) / 8), 1, file);
+        fread(font->glyph[character].buffer, glyphMemSize, 1, file);
         font->active[character] = 1;
-        glyphPtr+=(font->font_height * ((font->glyph[character].width + 7) / 8));
     }
 
     fclose(file);
