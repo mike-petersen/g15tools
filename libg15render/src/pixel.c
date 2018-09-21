@@ -395,7 +395,12 @@ g15r_loadWbmpSplash(g15canvas *canvas, char *filename)
                              &width,
                              &height);
 
-    memcpy (canvas->buffer, buf, G15_BUFFER_LEN);
+    int byte_width = width / 8;
+    if (width %8)
+        byte_width++;
+    
+    memcpy (canvas->buffer, buf, byte_width * height);
+    free(buf);
     return 0;
 }
 
